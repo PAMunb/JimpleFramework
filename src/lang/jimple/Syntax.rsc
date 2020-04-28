@@ -35,15 +35,13 @@ data Field
   ;  
 
 data Method 
-  = method(list[Modifier] modifiers, Type \type, Name name, list[Formal] formals, list[Type] exceptions, MethodBody body)
+  = method(list[Modifier] modifiers, Type \type, Name name, list[Type] formals = [], list[Type] exceptions = [], MethodBody body = signatureOnly())
   ;
   
-data Formal 
-  = foramlArg(Type \type)
-  ; 
-     
+      
 data MethodBody 
   = methodBody(list[Declaration] decls, list[Statement] stmts)//, list[CatchClause] catchClauses)
+  | signatureOnly()
   ; 
 
 data Declaration 
@@ -123,11 +121,11 @@ data InvokeExp
   ;   
 
 data MethodSignature 
-  = methodSignature(Name className, Type \type, list[Formal] formals)
+  = methodSignature(Name className, Type \type, list[Type] formals)
   ; 
   
 data UnnamedMethodSignature 
-  = unnamedMethodSignature(Type \type, list[Formal] formals)
+  = unnamedMethodSignature(Type \type, list[Type] formals)
   ;   
     
 data Modifier 

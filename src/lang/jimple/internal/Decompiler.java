@@ -1,13 +1,17 @@
 package lang.jimple.internal;
 
+	
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 import org.rascalmpl.uri.URIResolverRegistry;
 
@@ -44,7 +48,9 @@ public class Decompiler {
 	public IConstructor decompile(ISourceLocation classLoc) {
 		try {
 			ClassReader reader = new ClassReader(URIResolverRegistry.getInstance().getInputStream(classLoc));
-			reader.accept(new GenerateJimpleClassVisitor(), 0);
+			ClassNode cn = new ClassNode();
+			reader.accept(cn, 0);
+			reader.accept(new GenerateJimpleClassVisitor(cn), 0);
 			return _class;
 		} catch (IOException e) {
 			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
@@ -55,6 +61,7 @@ public class Decompiler {
 		// Jimple AST types
 		Type _classOrInterface = tf.abstractDataType(typestore, "ClassOrInterfaceDeclaration");
 		Type _field = tf.abstractDataType(typestore, "Field");
+		Type _method = tf.abstractDataType(typestore, "Method");
 		Type _type = tf.abstractDataType(typestore, "Type");
 		Type _modifier = tf.abstractDataType(typestore, "Modifier");
 		
@@ -62,6 +69,7 @@ public class Decompiler {
 		// Jimple AST constructors 
 		Type _classConstructor = tf.constructor(typestore, _classOrInterface, "class", _type, "type");
 		Type _fieldConstructor = tf.constructor(typestore,_field,"field",_type,"type",tf.stringType(),"name");
+		Type _methodConstructor = tf.constructor(typestore,_method,"method",_type,"type",tf.stringType(),"name");
 		
 		Type _byteConstructor = tf.constructor(typestore, _type, "byte");
 		Type _booleanConstructor = tf.constructor(typestore, _type, "boolean");
@@ -92,14 +100,17 @@ public class Decompiler {
 		Type _enumConstructor = tf.constructor(typestore, _modifier, "Enum");
 		Type _annotationConstructor = tf.constructor(typestore, _modifier, "Annotation");
 		
+		private ClassNode cn; 
 		private int classModifiers; 
 		private String name;
 		private String superClass;
 		private String[] interfaces;
 		private IList fields; 
+		private IList methods; 
 
-		public GenerateJimpleClassVisitor() {
+		public GenerateJimpleClassVisitor(ClassNode cn) {
 			super(Opcodes.ASM4);
+			this.cn = cn; 
 		}
 
 		@Override
@@ -110,6 +121,7 @@ public class Decompiler {
 			this.superClass = superClass;
 			this.interfaces = interfaces;
 			this.fields = vf.list();
+			this.methods = vf.list();
 		}
 
 		
@@ -129,15 +141,41 @@ public class Decompiler {
 				}
 			}
 			
+			Iterator it = cn.methods.iterator();
+			
+			while(it.hasNext()) {
+				visitMethod((MethodNode)it.next());
+			}
+			
 			params.put("interfaces", list);
 			params.put("modifiers", modifiers(classModifiers));
 			params.put("fields", fields);
+			params.put("methods", methods);
 			
 			_class = vf.constructor(_classConstructor, objectConstructor(name))
 					.asWithKeywordParameters()
 					.setParameters(params);
 		}
 		
+		private void visitMethod(MethodNode mn) {
+			IList methodModifiers = modifiers(mn.access);
+			IConstructor methodReturnType = type(org.objectweb.asm.Type.getReturnType(mn.desc).getDescriptor());
+			IString methodName = vf.string(mn.name);
+			IList methodFormalArgs = vf.list(); 
+			
+			for(org.objectweb.asm.Type t: org.objectweb.asm.Type.getArgumentTypes(mn.desc)) {
+				methodFormalArgs = methodFormalArgs.append(type(t.getDescriptor()));
+			}
+			
+			Map<String, IValue> params = new HashMap<>();
+			
+			params.put("formals", methodFormalArgs);
+			
+			methods = methods.append(methodConstructor(methodReturnType, methodName)
+					.asWithKeywordParameters()
+					.setParameters(params)); 
+		}
+
 		@Override
 		public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
 			IString fieldName = vf.string(name);
@@ -145,9 +183,7 @@ public class Decompiler {
 			IConstructor type = type(descriptor);
 			
 			// TODO: what should we do with the attribute signature an
-			//       value??? 
-			
-			
+			//       value??? 			
 			this.fields = fields.append(fieldConstructor(type, fieldName));
 			
 			return super.visitField(access, name, descriptor, signature, value);
@@ -159,6 +195,10 @@ public class Decompiler {
 		
 		private IConstructor fieldConstructor(IConstructor type, IString name) {
 			return vf.constructor(_field, type, name);
+		}
+		
+		private IConstructor methodConstructor(IConstructor type, IString name) {
+			return vf.constructor(_method, type, name); 
 		}
 		
 		private IConstructor arrayConstructor(IConstructor baseType) {
@@ -176,6 +216,7 @@ public class Decompiler {
 			  case "F" : return vf.constructor(_floatConstructor);
 			  case "J" : return vf.constructor(_longConstructor);
 			  case "D" : return vf.constructor(_doubleConstructor); 
+			  case "V" : return vf.constructor(_voidConstructor);
 			  default  : /* do nothing */  
 			}
 			// object types 
@@ -188,8 +229,9 @@ public class Decompiler {
 				return arrayConstructor(type(baseType));	
 			}
 			
-			return null; // TODO: perhaps we should thrown an exception here.
-			             //       or even better, return "unknown type"
+			throw RuntimeExceptionFactory.illegalArgument(vf.string(descriptor), null, null);
+			// TODO: perhaps we should not throw an exception here,	
+			//       and then return "unknown type"
 		}
 
 		private IList modifiers(int access) {
