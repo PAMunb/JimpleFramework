@@ -1,6 +1,5 @@
 package lang.jimple.internal;
 
-
 import static lang.jimple.internal.JimpleVallangInterface._classConstructor;
 import static lang.jimple.internal.JimpleVallangInterface.fieldConstructor;
 import static lang.jimple.internal.JimpleVallangInterface.methodConstructor;
@@ -28,11 +27,14 @@ import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IString;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory;
+import io.usethesource.vallang.type.Type;
 
 /**
  * Decompiler used to convert Java byte code into 
- * Jimple representation. 
- * 
+ * Jimple representation. This is an internal class, 
+ * which should only be used through its Rascal 
+ * counterpart. 
+ *
  * @author rbonifacio
  */
 public class Decompiler {
@@ -43,10 +45,10 @@ public class Decompiler {
 		this.vf = vf;
 	}
 
-	public IValue foo() {
-		return vf.string("foo");
-	}
-
+	/*
+	 * decompiles a Java byte code at <i>classLoc</i> 
+	 * into a Jimple representation. 
+	 */
 	public IConstructor decompile(ISourceLocation classLoc) {
 		try {
 			ClassReader reader = new ClassReader(URIResolverRegistry.getInstance().getInputStream(classLoc));
@@ -59,14 +61,16 @@ public class Decompiler {
 		}
 	}
 
+	/*
+	 * an ASM class visitor that traverses a class byte code and 
+	 * generates a Jimple class. 
+	 */
 	class GenerateJimpleClassVisitor extends ClassVisitor {
-		
-		
 		private ClassNode cn; 
-		private int classModifiers; 
-		private String name;
-		private String superClass;
-		private String[] interfaces;
+		private IList classModifiers; 
+		private IConstructor type;
+		private IConstructor superClass;
+		private IList interfaces;
 		private IList fields; 
 		private IList methods; 
 
@@ -76,12 +80,18 @@ public class Decompiler {
 		}
 
 		@Override
-		public void visit(int version, int access, String name, String signature, String superClass,
-				String[] interfaces) {
-			this.classModifiers = access;
-			this.name = name;
-			this.superClass = superClass;
-			this.interfaces = interfaces;
+		public void visit(int version, int access, String name, String signature, String superClass, String[] interfaces) {
+			this.classModifiers = modifiers(vf, access);
+			this.type = objectConstructor(vf, name);
+			this.superClass = superClass != null ? objectConstructor(vf, superClass) : objectConstructor(vf, "java.lang.Object");
+			this.interfaces = vf.list(); 
+			
+			if(interfaces != null) {
+				for(String anInterface: interfaces) {
+					this.interfaces = this.interfaces.append(objectConstructor(vf, anInterface));
+				}
+			}
+			
 			this.fields = vf.list();
 			this.methods = vf.list();
 		}
@@ -90,33 +100,22 @@ public class Decompiler {
 		@Override
 		public void visitEnd() {
 			Map<String, IValue> params = new HashMap<>();
-			
-			if(superClass != null) {
-				params.put("super", objectConstructor(vf, superClass));
-			}
-			
-			IList list = vf.list();
-			
-			if(interfaces != null) {
-				for(String anInterface: interfaces) {
-					list = list.append(objectConstructor(vf, anInterface));
-				}
-			}
-			
+						
 			Iterator it = cn.methods.iterator();
-			
 			while(it.hasNext()) {
 				visitMethod((MethodNode)it.next());
 			}
 			
-			params.put("interfaces", list);
-			params.put("modifiers", modifiers(vf, classModifiers));
-			params.put("fields", fields);
+			params.put("super", superClass);
+			params.put("interfaces", interfaces);
+			//params.put("modifiers", modifiers(vf, classModifiers));
+			//params.put("fields", fields);
 			params.put("methods", methods);
 			
-			_class = vf.constructor(_classConstructor, objectConstructor(vf, name))
+			_class = vf.constructor(_classConstructor, type, classModifiers)
 					.asWithKeywordParameters()
 					.setParameters(params);
+			
 		}
 		
 		private void visitMethod(MethodNode mn) {

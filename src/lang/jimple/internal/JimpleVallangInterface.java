@@ -25,7 +25,7 @@ public class JimpleVallangInterface {
 	public static Type _modifier = tf.abstractDataType(typestore, "Modifier");
 
 	// Jimple AST constructors
-	public static Type _classConstructor = tf.constructor(typestore, _classOrInterface, "class", _type, "type");
+	public static Type _classConstructor = tf.constructor(typestore, _classOrInterface, "class", _type, "type", tf.listType(_modifier), "modifiers");
 	public static Type _fieldConstructor = tf.constructor(typestore, _field, "field", _type, "type", tf.stringType(), "name");
 	public static Type _methodConstructor = tf.constructor(typestore, _method, "method", _type, "type", tf.stringType(), "name");
 	
