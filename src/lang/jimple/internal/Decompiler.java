@@ -99,23 +99,11 @@ public class Decompiler {
 		
 		@Override
 		public void visitEnd() {
-			Map<String, IValue> params = new HashMap<>();
-						
 			Iterator it = cn.methods.iterator();
 			while(it.hasNext()) {
 				visitMethod((MethodNode)it.next());
 			}
-			
-			params.put("super", superClass);
-			params.put("interfaces", interfaces);
-			//params.put("modifiers", modifiers(vf, classModifiers));
-			//params.put("fields", fields);
-			params.put("methods", methods);
-			
-			_class = vf.constructor(_classConstructor, type, classModifiers)
-					.asWithKeywordParameters()
-					.setParameters(params);
-			
+			_class = vf.constructor(_classConstructor, type, classModifiers, superClass, interfaces, fields, methods); 
 		}
 		
 		private void visitMethod(MethodNode mn) {
