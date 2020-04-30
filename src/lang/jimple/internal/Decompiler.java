@@ -1,7 +1,9 @@
 package lang.jimple.internal;
 
 import static lang.jimple.internal.JimpleVallangInterface._classConstructor;
+import static lang.jimple.internal.JimpleVallangInterface._interfaceConstructor;
 import static lang.jimple.internal.JimpleVallangInterface.fieldConstructor;
+import static lang.jimple.internal.JimpleVallangInterface.isInterface;
 import static lang.jimple.internal.JimpleVallangInterface.methodConstructor;
 import static lang.jimple.internal.JimpleVallangInterface.modifiers;
 import static lang.jimple.internal.JimpleVallangInterface.objectConstructor;
@@ -27,7 +29,6 @@ import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IString;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory;
-import io.usethesource.vallang.type.Type;
 
 /**
  * Decompiler used to convert Java byte code into 
@@ -73,6 +74,7 @@ public class Decompiler {
 		private IList interfaces;
 		private IList fields; 
 		private IList methods; 
+		private boolean isInterface; 
 
 		public GenerateJimpleClassVisitor(ClassNode cn) {
 			super(Opcodes.ASM4);
@@ -94,16 +96,37 @@ public class Decompiler {
 			
 			this.fields = vf.list();
 			this.methods = vf.list();
+			
+			isInterface = isInterface(access);
 		}
 
 		
 		@Override
 		public void visitEnd() {
+			Map<String, IValue> params = new HashMap<>();
+			
 			Iterator it = cn.methods.iterator();
 			while(it.hasNext()) {
 				visitMethod((MethodNode)it.next());
 			}
-			_class = vf.constructor(_classConstructor, type, classModifiers, superClass, interfaces, fields, methods); 
+			
+			params.put("modifiers", classModifiers);
+			params.put("interfaces", interfaces);
+			params.put("fields", fields);
+			params.put("methods", methods); 
+		
+		
+			if(!isInterface) {
+				params.put("super", superClass);
+				_class = vf.constructor(_classConstructor, type)
+						.asWithKeywordParameters()
+						.setParameters(params); 
+			}
+			else {
+				_class = vf.constructor(_interfaceConstructor, type)
+						.asWithKeywordParameters()
+						.setParameters(params); 
+			}
 		}
 		
 		private void visitMethod(MethodNode mn) {

@@ -1,11 +1,15 @@
 package lang.jimple.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectweb.asm.Opcodes;
 import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IString;
+import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory;
 import io.usethesource.vallang.type.Type;
 import io.usethesource.vallang.type.TypeFactory;
@@ -25,15 +29,8 @@ public class JimpleVallangInterface {
 	public static Type _modifier = tf.abstractDataType(typestore, "Modifier");
 
 	// Jimple AST constructors
-	public static Type _classConstructor = tf.constructor(typestore, _classOrInterface, "class"
-			, _type, "type"
-			, tf.listType(_modifier), "modifiers"
-			, _type, "super"
-			, tf.listType(_type), "interfaces"
-			, tf.listType(_type), "fields"
-			, tf.listType(_method), "methods"
-			);
-	
+	public static Type _classConstructor = tf.constructor(typestore, _classOrInterface, "class" , _type, "type");	
+	public static Type _interfaceConstructor = tf.constructor(typestore, _classOrInterface, "interface" , _type, "type");
 	public static Type _fieldConstructor = tf.constructor(typestore, _field, "field", _type, "type", tf.stringType(), "name");
 	public static Type _methodConstructor = tf.constructor(typestore, _method, "method", _type, "type", tf.stringType(), "name");
 	
@@ -65,6 +62,7 @@ public class JimpleVallangInterface {
 	public static Type _strictfpConstructor = tf.constructor(typestore, _modifier, "Strictfp");
 	public static Type _enumConstructor = tf.constructor(typestore, _modifier, "Enum");
 	public static Type _annotationConstructor = tf.constructor(typestore, _modifier, "Annotation");
+	
 	
 	public static IConstructor objectConstructor(IValueFactory vf, String name) {
 		return vf.constructor(_objectConstructor, vf.string(name.replace("/", ".")));
@@ -151,6 +149,10 @@ public class JimpleVallangInterface {
 			list = list.append(vf.constructor(_annotationConstructor));
 		}
 		return list;
+	}
+	
+	public static boolean isInterface(int access) {
+		return (access & Opcodes.ACC_INTERFACE) != 0; 
 	}
 
 }

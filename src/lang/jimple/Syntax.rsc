@@ -11,7 +11,7 @@ data Immediate
  | stringValue(str sv)
  | nullValue(); 
  
-data ClassOrInterfaceDeclaration 
+public data ClassOrInterfaceDeclaration 
  = class(Type \type,
  	 list[Modifier] modifiers = [],
      Type super = object(),
@@ -19,22 +19,19 @@ data ClassOrInterfaceDeclaration
      list[Field] fields = [],
      list[Method] methods = []
    ) 
- | interface(list[Modifier] modifiers,
-     Type \type, 
-     list[Type] interfaces, 
-     list[Field] fields,
-     list[Method] methods
+ | interface(Type \type,
+     list[Modifier] modifiers = [], 
+     list[Type] interfaces = [], 
+     list[Field] fields = [],
+     list[Method] methods = []
    );    
  
-ClassOrInterfaceDeclaration basicClassConstructor(Type \type) = class([], \type, object(), [], [], []); 
 
-ClassOrInterfaceDeclaration basicInterfaceConstructor(Type \type) = interface([], \type, [], [], []); 
-
-data Field 
+public data Field 
   = field(list[Modifier] modifiers, Type \type, Name name)
   ;  
 
-data Method 
+public data Method 
   = method(list[Modifier] modifiers, Type \type, Name name, list[Type] formals = [], list[Type] exceptions = [], MethodBody body = signatureOnly())
   ;
   
