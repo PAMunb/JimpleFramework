@@ -29,6 +29,7 @@ import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IString;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory;
+import lang.jimple.internal.ValueBuilder.InternalValue;
 
 /**
  * Decompiler used to convert Java byte code into 
@@ -136,13 +137,25 @@ public class Decompiler {
 			IConstructor methodReturnType = type(vf, org.objectweb.asm.Type.getReturnType(mn.desc).getDescriptor());
 			IString methodName = vf.string(mn.name);
 			IList methodFormalArgs = vf.list(); 
+			IList methodExceptions = vf.list();
+			
 			
 			for(org.objectweb.asm.Type t: org.objectweb.asm.Type.getArgumentTypes(mn.desc)) {
 				methodFormalArgs = methodFormalArgs.append(type(vf, t.getDescriptor()));
 			}
 			
+			if(mn.exceptions != null) {
+				Iterator exceptions = mn.exceptions.iterator();
+			
+				while(exceptions.hasNext()) {
+					String str = (String)exceptions.next();
+					methodExceptions = methodExceptions.append(objectConstructor(vf, str));
+				}
+			}
+			
 			params.put("modifiers", methodModifiers);
 			params.put("formals", methodFormalArgs);
+			params.put("exceptions", methodExceptions);
 			
 			methods = methods.append(methodConstructor(vf, methodReturnType, methodName)
 					.asWithKeywordParameters()
