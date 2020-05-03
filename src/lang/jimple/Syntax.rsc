@@ -5,46 +5,50 @@ alias Label = str;
 alias Identifier = str; 
 
 data Immediate 
- = local(str local) 
- | intValue(int iv)
+ = local(str localName) 
+ | intValue(int iValue)
  | floatValue(real fv)
  | stringValue(str sv)
  | nullValue(); 
  
 public data ClassOrInterfaceDeclaration 
- = class(Type \type,
- 	 list[Modifier] modifiers = [],
-     Type super = object(),
-     list[Type] interfaces = [],
-     list[Field] fields = [],
-     list[Method] methods = []
+ = classDecl(Type typeName,
+ 	 list[Modifier] modifiers,
+     Type superClass,
+     list[Type] interfaces,
+     list[Field] fields,
+     list[Method] methods
    ) 
- | interface(Type \type,
-     list[Modifier] modifiers = [], 
-     list[Type] interfaces = [], 
-     list[Field] fields = [],
-     list[Method] methods = []
+ | interfaceDecl(Type typeName,
+     list[Modifier] modifiers, 
+     list[Type] interfaces, 
+     list[Field] fields,
+     list[Method] methods
    );    
  
 
 public data Field 
-  = field(list[Modifier] modifiers, Type \type, Name name)
+  = field(list[Modifier] modifiers, Type fieldType, Name name)
   ;  
 
 public data Method 
-  = method(list[Modifier] modifiers, Type \type, Name name, list[Type] formals = [], list[Type] exceptions = [], MethodBody body = signatureOnly())
+  = method(list[Modifier] modifiers, Type returnType, Name name, list[Type] formals, list[Type] exceptions, MethodBody body)
   ;
   
       
 data MethodBody 
-  = methodBody(list[Declaration] decls, list[Statement] stmts)//, list[CatchClause] catchClauses)
+  = methodBody(list[LocalVariableDeclaration] localVariableDecls, list[Statement] stmts, list[CatchClause] catchClauses)
   | signatureOnly()
   ; 
 
-data Declaration 
-  = declaration(Type \type, Identifier local)
+data LocalVariableDeclaration 
+  = localVariableDeclaration(Type varType, Identifier local)
   ; 
 
+data CatchClause 
+ = catchClause(Type exception, Label from, Label to, Label with)
+ ; 
+ 
 data Statement  
   = label(Label label)  
   | breakpoint()
@@ -52,39 +56,40 @@ data Statement
   | exitMonitor(Immediate immediate)
   | tableSwitch(Immediate immediate, list[CaseStmt] stmts)
   | lookupSwitch(Immediate immediate, list[CaseStmt] stmts)
-  | identity(Name local, Name identifier, Type \type)
+  | identity(Name local, Name identifier, Type idType)
   | identityNoType(Name local, Name identifier)
-  | assign(Name variable, Expression exp)
+  | assign(Name local, Expression expression)
   | ifStmt(Expression exp, GotoStmt stmt)
   | retEmptyStmt()
   | retStmt(Immediate immediate)
   | returnEmptyStmt() 
   | returnStmt(Immediate immediate)
   | throwStmt(Immediate immediate)
-  | invokeStmt(InvokeExp expression)
+  | invokeStmt(InvokeExp invokeExpression)
+  | nop()
   ;        
  
  data CaseStmt 
-   = \case(int const, GotoStmt targetStmt) 
-   | \default(GotoStmt targetStmt)
+   = caseOption(int option, GotoStmt targetStmt) 
+   | defaultOption(GotoStmt targetStmt)
    ; 
 
-data GotoStmt = goto(Label label); 
+data GotoStmt = gotoStmt(Label label); 
 
 data Expression 
-  = newInstance(Type \type)
-  | newArray(Type \type, list[ArrayDescriptor] dims)
-  | cast(Type \type, Immediate immeadiate)
-  | instanceOf(Type \type, Immediate immediate)
+  = newInstance(Type instanceType)
+  | newArray(Type baseType, list[ArrayDescriptor] dims)
+  | cast(Type toType, Immediate immeadiate)
+  | instanceOf(Type baseType, Immediate immediate)
   | invokeExp(InvokeExp expression)
-  | arraySubscript(Identifier name, Immediate immediate)
+  | arraySubscript(Name name, Immediate immediate)
   | stringSubscript(str string, Immediate immediate)
   | localFieldRef(Name local, Name className, Type fieldType, Name fieldName)
   | fieldRef(Name className, Type fieldType, Name fieldName)
   | and(Immediate lhs, Immediate rhs)
   | or(Immediate lhs, Immediate rhs)
   | xor(Immediate lhs, Immediate rhs)
-  | \mod(Immediate lhs, Immediate rhs)
+  | reminder(Immediate lhs, Immediate rhs)
   | cmp(Immediate lhs, Immediate rhs) 
   | cmpg(Immediate lhs, Immediate rhs) 
   | cmpl(Immediate lhs, Immediate rhs)
@@ -102,7 +107,7 @@ data Expression
   | mult(Immediate lhs, Immediate rhs) 
   | div(Immediate lhs, Immediate rhs)
   | lengthOf(Immediate immediate)
-  | neg(Immediate) 
+  | neg(Immediate immediate) 
   | immediate(Immediate immediate)
   ;
   
@@ -112,17 +117,17 @@ data ArrayDescriptor
   ;
   
 data InvokeExp
-  = instanceMethodInvoke(Name local, MethodSignature signature1, list[Immediate] args)
-  | staticMethodInvoke(MethodSignature signature2, list[Immediate] args)
-  | dynamicInvoke(str string, UnnamedMethodSignature signature3, list[Immediate] args1, MethodSignature, list[Immediate] args2)
+  = instanceMethodInvoke(Name local, MethodSignature sig, list[Immediate] args)
+  | staticMethodInvoke(MethodSignature sig, list[Immediate] args)
+  | dynamicInvoke(str string, UnnamedMethodSignature usig, list[Immediate] args1, MethodSignature sig, list[Immediate] args2)
   ;   
 
 data MethodSignature 
-  = methodSignature(Name className, Type \type, list[Type] formals)
+  = methodSignature(Name className, Type returnType, list[Type] formals)
   ; 
   
 data UnnamedMethodSignature 
-  = unnamedMethodSignature(Type \type, list[Type] formals)
+  = unnamedMethodSignature(Type returnType, list[Type] formals)
   ;   
     
 data Modifier 
@@ -146,20 +151,20 @@ data Modifier
  * type declaration.  
  */  
 data Type
-  = byte()
-  | boolean()
-  | short()
-  | character()
-  | integer()
-  | float()
-  | double()
-  | long()
-  | object(str name)  
-  | array(Type arg)
-  | \void()
-  | string()
-  | null_type()
-  | unknown()            // it might be useful in the first phase of Jimple Body creation 
+  = TByte()
+  | TBoolean()
+  | TShort()
+  | TCharacter()
+  | TInteger()
+  | TFloat()
+  | TDouble()
+  | TLong()
+  | TObject(Name name)  
+  | TArray(Type baseType)
+  | TVoid()
+  | TString()
+  | TNull()
+  | TUnknown()            // it might be useful in the first phase of Jimple Body creation 
   ;  
   
-Type object() = object("java.lang.Object");
+Type object() = TObject("java.lang.Object");
