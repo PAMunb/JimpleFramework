@@ -43,7 +43,7 @@ private void generateClass(map[str, str] aliases, UserType t, {Variant "|"}+ var
              'import io.usethesource.vallang.IConstructor;
              'import io.usethesource.vallang.IList;
              'import io.usethesource.vallang.IValue;
-             'import io.usethesource.vallang.impl.fast.ValueFactory; 
+             'import io.usethesource.vallang.IValueFactory; 
              '
              'public abstract class <unparse(t)> extends AbstractJimpleConstructor {
              '   @Override 
@@ -91,16 +91,18 @@ private str generateSubClass(map[str, str] aliases, str base, Variant v) {
               '  }
               '  
               '  @Override
-              '  public IConstructor createVallangInstance(ValueFactory vf) {
+              '  public IConstructor createVallangInstance(IValueFactory vf) {
               '    HashMap\<String, IValue\> map = new HashMap\<\>();
               '
               '    <for(TypeArg arg <- arguments){>
               '    <populateMap(aliases, arg)>
               '    <}>
               '    
-              '    return vf.constructor(getVallangConstructor())
-              '             .asWithKeywordParameters()
-              '             .setParameters(map);
+              '    return vf.constructor(getVallangConstructor()
+              '             <for(TypeArg arg <- arguments){>
+              '             , iv_<generateAttributeName(arg)> 
+              '             <}>
+              '             ); 
               '  }
               '  @Override
               '  public String getConstructor() {
@@ -140,10 +142,10 @@ private str populateMap(map[str, str] aliases, TypeArg arg) {
   }
 }
 
-private str populateBasicType("str", str n)   = "map.put(\"<n>\", vf.string(<n>));";
-private str populateBasicType("int", str n)   = "map.put(\"<n>\", vf.integer(<n>));";
-private str populateBasicType("bool", str n)  = "map.put(\"<n>\", vf.bool(<n>));";
-private str populateBasicType("real", str n)  = "map.put(\"<n>\", vf.real(<n>));";
+private str populateBasicType("str", str n)   = "IValue iv_<n> = vf.string(<n>);";
+private str populateBasicType("int", str n)   = "IValue iv_<n> = vf.integer(<n>);";
+private str populateBasicType("bool", str n)  = "IValue iv_<n> = vf.bool(<n>);";
+private str populateBasicType("real", str n)  = "IValue iv_<n> = vf.real(<n>);";
 
 private str populateUserDefinedType(map[str, str] aliases, str base, str n) {
  str val = ""; 
@@ -154,7 +156,7 @@ private str populateUserDefinedType(map[str, str] aliases, str base, str n) {
    case "Real"    : val = "vf.real(<n>)";
    default        : val = "<n>.createVallangInstance(vf)"; 
  }
- return "map.put(\"<n>\", <val>);"; 
+ return "IValue iv_<n> = <val>;"; 
 }
 
 private str populateListType(map[str, str] aliases, str base, str n) {
@@ -166,17 +168,13 @@ private str populateListType(map[str, str] aliases, str base, str n) {
    case "Real"    : val = "vf.real(v)";
    default        : val = "v.createVallangInstance(vf)"; 
  }
- return "IList <n>_list = vf.list();
+ return "IList iv_<n> = vf.list();
         '
         'for(<base> v: <n>) {
-        ' <n>_list = <n>_list.append(<val>);   
+        ' iv_<n> = iv_<n>.append(<val>);   
         '}
-        'map.put(\"<n>\", <n>_list);
         "; 
 }
-
-
-
 
 private str resolve(map[str, str] aliases, str t) {
   if(t in aliases) {

@@ -3,6 +3,7 @@ module \test::rascal::TestDecompiler
 import lang::jimple::Syntax;
 import lang::jimple::Decompiler; 
 
+import IO;
 
 loc classLocation = |project://JimpleFramework/target/classes/test/java/AbstractClassSample.class|;  
 loc interfaceLocation = |project://JimpleFramework/target/classes/test/java/InterfaceSample.class|;  
@@ -10,15 +11,16 @@ loc interfaceLocation = |project://JimpleFramework/target/classes/test/java/Inte
  test bool testAbstractClass() {
     ClassOrInterfaceDeclaration c = decompile(classLocation);
     switch(c) {
-      case class(_): return c.fields == [] && c.interfaces == [] && c.super == object("java.lang.Object");  
+      case classDecl(_, _, _, _, _, _): return true;  
       default: return false; 
     }
  }
  
  test bool testInterface() {
     ClassOrInterfaceDeclaration c = decompile(interfaceLocation);
+    println(c);
     switch(c) {
-      case interface(_): return true;  
+      case interfaceDecl(_, _, _, _, _): return true;  
       default: return false; 
     }
  }
