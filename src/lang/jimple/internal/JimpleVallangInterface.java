@@ -18,8 +18,8 @@ import lang.jimple.internal.generated.Type;
 
 public class JimpleVallangInterface {
 
-	public static TypeStore typestore = new TypeStore();
-	public static TypeFactory tf = TypeFactory.getInstance();
+//	public static TypeStore typestore = new TypeStore();
+//	public static TypeFactory tf = TypeFactory.getInstance();
 
 	// Jimple AST types
 //	public static Type _classOrInterface = tf.abstractDataType(typestore, "ClassOrInterfaceDeclaration");
@@ -98,38 +98,38 @@ public class JimpleVallangInterface {
 //		return vf.constructor(_arrayConstructor, baseType); 
 //	}
 	
-//	public static IConstructor type(IValueFactory vf, String descriptor) {
-//		// primitive types 
-//		switch(descriptor) {
-//		  case "Z" : return vf.constructor(_booleanConstructor); 
-//		  case "C" : return vf.constructor(_characterConstructor); 
-//		  case "B" : return vf.constructor(_byteConstructor); 
-//		  case "S" : return vf.constructor(_shortConstructor); 
-//		  case "I" : return vf.constructor(_integerConstructor); 
-//		  case "F" : return vf.constructor(_floatConstructor);
-//		  case "J" : return vf.constructor(_longConstructor);
-//		  case "D" : return vf.constructor(_doubleConstructor); 
-//		  case "V" : return vf.constructor(_voidConstructor);
-//		  case "null_type" : return vf.constructor(_nullTypeConstructor);
-//		  default  : /* do nothing */  
-//		}
-//		// object types 
-//		if(descriptor.startsWith("L")) {
-//			String objectName = descriptor.substring(1, descriptor.length()-1);
-//			return objectConstructor(vf, objectName);
-//		}
-//		else if(descriptor.startsWith("[")) {  // array types 
-//			String baseType = descriptor.substring(0, descriptor.length());				
-//			return arrayConstructor(vf, type(vf, baseType));	
-//		}
-//		
-//		
-//		throw RuntimeExceptionFactory.illegalArgument(vf.string(descriptor), null, null);
-//		// TODO: perhaps we should not throw an exception here,	
-//		//       and then return "unknown type"
-//	}
+	public static Type type(String descriptor) {
+		// primitive types 
+		switch(descriptor) {
+		  case "Z" : return Type.TBoolean();
+		  case "C" : return Type.TCharacter(); 
+		  case "B" : return Type.TByte(); 
+		  case "S" : return Type.TShort(); 
+		  case "I" : return Type.TInteger(); 
+		  case "F" : return Type.TFloat();
+		  case "J" : return Type.TLong();
+		  case "D" : return Type.TDouble(); 
+		  case "V" : return Type.TVoid();
+		  case "null_type" : return Type.TNull();
+		  default  : /* do nothing */  
+		}
+		// object types 
+		if(descriptor.startsWith("L")) {
+			String objectName = descriptor.substring(1, descriptor.length()-1);
+			return objectConstructor(objectName);
+		}
+		else if(descriptor.startsWith("[")) {  // array types 
+			String baseType = descriptor.substring(0, descriptor.length());				
+			return Type.TArray(type(baseType));	
+		}
+		
+		// TODO: what should we do in this situation? For now, 
+		// instead of throwing a runtime exception, lets return 
+		// the unknown type. 
+		return Type.TUnknown();
+	}
 
-	public static List<Modifier> modifiers(IValueFactory vf, int access) {
+	public static List<Modifier> modifiers(int access) {
 		List<Modifier> list = new ArrayList<Modifier>();
 		
 		if((access & Opcodes.ACC_ABSTRACT) != 0) {
