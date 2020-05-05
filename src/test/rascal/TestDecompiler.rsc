@@ -18,9 +18,9 @@ loc interfaceLocation = |project://JimpleFramework/target/classes/test/java/Inte
  
  test bool testInterface() {
     ClassOrInterfaceDeclaration c = decompile(interfaceLocation);
-    println(c);
+    println(c); 
     switch(c) {
-      case interfaceDecl(_, _, _, _, _): return true;  
+      case interfaceDecl(TObject("test.java.InterfaceSample"), _, _, _, _): return true;  
       default: return false; 
     }
  }

@@ -175,11 +175,14 @@ public class Decompiler {
 
 		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(List<LocalVariableNode> nodes) {
 			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
-			for(int i = 0; i < nodes.size(); i++) {
-				LocalVariableNode var = nodes.get(i);
-				Type type = type(var.desc);
-			    String name = "l" + i;
-			    localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name));
+			
+			if(nodes != null) {
+				for(int i = 0; i < nodes.size(); i++) {
+					LocalVariableNode var = nodes.get(i);
+					Type type = type(var.desc);
+				    String name = "l" + i;
+				    localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name));
+				}
 			}
 			return localVariables;
 		}
