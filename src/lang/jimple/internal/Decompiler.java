@@ -1,9 +1,6 @@
 package lang.jimple.internal;
 
-import static lang.jimple.internal.JimpleVallangInterface.isInterface;
-import static lang.jimple.internal.JimpleVallangInterface.modifiers;
-import static lang.jimple.internal.JimpleVallangInterface.objectConstructor;
-import static lang.jimple.internal.JimpleVallangInterface.type;
+import static lang.jimple.internal.JimpleObjectFactory.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,19 +22,20 @@ import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 import org.rascalmpl.uri.URIResolverRegistry;
 
 import io.usethesource.vallang.IConstructor;
-import io.usethesource.vallang.IList;
 import io.usethesource.vallang.ISourceLocation;
-import io.usethesource.vallang.IString;
 import io.usethesource.vallang.IValueFactory;
 import lang.jimple.internal.generated.CatchClause;
 import lang.jimple.internal.generated.ClassOrInterfaceDeclaration;
+import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Field;
+import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.LocalVariableDeclaration;
 import lang.jimple.internal.generated.Method;
 import lang.jimple.internal.generated.MethodBody;
 import lang.jimple.internal.generated.Modifier;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
+import lang.jimple.internal.generated.Variable;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -156,16 +154,13 @@ public class Decompiler {
 				decls.add(var);
 			}
 			
-			// TODO: Instructions
-			// InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
-			//
-			// mn.instructions.accept(insVisitor);
-			//
-			
+			//TODO: uncomment the following lines to decompile the instructions. 
+//			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
+//			mn.instructions.accept(insVisitor);
+//			
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses); 
 			
 			methods.add(Method.method(methodModifiers, methodReturnType, methodName, methodFormalArgs, methodExceptions, methodBody));
-			
 		}
 
 		@Override
@@ -207,34 +202,34 @@ public class Decompiler {
 
 	class InstructionSetVisitor extends MethodVisitor {
 		class Operand {
-			IConstructor type;
-			IConstructor immediate;
+			Type type;
+			Immediate immediate;
 
-			Operand(IConstructor type, IConstructor immediate) {
+			Operand(Type type, Immediate immediate) {
 				this.type = type;
 				this.immediate = immediate;
 			}
 
-			Operand(IConstructor localDeclaration) {
-				this.type = (IConstructor) localDeclaration.get("type");
-				this.immediate = newLocalImmediate((IString) localDeclaration.get("local"));
+			Operand(LocalVariableDeclaration localDeclaration) {
+				this.type = localDeclaration.varType;
+				this.immediate = Immediate.local(localDeclaration.local);
 			}
 		}
 
 		Stack<Operand> operandStack;
-		List<IConstructor> auxiliarlyLocalVariables;
-		HashMap<LocalVariableNode, IConstructor> localVariables;
+		List<LocalVariableDeclaration> auxiliarlyLocalVariables;
+		HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables;
 		int locals;
 
-		IList instructions;
+		List<Statement> instructions;
 
-		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, IConstructor> localVariables) {
+		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables) {
 			super(version);
 			this.localVariables = localVariables;
 			operandStack = new Stack<>();
 			auxiliarlyLocalVariables = new ArrayList<>();
 			locals = localVariables.size();
-			instructions = vf.list();
+			instructions = new ArrayList<>();
 		}
 
 		/*
@@ -244,16 +239,10 @@ public class Decompiler {
 		@Override
 		public void visitFieldInsn(int opcode, String owner, String field, String descriptor) {
 			switch (opcode) {
-			case Opcodes.GETSTATIC:
-				getStaticIns(owner, field, descriptor);
-				break;
-			case Opcodes.PUTSTATIC:
-				break; // TODO not implemented yet
-			case Opcodes.GETFIELD:
-				getFieldIns(owner, field, descriptor);
-				break;
-			case Opcodes.PUTFIELD:
-				break; // TODO not implemented yet
+			 case Opcodes.GETSTATIC : getStaticIns(owner, field, descriptor); break;
+			 case Opcodes.PUTSTATIC : break; // TODO not implemented yet
+			 case Opcodes.GETFIELD  : getFieldIns(owner, field, descriptor); break;
+			 case Opcodes.PUTFIELD  : break; // TODO not implemented yet
 			}
 			super.visitFieldInsn(opcode, owner, field, descriptor);
 		}
@@ -263,112 +252,67 @@ public class Decompiler {
 		 * operand stack.
 		 * 
 		 * @param idx index of the local variable
-		 * 
 		 * @increment ammount of the increment.
 		 * 
 		 * (non-Javadoc)
-		 * 
 		 * @see org.objectweb.asm.MethodVisitor#visitIincInsn(int, int)
-		 * 
 		 * @see
 		 * https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-6.html#jvms-6.5.iinc
 		 */
 		@Override
 		public void visitIincInsn(int idx, int increment) {
-			IConstructor local = findLocalVariable(idx);
+			LocalVariableDeclaration local = findLocalVariable(idx);
 
-			IString var = (IString) local.get("local");
+			String var = local.local;
 
-			IConstructor lhs = newLocalImmediate(var);
-			IConstructor rhs = newIntValueImmediate(increment);
-			IConstructor expression = newPlusExpression(lhs, rhs);
+			Immediate lhs = newLocalImmediate(var);
+			Immediate rhs = newIntValueImmediate(increment);
+			Expression expression = newPlusExpression(lhs, rhs);
 
-			instructions = instructions.append(assignmentStmt(var, expression));
+			instructions.add(assignmentStmt(Variable.localVariable(var), expression));
 		}
 
-		private IConstructor findLocalVariable(int idx) {
-			IConstructor local = null;
-			for (LocalVariableNode node : localVariables.keySet()) {
-				if (node.index == idx) {
-					local = localVariables.get(node);
-				}
-			}
-			if (local == null) {
-				throw new RuntimeException("local variable not found");
-			}
-			return local;
-		}
-
+		
 		@Override
 		public void visitInsn(int opcode) {
 			switch (opcode) {
-			case Opcodes.NOP:
-				nopIns();
-				break;
-			case Opcodes.ACONST_NULL:
-				acconstNullIns();
-				break;
-			case Opcodes.ICONST_M1:
-				loadIntConstIns(-1, "I");
-				break;
-			case Opcodes.ICONST_0:
-				loadIntConstIns(0, "I");
-				break;
-			case Opcodes.ICONST_1:
-				loadIntConstIns(1, "I");
-				break;
-			case Opcodes.ICONST_2:
-				loadIntConstIns(2, "I");
-				break;
-			case Opcodes.ICONST_3:
-				loadIntConstIns(3, "I");
-				break;
-			case Opcodes.ICONST_4:
-				loadIntConstIns(4, "I");
-				break;
-			case Opcodes.ICONST_5:
-				loadIntConstIns(5, "I");
-				break;
-			case Opcodes.LCONST_0:
-				loadIntConstIns(0, "J");
-				break;
-			case Opcodes.LCONST_1:
-				loadIntConstIns(1, "J");
-				break;
-			case Opcodes.FCONST_0:
-				loadRealConstIns(0.0F, "F");
-				break;
-			case Opcodes.FCONST_1:
-				loadRealConstIns(1.0F, "F");
-				break;
-			case Opcodes.FCONST_2:
-				loadRealConstIns(2.0F, "F");
-				break;
-			case Opcodes.DCONST_0:
-				loadRealConstIns(0.0F, "F");
-				break;
-			case Opcodes.DCONST_1:
-				loadRealConstIns(1.0F, "F");
-				break;
-			case Opcodes.IALOAD:
-				arraySubscript();
-				break;
-			case Opcodes.LALOAD:
-				arraySubscript();
-				break;
-			case Opcodes.FALOAD:
-				arraySubscript();
-				break;
-			case Opcodes.DALOAD:
-				arraySubscript();
-				break;
-
-			case Opcodes.IADD:
-				addIns("I");
-				break;
+			 case Opcodes.NOP         : nopIns();                     break;
+			 case Opcodes.ACONST_NULL : acconstNullIns();             break;
+			 case Opcodes.ICONST_M1   : loadIntConstIns(-1,"I");      break;
+			 case Opcodes.ICONST_0    : loadIntConstIns(0, "I");      break;
+			 case Opcodes.ICONST_1    : loadIntConstIns(1, "I");      break;
+			 case Opcodes.ICONST_2    : loadIntConstIns(2, "I");      break;
+			 case Opcodes.ICONST_3    : loadIntConstIns(3, "I");      break;
+			 case Opcodes.ICONST_4    : loadIntConstIns(4, "I");      break;
+			 case Opcodes.ICONST_5    : loadIntConstIns(5, "I");      break; 
+			 case Opcodes.LCONST_0    : loadIntConstIns(0, "J");      break;
+			 case Opcodes.LCONST_1    : loadIntConstIns(1, "J");      break;
+			 case Opcodes.FCONST_0    : loadRealConstIns(0.0F, "F");  break;
+			 case Opcodes.FCONST_1    : loadRealConstIns(1.0F, "F");  break;
+			 case Opcodes.FCONST_2    : loadRealConstIns(2.0F, "F");  break;
+			 case Opcodes.DCONST_0    : loadRealConstIns(0.0F, "F");  break;
+			 case Opcodes.DCONST_1    : loadRealConstIns(1.0F, "F");  break;
+			 case Opcodes.IALOAD      : arraySubscriptIns();          break;
+			 case Opcodes.LALOAD      : arraySubscriptIns();          break;
+			 case Opcodes.FALOAD      : arraySubscriptIns();          break;
+			 case Opcodes.DALOAD      : arraySubscriptIns();          break;
+			 case Opcodes.AALOAD      : arraySubscriptIns();          break;
+			 case Opcodes.BALOAD      : arraySubscriptIns();          break; 
+			 case Opcodes.CALOAD      : arraySubscriptIns();          break; 
+			 case Opcodes.SALOAD      : arraySubscriptIns();          break; 
+			 case Opcodes.IASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.LASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.FASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.DASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.AASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.BASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.CASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.SASTORE     : storeIntoArrayIns();          break; 
+			 case Opcodes.POP         : popIns();                     break;
+			 case Opcodes.POP2        : pop2Ins();                    break; 
+			 case Opcodes.DUP         : dupIns();                     break;
+			 case Opcodes.IADD        : addIns("I");                  break;
 			}
-			// IALOAD, LALOAD, FALOAD, DALOAD, AALOAD, BALOAD, CALOAD, SALOAD, IASTORE,
-			// LASTORE, FASTORE, DASTORE, AASTORE, BASTORE, CASTORE, SASTORE, POP, POP2,
 			// DUP, DUP_X1, DUP_X2, DUP2, DUP2_X1, DUP2_X2, SWAP, IADD, LADD, FADD, DADD,
 			// ISUB, LSUB, FSUB, DSUB, IMUL, LMUL, FMUL, DMUL, IDIV, LDIV, FDIV, DDIV, IREM,
 			// LREM, FREM, DREM, INEG, LNEG, FNEG, DNEG, ISHL, LSHL, ISHR, LSHR, IUSHR,
@@ -381,210 +325,250 @@ public class Decompiler {
 		@Override
 		public void visitVarInsn(int opcode, int var) {
 			switch (opcode) {
-			case Opcodes.ILOAD:
-				loadIns(var);
-				break;
-			case Opcodes.ISTORE:
-				storeIns(var);
-				break;
+			 case Opcodes.ILOAD : loadIns(var);  break;
+			 case Opcodes.ISTORE: storeIns(var); break;
 			}
 		}
 
+		private LocalVariableDeclaration findLocalVariable(int idx) {
+			for (LocalVariableNode node : localVariables.keySet()) {
+				if (node.index == idx) {
+					return localVariables.get(node);
+				}
+			}
+			throw new RuntimeException("local variable not found");
+		}
+		
+		/*
+		 * Load a local variable into the top of the 
+		 * operand stack. 
+		 */
 		private void loadIns(int var) {
-			IConstructor local = findLocalVariable(var);
+			LocalVariableDeclaration local = findLocalVariable(var);
 			operandStack.push(new Operand(local));
 		}
 
 		/*
-		 * assigns the expression at the top position of the stack into a variable.
+		 * Assign the expression at the top position of the stack into a variable.
 		 */
 		private void storeIns(int var) {
-			IConstructor local = findLocalVariable(var);
-			IConstructor immediate = operandStack.pop().immediate;
-
-			instructions = instructions.append(assignmentStmt((IString) local.get("local"), immediate));
+			LocalVariableDeclaration local = findLocalVariable(var);
+			Immediate immediate = operandStack.pop().immediate;
+			instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
 		}
 
+		/*
+		 * Add a nop instruction 
+		 */
 		private void nopIns() {
-			IConstructor nop = ValueBuilder.instance().withType("Statement").withConstructor("nop").build(vf);
-
-			instructions = instructions.append(nop);
+			instructions.add(Statement.nop());
 		}
 
+		/*
+		 * Load a null value into the top of the 
+		 * operand stack. 
+		 */
 		private void acconstNullIns() {
-			// operandStack.add(new Operand(type(vf, "null_type"),
-			// newNullValueImmediate()));
+			operandStack.push(new Operand(Type.TNull(), Immediate.nullValue()));
 		}
 
+		/*
+		 * Load an int const into the top of the 
+		 * operand stack. 
+		 */
 		private void loadIntConstIns(int value, String descriptor) {
-			// operandStack.add(new Operand(type(vf, descriptor),
-			// newIntValueImmediate(value)));
+			operandStack.push(new Operand(type(descriptor), Immediate.intValue(value)));
 		}
 
+		/*
+		 * Load a float const into the top of the 
+		 * operand stack. 
+		 */
 		private void loadRealConstIns(float value, String descriptor) {
-			// operandStack.add(new Operand(type(vf, descriptor),
-			// newRealValueImmediate(value)));
+			operandStack.push(new Operand(type(descriptor), Immediate.floatValue(value)));
 		}
 
+		/*
+		 * Add two operands (lhs and rhs), and push the result into the 
+		 * top of the stack. 
+		 */
 		private void addIns(String descriptor) {
 			Operand lhs = operandStack.pop();
 			Operand rhs = operandStack.pop();
 
-			IConstructor newLocal = createLocal(descriptor);
+			LocalVariableDeclaration newLocal = createLocal(descriptor);
 
-			IConstructor expression = newPlusExpression(lhs.immediate, rhs.immediate);
+			Expression expression = newPlusExpression(lhs.immediate, rhs.immediate);
 
-			instructions = instructions.append(assignmentStmt((IString) newLocal.get("local"), expression));
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
 
 			operandStack.push(new Operand(newLocal));
 		}
 
-		private void arraySubscript() {
-			// Operand idx = operandStack.pop();
-			// Operand ref = operandStack.pop();
-			//
-			// IConstructor baseType = ref.type;
-			// if(baseType.getConstructorType().equals(_arrayConstructor)) {
-			// baseType = (IConstructor)baseType.get("baseType");
-			// }
-			// IConstructor newLocal =createLocal(baseType);
-			//
-			// instructions =
-			// instructions.append(assignmentStmt((IString)newLocal.get("local"),
-			// newArraySubscript((IString)ref.immediate.get("localName"), idx.immediate)));
-			//
-			// operandStack.push(new Operand(newLocal));
+		/*
+		 * Update the top of the operand stack with 
+		 * the value of a specific indexed element of an 
+		 * array. The index and the array's reference 
+		 * are popped up from the stack.  
+		 */
+		private void arraySubscriptIns() {
+			Operand idx = operandStack.pop();
+			Operand ref = operandStack.pop();
+			
+			Type baseType = ref.type;
+			
+			if(baseType instanceof Type.c_TArray) {
+			   baseType = ((Type.c_TArray)baseType).baseType;
+			}
+			
+			LocalVariableDeclaration newLocal =createLocal(baseType);
+			
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), newArraySubscript(((Immediate.c_local)ref.immediate).localName,idx.immediate)));
+			
+			operandStack.push(new Operand(newLocal));
+		}
+		
+		/*
+		 * Updates a position of an array with a 
+		 * value. The stack must be with the values:
+		 * 
+		 *  [ value ]
+		 *  [  idx  ]
+		 *  [ array ]
+		 *  [ ...   ]  
+		 *  _________
+		 *  
+		 *  After popping value, idx, and array, 
+		 *  no value is introduced into the stack. 
+		 */
+		private void storeIntoArrayIns() {
+			Immediate value = operandStack.pop().immediate;
+			Immediate idx = operandStack.pop().immediate;
+			Immediate arrayRef = operandStack.pop().immediate;
+			
+			Variable var = Variable.arrayRef(((Immediate.c_local)arrayRef).localName, idx);
+			
+			instructions.add(assignmentStmt(var, Expression.immediate(value)));
+		}
+		
+		/*
+		 * Removes an operand from the stack. 
+		 */
+		private void popIns() {
+			operandStack.pop();
+		}
+		
+		/*
+		 * Removes either one or two operand from the 
+		 * top of the stack. If the type of the first 
+		 * operand is either a long or a double, it 
+		 * removes just one operand. 
+		 */
+		private void pop2Ins() {
+			Operand op = operandStack.pop(); 
+			
+			if(! (op.type instanceof Type.c_TDouble || op.type instanceof Type.c_TLong)) {
+				operandStack.pop();
+			}
+		}
+		
+		/*
+		 * Duplicate the top operand stack value
+		 */
+		private void dupIns() {
+			Operand value = operandStack.pop();
+			
+			operandStack.push(value);
+			operandStack.push(value);
+		}
+		
+		/*
+		 * Duplicate the top operand stack value and insert 
+		 * the copy two values down. 
+		 */
+		private void dupX1Ins() {
+			Operand value1 = operandStack.pop();
+			Operand value2 = operandStack.pop();
+			
+			operandStack.push(value1);
+			operandStack.push(value2);
+			operandStack.push(value1); 
+		}
+		
+		/*
+		 * Duplicate the top operand stack value and insert 
+		 * the copy two or three values down. 
+		 */
+		private void dupX2Ins() {
+			Operand value1 = operandStack.pop(); 
+			
+			if(! (value1.type instanceof Type.c_TDouble || value1.type instanceof Type.c_TLong)) {
+				Operand value2 = operandStack.pop();
+				Operand value3 = operandStack.pop();
+				operandStack.push(value1);
+				operandStack.push(value3);
+				operandStack.push(value2);
+				operandStack.push(value1);
+			}
+			else {
+				Operand value2 = operandStack.pop();
+				operandStack.push(value1);
+				operandStack.push(value2);
+				operandStack.push(value1); 
+			}
 		}
 
+		/*
+		 * Load the value of a static field into the top 
+		 * of the operand stack. 
+		 * 
+		 * @param owner the field's owner class. 
+		 * @param field the name of the field. 
+		 * @param descriptor use to compute the field's type. 
+		 */
 		private void getStaticIns(String owner, String field, String descriptor) {
-			IConstructor newLocal = createLocal(descriptor);
-			IString className = vf.string(owner);
-			IString fieldName = vf.string(field);
-			// IConstructor fieldType = type(vf, descriptor);
+			LocalVariableDeclaration newLocal = createLocal(descriptor);
+			Type fieldType = type(descriptor);
+			Expression fieldRef = Expression.fieldRef(owner, fieldType, field);
+		
+			instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
 
-			// IConstructor fieldRef = ValueBuilder.instance()
-			// .withType("Expression")
-			// .withConstructor("fieldRef")
-			// .withStringArgument("className", className)
-			// .withConstructorArgument("fieldType", "Type", fieldType)
-			// .withStringArgument("fieldName", fieldName)
-			// .build(vf);
-			//
-			// instructions =
-			// instructions.append(assignmentStmt((IString)newLocal.get("local"),
-			// fieldRef));
-			// operandStack.push(new Operand(newLocal));
+			operandStack.push(new Operand(newLocal));
 		}
 
-		private IConstructor assignmentStmt(IString local, IConstructor expression) {
-			// return ValueBuilder.instance()
-			// .withType("Statement")
-			// .withConstructor("assign")
-			// .withStringArgument("local", local)
-			// .withConstructorArgument("expression", "Expression", expression)
-			// .build(vf);
-			return null;
-		}
-
+		/*
+		 * Load the value of an instance field into the top 
+		 * of the operand stack. The instance object is popped 
+		 * from the stack. 
+		 * 
+		 * @param owner the field's owner class. 
+		 * @param field the name of the field. 
+		 * @param descriptor use to compute the field's type. 
+		 */
 		private void getFieldIns(String owner, String field, String descriptor) {
-			// IConstructor local = operandStack.pop().immediate;
-			//
-			// IConstructor newLocal = createLocal(descriptor);
-			// IString className = vf.string(owner);
-			// IString fieldName = vf.string(field);
-			// IConstructor fieldType = type(vf, descriptor);
-			//
-			// IConstructor localFieldRef = ValueBuilder.instance()
-			// .withType("Expression")
-			// .withConstructor("localFieldRef")
-			// .withStringArgument("local", (IString)local.get("localName"))
-			// .withStringArgument("className", className)
-			// .withConstructorArgument("fieldType", "Type", fieldType)
-			// .withStringArgument("fieldName", fieldName)
-			// .build(vf);
-			//
-			// IConstructor assignment = ValueBuilder.instance()
-			// .withType("Statement")
-			// .withConstructor("assign")
-			// .withStringArgument("local", (IString)newLocal.get("local"))
-			// .withConstructorArgument("expression", "Expression", localFieldRef)
-			// .build(vf);
-			//
-			// instructions = instructions.append(assignment);
-			// operandStack.push(new Operand(newLocal));
+			Immediate instance = operandStack.pop().immediate;
+			
+			LocalVariableDeclaration newLocal = createLocal(descriptor);
+			
+			Type fieldType = type(descriptor);
+			
+			Expression fieldRef = Expression.localFieldRef(((Immediate.c_local)instance).localName, 
+					owner, fieldType, field); 
+			
+			instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef)); 
+			
+			operandStack.push(new Operand(newLocal));
 		}
 
-		private IConstructor createLocal(String descriptor) {
-			// return createLocal(type(vf, descriptor));
-			return null;
+		private LocalVariableDeclaration createLocal(String descriptor) {
+			return createLocal(type(descriptor));
 		}
 
-		private IConstructor createLocal(IConstructor type) {
-			// String name = "l" + locals++;
-			// IConstructor local = localVariableDeclaration(vf, type, vf.string(name));
-			// auxiliarlyLocalVariables.add(local);
-			// return local;
-			return null;
-		}
-
-		private IConstructor newPlusExpression(IConstructor lhs, IConstructor rhs) {
-			// return ValueBuilder.instance()
-			// .withType("Expression")
-			// .withConstructor("plus")
-			// .withConstructorArgument("lhs", "Immediate", lhs)
-			// .withConstructorArgument("rhs", "Immediate", rhs)
-			// .build(vf);
-			//
-			return null;
-		}
-
-		private IConstructor newArraySubscript(IString name, IConstructor immediate) {
-			// return ValueBuilder.instance()
-			// .withType("Expression")
-			// .withConstructor("arraySubscript")
-			// .withStringArgument("name", name)
-			// .withConstructorArgument("immediate", "Immediate", immediate)
-			// .build(vf);
-
-			return null;
-		}
-
-		private IConstructor newIntValueImmediate(int value) {
-			// return ValueBuilder.instance()
-			// .withType("Immediate")
-			// .withConstructor("intValue")
-			// .withIntArgument("iValue", vf.integer(value))
-			// .build(vf);
-			return null;
-		}
-
-		private IConstructor newRealValueImmediate(float value) {
-			// return ValueBuilder.instance()
-			// .withType("Immediate")
-			// .withConstructor("intValue")
-			// .withRealArgument("iValue", vf.real(value))
-			// .build(vf);
-
-			return null;
-		}
-
-		private IConstructor newNullValueImmediate() {
-			// return ValueBuilder.instance()
-			// .withType("Immediate")
-			// .withConstructor("nullValue")
-			// .build(vf);
-
-			return null;
-		}
-
-		private IConstructor newLocalImmediate(IString var) {
-			// return ValueBuilder.instance().
-			// withType("Immediate")
-			// .withConstructor("local")
-			// .withStringArgument("localName", var)
-			// .build(vf);
-
-			return null;
+		private LocalVariableDeclaration createLocal(Type type) {
+			String name = "l" + locals++;
+			LocalVariableDeclaration local = LocalVariableDeclaration.localVariableDeclaration(type, name);
+			auxiliarlyLocalVariables.add(local);
+			return local;
 		}
 
 	}

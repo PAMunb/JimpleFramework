@@ -7,7 +7,7 @@ import io.usethesource.vallang.type.Type;
 import io.usethesource.vallang.type.TypeFactory;
 import io.usethesource.vallang.type.TypeStore;
 
-public abstract class AbstractJimpleConstructor {
+public abstract class JimpleAbstractDataType {
 	
 	public static TypeStore typestore = new TypeStore();
 	public static TypeFactory tf = TypeFactory.getInstance();

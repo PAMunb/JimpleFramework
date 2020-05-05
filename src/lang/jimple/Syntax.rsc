@@ -49,6 +49,12 @@ data CatchClause
  = catchClause(Type exception, Label from, Label to, Label with)
  ; 
  
+data Variable 
+ = localVariable(Name local)
+ | arrayRef(Name reference, Immediate idx)
+ | fieldRef(Name reference, FieldSignature field)
+ ;  
+ 
 data Statement  
   = label(Label label)  
   | breakpoint()
@@ -58,7 +64,7 @@ data Statement
   | lookupSwitch(Immediate immediate, list[CaseStmt] stmts)
   | identity(Name local, Name identifier, Type idType)
   | identityNoType(Name local, Name identifier)
-  | assign(Name local, Expression expression)
+  | assign(Variable var, Expression expression)
   | ifStmt(Expression exp, GotoStmt stmt)
   | retEmptyStmt()
   | retStmt(Immediate immediate)
@@ -122,6 +128,10 @@ data InvokeExp
   | dynamicInvoke(str string, UnnamedMethodSignature usig, list[Immediate] args1, MethodSignature sig, list[Immediate] args2)
   ;   
 
+data FieldSignature 
+  = fieldSignature(Name className, Type fieldType, Name fieldName)
+  ; 
+  
 data MethodSignature 
   = methodSignature(Name className, Type returnType, list[Type] formals)
   ; 

@@ -1,4 +1,4 @@
-module lang::jimple::internal::RascalJimpleConverter
+module lang::jimple::internal::RascalJavaConverter
 
 import IO;
 import Map; 
@@ -9,9 +9,12 @@ import ParseTree;
 import lang::rascal::\syntax::Rascal; 
 
 /**
- * from a Rascal module, it exports a set 
+ * From a Rascal module, it exports a set 
  * of Java classes corresponding to the algebraic 
  * data types. 
+ * 
+ * status: This implementation is too experimental, and 
+ * does not suppor all Rascal structured types (such as map). 
  */
 public void generateJavaCode(loc location) {
   Module m = parse(#Module, location);
@@ -29,7 +32,7 @@ private map[str, str] collectAliases(Module m) {
 
 private void generateCode(Module m, map[str, str] aliases) {
 	top-down visit(m) {
-	  case (Declaration)`<Visibility v> data <UserType t> = <{Variant "|"}+ variants>;`: generateClass(aliases, t, variants);
+	  case (Declaration)`<Visibility _> data <UserType t> = <{Variant "|"}+ variants>;`: generateClass(aliases, t, variants);
 	}
 }
 
@@ -68,7 +71,7 @@ private str generateFactory(map[str, str] aliases, str base, Variant v) {
    str code = ""; 
    switch(v) {
      case (Variant)`<Name n>(<{TypeArg ","}* arguments>)` : 
-       code = "public static <base> <n>(<intercalate(", ", [generateAttribute(aliases, arg) | TypeArg arg <- arguments])>)  {
+       code = "public static <base> <n>(<intercalate(", ", [generateAttribute(aliases, arg, false) | TypeArg arg <- arguments])>)  {
               '  return new c_<n>(<intercalate(", ", [generateAttributeName(arg) | TypeArg arg <- arguments])>);
               '}"; 
    }
@@ -79,12 +82,12 @@ private str generateSubClass(map[str, str] aliases, str base, Variant v) {
    str code = ""; 
    switch(v) {
      case (Variant)`<Name n>(<{TypeArg ","}* arguments>)` : 
-       code = "static class c_<n> extends <base> {
+       code = "public static class c_<n> extends <base> {
               '  <for(TypeArg arg <- arguments){>
-              '  <generateAttribute(aliases, arg)>;
+              '  <generateAttribute(aliases, arg, true)>;
               '  <}>
               '
-              '  public c_<n>(<intercalate(", ", [generateAttribute(aliases, arg) | TypeArg arg <- arguments])>) {
+              '  public c_<n>(<intercalate(", ", [generateAttribute(aliases, arg, false) | TypeArg arg <- arguments])>) {
               '   <for(TypeArg arg <-arguments){>
               '     this.<generateAttributeName(arg)> = <generateAttributeName(arg)>;  
               '   <}>  
@@ -92,7 +95,6 @@ private str generateSubClass(map[str, str] aliases, str base, Variant v) {
               '  
               '  @Override
               '  public IConstructor createVallangInstance(IValueFactory vf) {
-              '    HashMap\<String, IValue\> map = new HashMap\<\>();
               '
               '    <for(TypeArg arg <- arguments){>
               '    <populateMap(aliases, arg)>
@@ -113,9 +115,10 @@ private str generateSubClass(map[str, str] aliases, str base, Variant v) {
    return code; 
 }
 
-private str generateAttribute(map[str, str] aliases, TypeArg arg) { 
+private str generateAttribute(map[str, str] aliases, TypeArg arg, bool isPublic) {
+  str prefix = isPublic ? "public " : "";  
   switch(arg) {
-    case (TypeArg)`<Type t> <Name n>`: return resolve(aliases, unparse(t)) + " " + unparse(n); 
+    case (TypeArg)`<Type t> <Name n>`: return prefix + resolve(aliases, unparse(t)) + " " + unparse(n); 
     default: return ""; 
   } 
 }
