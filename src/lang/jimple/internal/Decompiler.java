@@ -3,7 +3,9 @@ package lang.jimple.internal;
 import static lang.jimple.internal.JimpleObjectFactory.*;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,10 +16,12 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.rascalmpl.interpreter.IEvaluatorContext;
 import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 import org.rascalmpl.uri.URIResolverRegistry;
 
@@ -54,7 +58,7 @@ public class Decompiler {
 	/*
 	 * decompiles a Java byte code at <i>classLoc</i> into a Jimple representation.
 	 */
-	public IConstructor decompile(ISourceLocation classLoc) {
+	public IConstructor decompile(ISourceLocation classLoc, IEvaluatorContext ctx) {
 		try {
 			ClassReader reader = new ClassReader(URIResolverRegistry.getInstance().getInputStream(classLoc));
 			ClassNode cn = new ClassNode();
@@ -155,9 +159,16 @@ public class Decompiler {
 			}
 			
 			//TODO: uncomment the following lines to decompile the instructions. 
-//			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
-//			mn.instructions.accept(insVisitor);
-//			
+			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
+			
+			Iterator it2 = mn.instructions.iterator();
+			
+			while(it2.hasNext()) {
+				AbstractInsnNode ins = (AbstractInsnNode)it2.next();
+			}
+			
+			mn.instructions.accept(insVisitor);
+			
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses); 
 			
 			methods.add(Method.method(methodModifiers, methodReturnType, methodName, methodFormalArgs, methodExceptions, methodBody));
@@ -314,15 +325,80 @@ public class Decompiler {
 			 case Opcodes.POP         : popIns();                     break;
 			 case Opcodes.POP2        : pop2Ins();                    break; 
 			 case Opcodes.DUP         : dupIns();                     break;
-			 case Opcodes.IADD        : addIns("I");                  break;
+			 case Opcodes.DUP_X1      : dupX1Ins();                   break;
+			 case Opcodes.DUP_X2      : dupX2Ins();                   break;
+			 case Opcodes.DUP2        : dup2Ins();                    break;
+			 case Opcodes.DUP2_X1     : dup2X1Ins();                  break;
+			 case Opcodes.DUP2_X2     : dup2X2Ins();                  break;
+			 case Opcodes.SWAP        : swapIns();                    break; 
+			 case Opcodes.IADD        : binOperatorIns(type("I"), (l, r) -> newPlusExpression(l, r));  break;
+			 case Opcodes.LADD        : binOperatorIns(type("J"), (l, r) -> newPlusExpression(l, r));  break;
+			 case Opcodes.FADD        : binOperatorIns(type("F"), (l, r) -> newPlusExpression(l, r));  break;
+			 case Opcodes.DADD        : binOperatorIns(type("D"), (l, r) -> newPlusExpression(l, r));  break;
+			 case Opcodes.ISUB        : binOperatorIns(type("I"), (l, r) -> newMinusExpression(l, r)); break;
+			 case Opcodes.LSUB        : binOperatorIns(type("J"), (l, r) -> newMinusExpression(l, r)); break;
+			 case Opcodes.FSUB        : binOperatorIns(type("F"), (l, r) -> newMinusExpression(l, r)); break;
+			 case Opcodes.DSUB        : binOperatorIns(type("D"), (l, r) -> newMinusExpression(l, r)); break;
+			 case Opcodes.IMUL        : binOperatorIns(type("I"), (l, r) -> newMultExpression(l, r));  break;
+			 case Opcodes.LMUL        : binOperatorIns(type("J"), (l, r) -> newMultExpression(l, r));  break;
+			 case Opcodes.FMUL        : binOperatorIns(type("F"), (l, r) -> newMultExpression(l, r));  break;
+			 case Opcodes.DMUL        : binOperatorIns(type("D"), (l, r) -> newMultExpression(l, r));  break;
+			 case Opcodes.IDIV        : binOperatorIns(type("I"), (l, r) -> newDivExpression(l, r));  break;
+			 case Opcodes.LDIV        : binOperatorIns(type("J"), (l, r) -> newDivExpression(l, r));  break;
+			 case Opcodes.FDIV        : binOperatorIns(type("F"), (l, r) -> newDivExpression(l, r));  break;
+			 case Opcodes.DDIV        : binOperatorIns(type("D"), (l, r) -> newDivExpression(l, r));  break;
+			 case Opcodes.IREM        : binOperatorIns(type("I"), (l, r) -> newReminderExpression(l, r));  break;
+			 case Opcodes.LREM        : binOperatorIns(type("J"), (l, r) -> newReminderExpression(l, r));  break;
+			 case Opcodes.FREM        : binOperatorIns(type("F"), (l, r) -> newReminderExpression(l, r));  break;
+			 case Opcodes.DREM        : binOperatorIns(type("D"), (l, r) -> newReminderExpression(l, r));  break;
+			 case Opcodes.INEG        : negIns(type("I"));  break;
+			 case Opcodes.LNEG        : negIns(type("J"));  break;
+			 case Opcodes.FNEG        : negIns(type("F"));  break;
+			 case Opcodes.DNEG        : negIns(type("D"));  break;
+			 case Opcodes.ISHL        : binOperatorIns(type("I"), (l, r) -> Expression.shl(l, r));   break;
+			 case Opcodes.LSHL        : binOperatorIns(type("J"), (l, r) -> Expression.shl(l, r));   break;
+			 case Opcodes.ISHR        : binOperatorIns(type("I"), (l, r) -> Expression.shr(l, r));   break;
+			 case Opcodes.LSHR        : binOperatorIns(type("J"), (l, r) -> Expression.shr(l, r));   break;
+			 case Opcodes.IUSHR       : binOperatorIns(type("I"), (l, r) -> Expression.ushr(l, r));  break;
+			 case Opcodes.LUSHR       : binOperatorIns(type("J"), (l, r) -> Expression.ushr(l, r));  break;
+			 case Opcodes.IAND        : binOperatorIns(type("I"), (l, r) -> Expression.and(l, r));   break;
+			 case Opcodes.LAND        : binOperatorIns(type("J"), (l, r) -> Expression.and(l, r));   break;
+			 case Opcodes.IOR         : binOperatorIns(type("I"), (l, r) -> Expression.or(l, r));    break;
+			 case Opcodes.LOR         : binOperatorIns(type("J"), (l, r) -> Expression.or(l, r));    break;
+			 case Opcodes.IXOR        : binOperatorIns(type("I"), (l, r) -> Expression.xor(l, r));  break;
+			 case Opcodes.LXOR        : binOperatorIns(type("J"), (l, r) -> Expression.xor(l, r));  break;
+			 case Opcodes.I2L         : simpleCastIns(type("J")); break;
+			 case Opcodes.I2F         : simpleCastIns(type("F")); break;
+			 case Opcodes.I2D         : simpleCastIns(type("D")); break;
+			 case Opcodes.L2I         : simpleCastIns(type("I")); break;
+			 case Opcodes.L2F         : simpleCastIns(type("F")); break;
+			 case Opcodes.L2D         : simpleCastIns(type("D")); break;
+			 case Opcodes.F2I         : simpleCastIns(type("I")); break;
+			 case Opcodes.F2L         : simpleCastIns(type("J")); break;
+			 case Opcodes.F2D         : simpleCastIns(type("D")); break;
+			 case Opcodes.D2I         : simpleCastIns(type("I")); break;
+			 case Opcodes.D2L         : simpleCastIns(type("J")); break;
+			 case Opcodes.D2F         : simpleCastIns(type("F")); break;
+			 case Opcodes.I2B         : simpleCastIns(type("B")); break;
+			 case Opcodes.I2C         : simpleCastIns(type("C")); break;
+			 case Opcodes.I2S         : simpleCastIns(type("S")); break;
+			 case Opcodes.LCMP        : binOperatorIns(type("I"), (l, r) -> Expression.cmp(l, r));  break;
+			 case Opcodes.FCMPG       : binOperatorIns(type("I"), (l, r) -> Expression.cmpg(l, r)); break;	
+			 case Opcodes.FCMPL       : binOperatorIns(type("I"), (l, r) -> Expression.cmpl(l, r)); break;	
+			 case Opcodes.DCMPG       : binOperatorIns(type("I"), (l, r) -> Expression.cmpg(l, r)); break;	
+			 case Opcodes.DCMPL       : binOperatorIns(type("I"), (l, r) -> Expression.cmpl(l, r)); break;	
+			 case Opcodes.IRETURN     : returnIns(); break;
+			 case Opcodes.LRETURN     : returnIns(); break;
+			 case Opcodes.FRETURN     : returnIns(); break;
+			 case Opcodes.DRETURN     : returnIns(); break;
+			 case Opcodes.ARETURN     : returnIns(); break;
+			 case Opcodes.RETURN      : returnVoidIns(); break; 
+			 case Opcodes.ARRAYLENGTH : arrayLengthIns(); break; 
+			 case Opcodes.ATHROW      : throwIns(); break; 
+			 case Opcodes.MONITORENTER : monitorEnterIns(); break; 
+			 case Opcodes.MONITOREXIT  : monitorExitIns(); break; 
+			 default: throw new RuntimeException("unknown instruction with opcode " + opcode);
 			}
-			// DUP, DUP_X1, DUP_X2, DUP2, DUP2_X1, DUP2_X2, SWAP, IADD, LADD, FADD, DADD,
-			// ISUB, LSUB, FSUB, DSUB, IMUL, LMUL, FMUL, DMUL, IDIV, LDIV, FDIV, DDIV, IREM,
-			// LREM, FREM, DREM, INEG, LNEG, FNEG, DNEG, ISHL, LSHL, ISHR, LSHR, IUSHR,
-			// LUSHR, IAND, LAND, IOR, LOR, IXOR, LXOR, I2L, I2F, I2D, L2I, L2F, L2D, F2I,
-			// F2L, F2D, D2I, D2L, D2F, I2B, I2C, I2S, LCMP, FCMPL, FCMPG, DCMPL, DCMPG,
-			// IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN, ARRAYLENGTH, ATHROW,
-			// MONITORENTER, or MONITOREXIT.
 		}
 
 		@Override
@@ -391,23 +467,84 @@ public class Decompiler {
 			operandStack.push(new Operand(type(descriptor), Immediate.floatValue(value)));
 		}
 
+		
 		/*
-		 * Add two operands (lhs and rhs), and push the result into the 
-		 * top of the stack. 
+		 * Neg instruction (INEG, LNEG, FNEG, DNEG)
 		 */
-		private void addIns(String descriptor) {
+		private void negIns(Type type) {
+			Operand operand = operandStack.pop();
+			
+			LocalVariableDeclaration newLocal = createLocal(type);
+			
+			Expression expression = Expression.neg(operand.immediate);
+			
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
+			
+			operandStack.push(new Operand(newLocal));
+		}
+		
+		/*
+		 * Instructions supporting binarya operations. 
+		 */
+		private void binOperatorIns(Type type, BinOperatorFactory factory) {
 			Operand lhs = operandStack.pop();
 			Operand rhs = operandStack.pop();
 
-			LocalVariableDeclaration newLocal = createLocal(descriptor);
-
-			Expression expression = newPlusExpression(lhs.immediate, rhs.immediate);
+			LocalVariableDeclaration newLocal = createLocal(type);
+			
+			Expression expression = factory.createExpression(lhs.immediate, rhs.immediate);
 
 			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
 
 			operandStack.push(new Operand(newLocal));
 		}
+		
+		private void simpleCastIns(Type targetType) {
+			Operand operand = operandStack.pop();
+			LocalVariableDeclaration newLocal = createLocal(targetType);
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.cast(targetType, operand.immediate)));
+			operand.type = targetType;
+			operandStack.push(operand);
+		}
+		
+		private void returnIns() {
+			Operand operand = operandStack.pop();
+			instructions.add(Statement.returnStmt(operand.immediate));
+			// TODO: perhaps we should call an exit monitor here. 
+			operandStack.empty();
+		}
+		
+		private void returnVoidIns() {
+			instructions.add(Statement.returnEmptyStmt());
+			// TODO: perhaps we should call an exit monitor here. 
+			operandStack.empty();
+		}
+		
+		private void arrayLengthIns() {
+			Operand arrayRef = operandStack.pop();
+			LocalVariableDeclaration newLocal = createLocal("I");
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate)));
+			operandStack.push(new Operand(newLocal));
+		}
+		
+		private void throwIns() {
+			Operand reference = operandStack.pop();
+			instructions.add(Statement.throwStmt(reference.immediate));
+			operandStack.empty();
+			operandStack.push(reference);
+		}
+		
+		private void monitorEnterIns() {
+			Operand reference = operandStack.pop();
+			instructions.add(Statement.enterMonitor(reference.immediate));
+		}
+		
+		private void monitorExitIns() {
+			Operand reference = operandStack.pop();
+			instructions.add(Statement.exitMonitor(reference.immediate));
+		}
 
+	    
 		/*
 		 * Update the top of the operand stack with 
 		 * the value of a specific indexed element of an 
@@ -468,9 +605,9 @@ public class Decompiler {
 		 * removes just one operand. 
 		 */
 		private void pop2Ins() {
-			Operand op = operandStack.pop(); 
+			Operand value = operandStack.pop(); 
 			
-			if(! (op.type instanceof Type.c_TDouble || op.type instanceof Type.c_TLong)) {
+			if(allCategory1(value.type)) {
 				operandStack.pop();
 			}
 		}
@@ -490,6 +627,8 @@ public class Decompiler {
 		 * the copy two values down. 
 		 */
 		private void dupX1Ins() {
+			assert operandStack.size() >= 2; 
+			
 			Operand value1 = operandStack.pop();
 			Operand value2 = operandStack.pop();
 			
@@ -503,9 +642,11 @@ public class Decompiler {
 		 * the copy two or three values down. 
 		 */
 		private void dupX2Ins() {
+			assert operandStack.size() >= 2; 
+			
 			Operand value1 = operandStack.pop(); 
 			
-			if(! (value1.type instanceof Type.c_TDouble || value1.type instanceof Type.c_TLong)) {
+			if(allCategory1(value1.type)) {
 				Operand value2 = operandStack.pop();
 				Operand value3 = operandStack.pop();
 				operandStack.push(value1);
@@ -520,7 +661,113 @@ public class Decompiler {
 				operandStack.push(value1); 
 			}
 		}
+		
+		/*
+		 * Duplicate the top one or two operand stack values. 
+		 * It duplicates the two top operand stack values (v1 and v2) 
+		 * if both have types of category1. Otherwise, it 
+		 * duplicates just the first value. 
+		 */
+		private void dup2Ins() {
+			assert operandStack.size() >= 2; 
+			
+			Operand value1 = operandStack.pop();
+			Operand value2 = operandStack.pop();
+			
+			if(allCategory1(value1.type, value2.type)) {
+				operandStack.push(value2);
+				operandStack.push(value1);
+				operandStack.push(value2);
+				operandStack.push(value1);
+			}
+			else {
+				operandStack.push(value2);
+				operandStack.push(value1);
+				operandStack.push(value1); 
+			}
+		}
+		
+		/*
+		 * Duplicate the top one or two operand stack values and 
+		 * insert two or three values down, depending on the 
+		 * type category of the values.
+		 */
+		private void dup2X1Ins() {
+			assert operandStack.size() >= 3;
+			
+			Operand value1 = operandStack.pop();
+			Operand value2 = operandStack.pop();
+			Operand value3 = operandStack.pop();
+			
+			if(allCategory1(value1.type, value2.type, value3.type)) {
+				operandStack.push(value2);
+				operandStack.push(value1); 
+				operandStack.push(value3);
+				operandStack.push(value2);
+				operandStack.push(value1); 
+			}
+			else if((allCategory2(value1.type)) && allCategory1(value2.type)){
+				operandStack.push(value3);
+				operandStack.push(value1);
+				operandStack.push(value2);
+				operandStack.push(value1); 
+			}
+		}
 
+		/*
+		 * Duplicate the top one or two operand stack values and insert two, three, or four values down
+		 */
+		private void dup2X2Ins() {
+			assert operandStack.size() >= 4; 
+			
+			Operand value1 = operandStack.pop();
+			Operand value2 = operandStack.pop(); 
+			Operand value3 = operandStack.pop(); 
+			Operand value4 = operandStack.pop();
+					
+			if(allCategory1(value1.type, value2.type, value3.type, value4.type)) { 
+				operandStack.push(value2);
+				operandStack.push(value1);
+				operandStack.push(value4);
+				operandStack.push(value3);
+				operandStack.push(value2);
+				operandStack.push(value1);
+			}
+			else if((allCategory2(value1.type)) && allCategory1(value2.type, value3.type)) {  
+				operandStack.push(value4);
+				operandStack.push(value1);
+				operandStack.push(value3);
+				operandStack.push(value2);
+				operandStack.push(value1);
+			}
+			else if(allCategory1(value1.type, value2.type) && (allCategory2(value3.type))) {
+				operandStack.push(value4);
+				operandStack.push(value2);
+				operandStack.push(value1);
+				operandStack.push(value3);
+				operandStack.push(value2);
+				operandStack.push(value1);
+			}
+			else if((!allCategory2(value1.type, value2.type))) {
+				operandStack.push(value4);
+				operandStack.push(value3);
+				operandStack.push(value1);
+				operandStack.push(value2);
+				operandStack.push(value1);
+			}
+			
+		}
+		
+		private void swapIns() {
+			assert operandStack.size() >= 2; 
+			
+			Operand value1 = operandStack.pop();
+			Operand value2 = operandStack.pop();
+			
+			operandStack.push(value1);
+			operandStack.push(value2); 
+		}
+		
 		/*
 		 * Load the value of a static field into the top 
 		 * of the operand stack. 
@@ -572,6 +819,24 @@ public class Decompiler {
 			LocalVariableDeclaration local = LocalVariableDeclaration.localVariableDeclaration(type, name);
 			auxiliarlyLocalVariables.add(local);
 			return local;
+		}
+		
+		private boolean allCategory1(Type ... types) {
+			for(Type t: types) {
+				if(t instanceof Type.c_TDouble || t instanceof Type.c_TLong) {
+					return false;
+				}
+			}
+			return true; 
+		}
+		
+		private boolean allCategory2(Type ... types) {
+			for(Type t: types) {
+				if(!(t instanceof Type.c_TDouble || t instanceof Type.c_TLong)) {
+					return false;
+				}
+			}
+			return true; 
 		}
 
 	}

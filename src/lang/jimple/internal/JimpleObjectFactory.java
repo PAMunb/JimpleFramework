@@ -36,6 +36,22 @@ public class JimpleObjectFactory {
 	public static Expression newPlusExpression(Immediate lhs, Immediate rhs) {
 		return Expression.plus(lhs, rhs);
 	}
+	
+	public static Expression newMinusExpression(Immediate lhs, Immediate rhs) {
+		return Expression.minus(lhs, rhs);
+	}
+	
+	public static Expression newMultExpression(Immediate lhs, Immediate rhs) {
+		return Expression.mult(lhs, rhs);
+	}
+	
+	public static Expression newDivExpression(Immediate lhs, Immediate rhs) {
+		return Expression.div(lhs, rhs);
+	}
+	
+	public static Expression newReminderExpression(Immediate lhs, Immediate rhs) {
+		return Expression.reminder(lhs, rhs);
+	}
 
 	public static Expression newArraySubscript(String name, Immediate immediate) {
 		return Expression.arraySubscript(name, immediate);
