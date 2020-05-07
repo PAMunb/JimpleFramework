@@ -53,6 +53,7 @@ data Variable
  = localVariable(Name local)
  | arrayRef(Name reference, Immediate idx)
  | fieldRef(Name reference, FieldSignature field)
+ | staticFieldRef(FieldSignature field)
  ;  
  
 data Statement  
@@ -123,7 +124,9 @@ data ArrayDescriptor
   ;
   
 data InvokeExp
-  = instanceMethodInvoke(Name local, MethodSignature sig, list[Immediate] args)
+  = specialInvoke(Name local, MethodSignature sig, list[Immediate] args)
+  | virtualInvoke(Name local, MethodSignature sig, list[Immediate] args)
+  | interfaceInvoke(Name local, MethodSignature sig, list[Immediate] args)
   | staticMethodInvoke(MethodSignature sig, list[Immediate] args)
   | dynamicInvoke(str string, UnnamedMethodSignature usig, list[Immediate] args1, MethodSignature sig, list[Immediate] args2)
   ;   

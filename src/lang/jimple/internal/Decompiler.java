@@ -1,11 +1,22 @@
 package lang.jimple.internal;
 
-import static lang.jimple.internal.JimpleObjectFactory.*;
+import static lang.jimple.internal.JimpleObjectFactory.assignmentStmt;
+import static lang.jimple.internal.JimpleObjectFactory.isInterface;
+import static lang.jimple.internal.JimpleObjectFactory.methodSignature;
+import static lang.jimple.internal.JimpleObjectFactory.modifiers;
+import static lang.jimple.internal.JimpleObjectFactory.newArraySubscript;
+import static lang.jimple.internal.JimpleObjectFactory.newDivExpression;
+import static lang.jimple.internal.JimpleObjectFactory.newIntValueImmediate;
+import static lang.jimple.internal.JimpleObjectFactory.newLocalImmediate;
+import static lang.jimple.internal.JimpleObjectFactory.newMinusExpression;
+import static lang.jimple.internal.JimpleObjectFactory.newMultExpression;
+import static lang.jimple.internal.JimpleObjectFactory.newPlusExpression;
+import static lang.jimple.internal.JimpleObjectFactory.newReminderExpression;
+import static lang.jimple.internal.JimpleObjectFactory.objectConstructor;
+import static lang.jimple.internal.JimpleObjectFactory.type;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +25,7 @@ import java.util.Stack;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -28,14 +40,18 @@ import org.rascalmpl.uri.URIResolverRegistry;
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IValueFactory;
+import lang.jimple.internal.generated.ArrayDescriptor;
 import lang.jimple.internal.generated.CatchClause;
 import lang.jimple.internal.generated.ClassOrInterfaceDeclaration;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Field;
+import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
+import lang.jimple.internal.generated.InvokeExp;
 import lang.jimple.internal.generated.LocalVariableDeclaration;
 import lang.jimple.internal.generated.Method;
 import lang.jimple.internal.generated.MethodBody;
+import lang.jimple.internal.generated.MethodSignature;
 import lang.jimple.internal.generated.Modifier;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
@@ -168,6 +184,7 @@ public class Decompiler {
 			}
 			
 			mn.instructions.accept(insVisitor);
+			stmts = insVisitor.instructions;
 			
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses); 
 			
@@ -254,9 +271,10 @@ public class Decompiler {
 		public void visitFieldInsn(int opcode, String owner, String field, String descriptor) {
 			switch (opcode) {
 			 case Opcodes.GETSTATIC : getStaticIns(owner, field, descriptor); break;
-			 case Opcodes.PUTSTATIC : break; // TODO not implemented yet
-			 case Opcodes.GETFIELD  : getFieldIns(owner, field, descriptor); break;
-			 case Opcodes.PUTFIELD  : break; // TODO not implemented yet
+			 case Opcodes.PUTSTATIC : putStaticIns(owner, field, descriptor); break; 
+			 case Opcodes.GETFIELD  : getFieldIns(owner, field, descriptor);  break;
+			 case Opcodes.PUTFIELD  : putFieldIns(owner, field, descriptor);  break; 
+			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
 			}
 			super.visitFieldInsn(opcode, owner, field, descriptor);
 		}
@@ -284,6 +302,8 @@ public class Decompiler {
 			Expression expression = newPlusExpression(lhs, rhs);
 
 			instructions.add(assignmentStmt(Variable.localVariable(var), expression));
+			
+			super.visitIincInsn(idx, increment);
 		}
 
 		
@@ -397,18 +417,104 @@ public class Decompiler {
 			 case Opcodes.ATHROW      : throwIns(); break; 
 			 case Opcodes.MONITORENTER : monitorEnterIns(); break; 
 			 case Opcodes.MONITOREXIT  : monitorExitIns(); break; 
-			 default: throw new RuntimeException("unknown instruction with opcode " + opcode);
+			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
 			}
+			super.visitInsn(opcode);
 		}
 
+		/*
+		 * Visit a local variable instructions. 
+		 * 
+		 * (non-Javadoc)
+		 * @see org.objectweb.asm.MethodVisitor#visitVarInsn(int, int)
+		 */
 		@Override
 		public void visitVarInsn(int opcode, int var) {
 			switch (opcode) {
 			 case Opcodes.ILOAD : loadIns(var);  break;
+			 case Opcodes.FLOAD : loadIns(var);  break;
+			 case Opcodes.DLOAD : loadIns(var);  break;
+			 case Opcodes.ALOAD : loadIns(var);  break;
 			 case Opcodes.ISTORE: storeIns(var); break;
+			 case Opcodes.LSTORE: storeIns(var); break;
+			 case Opcodes.FSTORE: storeIns(var); break;
+			 case Opcodes.DSTORE: storeIns(var); break;
+			 case Opcodes.ASTORE: storeIns(var); break;
+			 case Opcodes.RET   : retIns(var);   break; 
+			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
 			}
+			super.visitVarInsn(opcode, var);
+		}
+		
+		/*
+		 * Visit a type instruction. 
+		 * 
+		 * (non-Javadoc)
+		 * @see org.objectweb.asm.MethodVisitor#visitTypeInsn(int, java.lang.String)
+		 */
+		@Override
+		public void visitTypeInsn(int opcode, String type) {
+			switch(opcode) {
+			 case Opcodes.NEW        : newInstanceIns(type(type));  break;
+			 case Opcodes.ANEWARRAY  : aNewArrayIns(type(type));    break;
+			 case Opcodes.CHECKCAST  : simpleCastIns(type(type));   break;
+			 case Opcodes.INSTANCEOF : instanceOfIns(type(type));   break; 
+			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
+			}
+			super.visitTypeInsn(opcode, type);
+		}
+		
+		
+
+		@Override
+		public void visitIntInsn(int opcode, int operand) {
+			switch(opcode) {
+			 case Opcodes.BIPUSH : pushConstantValue(type("I"), Immediate.intValue(operand)); break;
+			 case Opcodes.SIPUSH : pushConstantValue(type("I"), Immediate.intValue(operand)); break;
+			 case Opcodes.NEWARRAY : createNewArrayIns(operand); break;
+			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
+			}
+			super.visitIntInsn(opcode, operand);
 		}
 
+		@Override
+		public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterfaceInvoke) {
+			switch(opcode) {
+			 case Opcodes.INVOKEVIRTUAL   : invokeMethodIns(owner, name, descriptor, false, (r, s, args) -> InvokeExp.virtualInvoke(r, s, args)); break;
+			 case Opcodes.INVOKESPECIAL   : invokeMethodIns(owner, name, descriptor, false, (r, s, args) -> InvokeExp.specialInvoke(r, s, args)); break; 
+			 case Opcodes.INVOKESTATIC    : invokeMethodIns(owner, name, descriptor, true,  (r, s, args) -> InvokeExp.staticMethodInvoke(s, args)); break; 
+			 case Opcodes.INVOKEINTERFACE : invokeMethodIns(owner, name, descriptor, false, (r, s, args) -> InvokeExp.interfaceInvoke(r, s, args)); break;
+			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
+			}
+		}
+		
+		@Override
+		public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+			throw new RuntimeException("Invoke dynamic not implemented yet"); 
+		}
+		
+		private void invokeMethodIns(String owner, String name, String descriptor, boolean isStatic, InvokeExpressionFactory factory) {
+			MethodSignature signature = methodSignature(owner, descriptor);
+			List<Immediate> args = new ArrayList<>();
+			
+			for(int i = 0; i < signature.formals.size(); i++) {
+				args.add(operandStack.pop().immediate);
+			}
+			
+			InvokeExp exp = null; 
+			
+			if(! isStatic) {
+				String reference = ((Immediate.c_local)operandStack.pop().immediate).localName;
+				exp = factory.createInvokeExpression(reference, signature, args); 	
+			}
+			else {
+				exp = factory.createInvokeExpression(null, signature, args);
+			}
+			
+			instructions.add(Statement.invokeStmt(exp));
+		}
+
+		
 		private LocalVariableDeclaration findLocalVariable(int idx) {
 			for (LocalVariableNode node : localVariables.keySet()) {
 				if (node.index == idx) {
@@ -436,6 +542,33 @@ public class Decompiler {
 			instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
 		}
 
+		/*
+		 * Return from a subroutine. Not really clear the corresponding 
+		 * Java code. It seems to me a more internal instruction from 
+		 * the JVM. It is different from a return void call, for instance. 
+		 */
+		private void retIns(int var) {
+			LocalVariableDeclaration local = findLocalVariable(var);
+			instructions.add(Statement.retStmt(Immediate.local(local.local)));
+		}
+		
+		private void newInstanceIns(Type type) {
+			LocalVariableDeclaration newLocal = createLocal(type);
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newInstance(type)));
+			operandStack.push(new Operand(newLocal));
+		}
+		
+		private void aNewArrayIns(Type type) {
+			Operand operand = operandStack.pop();
+			LocalVariableDeclaration newLocal = createLocal(Type.TArray(type));
+			Integer size = ((Immediate.c_intValue)operand.immediate).iValue;
+			
+			List<ArrayDescriptor> dims = new ArrayList<>();
+			dims.add(ArrayDescriptor.fixedSize(size));	
+
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newArray(type, dims)));
+			operandStack.push(new Operand(newLocal));
+		}
 		/*
 		 * Add a nop instruction 
 		 */
@@ -486,7 +619,7 @@ public class Decompiler {
 		/*
 		 * Instructions supporting binarya operations. 
 		 */
-		private void binOperatorIns(Type type, BinOperatorFactory factory) {
+		private void binOperatorIns(Type type, BinExpressionFactory factory) {
 			Operand lhs = operandStack.pop();
 			Operand rhs = operandStack.pop();
 
@@ -503,8 +636,14 @@ public class Decompiler {
 			Operand operand = operandStack.pop();
 			LocalVariableDeclaration newLocal = createLocal(targetType);
 			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.cast(targetType, operand.immediate)));
-			operand.type = targetType;
-			operandStack.push(operand);
+			operandStack.push(new Operand(newLocal));
+		}
+		
+		private void instanceOfIns(Type type) {
+			Operand operand = operandStack.pop();
+			LocalVariableDeclaration newLocal = createLocal(Type.TBoolean());
+			instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.instanceOf(type, operand.immediate)));
+			operandStack.push(new Operand(newLocal));
 		}
 		
 		private void returnIns() {
@@ -785,6 +924,23 @@ public class Decompiler {
 
 			operandStack.push(new Operand(newLocal));
 		}
+		
+		private void putStaticIns(String owner, String field, String descriptor) {
+			Operand value = operandStack.pop();
+			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
+			instructions.add(assignmentStmt(Variable.staticFieldRef(signature), Expression.immediate(value.immediate))); 
+		}
+		
+		private void putFieldIns(String owner, String field, String descriptor) {
+			Operand value = operandStack.pop();
+			Operand operand = operandStack.pop();
+			
+			String reference = ((Immediate.c_local)operand.immediate).localName;
+			
+			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
+			
+			instructions.add(assignmentStmt(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate)));
+		}
 
 		/*
 		 * Load the value of an instance field into the top 
@@ -838,6 +994,24 @@ public class Decompiler {
 			}
 			return true; 
 		}
-
+		
+		private void pushConstantValue(Type type, Immediate immediate) {
+			operandStack.push(new Operand(type, immediate));
+		}
+		
+		private void createNewArrayIns(int aType) {
+			Type type = null; 
+			switch(aType) {
+			  case 4 : type = type("Z"); break;
+			  case 5 : type = type("C"); break;
+			  case 6 : type = type("F"); break;
+			  case 7 : type = type("D"); break;
+			  case 8 : type = type("B"); break;
+			  case 9 : type = type("S"); break;
+			  case 10: type = type("I"); break;
+			  case 11: type = type("J"); break;
+			}
+			aNewArrayIns(type);
+		}
 	}
 }

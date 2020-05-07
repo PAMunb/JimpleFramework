@@ -27,6 +27,10 @@ public abstract class Variable extends JimpleAbstractDataType {
    public static Variable fieldRef(String reference, FieldSignature field)  {
      return new c_fieldRef(reference, field);
    }
+   
+   public static Variable staticFieldRef(FieldSignature field)  {
+     return new c_staticFieldRef(field);
+   }
     
 
    
@@ -133,6 +137,36 @@ public abstract class Variable extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "fieldRef";
+     }
+   }
+   
+   public static class c_staticFieldRef extends Variable {
+     
+     public FieldSignature field;
+     
+   
+     public c_staticFieldRef(FieldSignature field) {
+      
+        this.field = field;  
+        
+     }
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+   
+       
+       IValue iv_field = field.createVallangInstance(vf);
+       
+       
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_field 
+                
+                ); 
+     }
+     @Override
+     public String getConstructor() {
+       return "staticFieldRef";
      }
    }
     

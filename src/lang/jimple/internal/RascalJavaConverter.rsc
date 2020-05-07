@@ -39,7 +39,7 @@ private void generateCode(Module m, map[str, str] aliases) {
 private void generateClass(map[str, str] aliases, UserType t, {Variant "|"}+ variants) {
   str code = "package lang.jimple.internal.generated;
              '
-             'import lang.jimple.internal.AbstractJimpleConstructor; 
+             'import lang.jimple.internal.JimpleAbstractDataType; 
              'import java.util.List; 
              'import java.util.HashMap;
              '
@@ -48,7 +48,7 @@ private void generateClass(map[str, str] aliases, UserType t, {Variant "|"}+ var
              'import io.usethesource.vallang.IValue;
              'import io.usethesource.vallang.IValueFactory; 
              '
-             'public abstract class <unparse(t)> extends AbstractJimpleConstructor {
+             'public abstract class <unparse(t)> extends JimpleAbstractDataType {
              '   @Override 
              '   public String getBaseType() { 
              '     return \"<unparse(t)>\";

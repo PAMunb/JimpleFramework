@@ -18,6 +18,7 @@ import io.usethesource.vallang.type.TypeStore;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.LocalVariableDeclaration;
+import lang.jimple.internal.generated.MethodSignature;
 import lang.jimple.internal.generated.Modifier;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
@@ -71,6 +72,20 @@ public class JimpleObjectFactory {
 
 	public static Immediate newLocalImmediate(String var) {
 		return Immediate.local(var);
+	}
+	
+	public static MethodSignature methodSignature(String owner, String descriptor) {
+		org.objectweb.asm.Type methodType = org.objectweb.asm.Type.getMethodType(descriptor);
+		
+		Type returnType = type(methodType.getReturnType().getDescriptor());
+		
+		List<Type> formals = new ArrayList();
+		
+		for(org.objectweb.asm.Type t: methodType.getArgumentTypes()) {
+			formals.add(type(t.getDescriptor()));
+		}
+		
+		return MethodSignature.methodSignature(owner, returnType, formals);
 	}
 	
 	public static Type type(String descriptor) {

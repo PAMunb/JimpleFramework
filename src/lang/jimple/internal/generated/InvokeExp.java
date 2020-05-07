@@ -16,8 +16,16 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
    } 
 
    
-   public static InvokeExp instanceMethodInvoke(String local, MethodSignature sig, List<Immediate> args)  {
-     return new c_instanceMethodInvoke(local, sig, args);
+   public static InvokeExp specialInvoke(String local, MethodSignature sig, List<Immediate> args)  {
+     return new c_specialInvoke(local, sig, args);
+   }
+   
+   public static InvokeExp virtualInvoke(String local, MethodSignature sig, List<Immediate> args)  {
+     return new c_virtualInvoke(local, sig, args);
+   }
+   
+   public static InvokeExp interfaceInvoke(String local, MethodSignature sig, List<Immediate> args)  {
+     return new c_interfaceInvoke(local, sig, args);
    }
    
    public static InvokeExp staticMethodInvoke(MethodSignature sig, List<Immediate> args)  {
@@ -30,7 +38,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
     
 
    
-   public static class c_instanceMethodInvoke extends InvokeExp {
+   public static class c_specialInvoke extends InvokeExp {
      
      public String local;
      
@@ -39,7 +47,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      public List<Immediate> args;
      
    
-     public c_instanceMethodInvoke(String local, MethodSignature sig, List<Immediate> args) {
+     public c_specialInvoke(String local, MethodSignature sig, List<Immediate> args) {
       
         this.local = local;  
       
@@ -77,7 +85,109 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      }
      @Override
      public String getConstructor() {
-       return "instanceMethodInvoke";
+       return "specialInvoke";
+     }
+   }
+   
+   public static class c_virtualInvoke extends InvokeExp {
+     
+     public String local;
+     
+     public MethodSignature sig;
+     
+     public List<Immediate> args;
+     
+   
+     public c_virtualInvoke(String local, MethodSignature sig, List<Immediate> args) {
+      
+        this.local = local;  
+      
+        this.sig = sig;  
+      
+        this.args = args;  
+        
+     }
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+   
+       
+       IValue iv_local = vf.string(local);
+       
+       IValue iv_sig = sig.createVallangInstance(vf);
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+               
+       
+       
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_local 
+                
+                , iv_sig 
+                
+                , iv_args 
+                
+                ); 
+     }
+     @Override
+     public String getConstructor() {
+       return "virtualInvoke";
+     }
+   }
+   
+   public static class c_interfaceInvoke extends InvokeExp {
+     
+     public String local;
+     
+     public MethodSignature sig;
+     
+     public List<Immediate> args;
+     
+   
+     public c_interfaceInvoke(String local, MethodSignature sig, List<Immediate> args) {
+      
+        this.local = local;  
+      
+        this.sig = sig;  
+      
+        this.args = args;  
+        
+     }
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+   
+       
+       IValue iv_local = vf.string(local);
+       
+       IValue iv_sig = sig.createVallangInstance(vf);
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+               
+       
+       
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_local 
+                
+                , iv_sig 
+                
+                , iv_args 
+                
+                ); 
+     }
+     @Override
+     public String getConstructor() {
+       return "interfaceInvoke";
      }
    }
    
