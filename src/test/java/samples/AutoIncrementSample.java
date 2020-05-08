@@ -1,4 +1,4 @@
-package test.java;
+package test.java.samples;
 
 public class AutoIncrementSample {
 	

@@ -16,6 +16,7 @@ import static lang.jimple.internal.JimpleObjectFactory.objectConstructor;
 import static lang.jimple.internal.JimpleObjectFactory.type;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,7 +67,7 @@ import lang.jimple.internal.generated.Variable;
 public class Decompiler {
 	private final IValueFactory vf;
 	private IConstructor _class;
-
+	private PrintWriter out; 
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
 	}
@@ -78,6 +79,7 @@ public class Decompiler {
 		try {
 			ClassReader reader = new ClassReader(URIResolverRegistry.getInstance().getInputStream(classLoc));
 			ClassNode cn = new ClassNode();
+			out = ctx.getOutPrinter();
 			reader.accept(cn, 0);
 			reader.accept(new GenerateJimpleClassVisitor(cn), 0);
 			return _class;
@@ -179,9 +181,14 @@ public class Decompiler {
 			
 			Iterator it2 = mn.instructions.iterator();
 			
+			out.println(mn.name);
+			out.println();
+			
 			while(it2.hasNext()) {
 				AbstractInsnNode ins = (AbstractInsnNode)it2.next();
+				out.println(" " + ((AbstractInsnNode)ins).getOpcode());
 			}
+			out.println();
 			
 			mn.instructions.accept(insVisitor);
 			stmts = insVisitor.instructions;

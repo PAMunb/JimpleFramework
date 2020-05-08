@@ -2,7 +2,6 @@ package lang.jimple.internal;
 
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IValueFactory;
-import io.usethesource.vallang.impl.fast.ValueFactory;
 import io.usethesource.vallang.type.Type;
 import io.usethesource.vallang.type.TypeFactory;
 import io.usethesource.vallang.type.TypeStore;
