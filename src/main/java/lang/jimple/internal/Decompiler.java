@@ -16,7 +16,7 @@ import static lang.jimple.internal.JimpleObjectFactory.objectConstructor;
 import static lang.jimple.internal.JimpleObjectFactory.type;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +29,6 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -67,7 +66,6 @@ import lang.jimple.internal.generated.Variable;
 public class Decompiler {
 	private final IValueFactory vf;
 	private IConstructor _class;
-	private PrintWriter out; 
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
 	}
@@ -76,10 +74,18 @@ public class Decompiler {
 	 * decompiles a Java byte code at <i>classLoc</i> into a Jimple representation.
 	 */
 	public IConstructor decompile(ISourceLocation classLoc, IEvaluatorContext ctx) {
+		try { 
+			return decompile(URIResolverRegistry.getInstance().getInputStream(classLoc), ctx);
+		}
+		catch (IOException e) {
+			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
+		}
+	}
+	
+	public IConstructor decompile(InputStream classLoc, IEvaluatorContext ctx) {
 		try {
-			ClassReader reader = new ClassReader(URIResolverRegistry.getInstance().getInputStream(classLoc));
+			ClassReader reader = new ClassReader(classLoc);
 			ClassNode cn = new ClassNode();
-			out = ctx.getOutPrinter();
 			reader.accept(cn, 0);
 			reader.accept(new GenerateJimpleClassVisitor(cn), 0);
 			return _class;
@@ -178,18 +184,7 @@ public class Decompiler {
 			
 			//TODO: uncomment the following lines to decompile the instructions. 
 			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
-			
-			Iterator it2 = mn.instructions.iterator();
-			
-			out.println(mn.name);
-			out.println();
-			
-			while(it2.hasNext()) {
-				AbstractInsnNode ins = (AbstractInsnNode)it2.next();
-				out.println(" " + ((AbstractInsnNode)ins).getOpcode());
-			}
-			out.println();
-			
+					
 			mn.instructions.accept(insVisitor);
 			stmts = insVisitor.instructions;
 			
@@ -500,6 +495,20 @@ public class Decompiler {
 			throw new RuntimeException("Invoke dynamic not implemented yet"); 
 		}
 		
+		
+		
+		@Override
+		public void visitLdcInsn(Object value) {
+			if(value instanceof Integer) {
+				operandStack.push(new Operand(Type.TInteger(), Immediate.intValue((Integer)value)));
+			}
+			else if (value instanceof String) {
+				operandStack.push(new Operand(Type.TString(), Immediate.stringValue((String)value)));
+			}
+			// TODO: new types here
+			super.visitLdcInsn(value);
+		}
+
 		private void invokeMethodIns(String owner, String name, String descriptor, boolean isStatic, InvokeExpressionFactory factory) {
 			MethodSignature signature = methodSignature(owner, descriptor);
 			List<Immediate> args = new ArrayList<>();
