@@ -109,7 +109,7 @@ public class Decompiler {
 		private boolean isInterface;
 
 		public GenerateJimpleClassVisitor(ClassNode cn) {
-			super(Opcodes.ASM4);
+			super(Opcodes.ASM5);
 			this.cn = cn;
 		}
 
@@ -434,6 +434,7 @@ public class Decompiler {
 		public void visitVarInsn(int opcode, int var) {
 			switch (opcode) {
 			 case Opcodes.ILOAD : loadIns(var);  break;
+			 case Opcodes.LLOAD : loadIns(var);  break; 
 			 case Opcodes.FLOAD : loadIns(var);  break;
 			 case Opcodes.DLOAD : loadIns(var);  break;
 			 case Opcodes.ALOAD : loadIns(var);  break;
@@ -502,7 +503,7 @@ public class Decompiler {
 			if((value instanceof Integer)) {
 				operandStack.push(new Operand(Type.TInteger(), Immediate.intValue((Integer)value)));
 			}
-			else if (value instanceof Float || (value instanceof Double)) {
+			else if (value instanceof Float) {
 				operandStack.push(new Operand(Type.TFloat(), Immediate.floatValue((Float)value)));
 			}
 			else if(value instanceof Long) {
@@ -543,7 +544,14 @@ public class Decompiler {
 				exp = factory.createInvokeExpression(null, signature, args);
 			}
 			
-			instructions.add(Statement.invokeStmt(exp));
+			if(signature.returnType.equals(Type.TVoid())) {   // TODO: This test does not work because equality is undefined. We have to implement this in the Jimple2Java compiler
+			   instructions.add(Statement.invokeStmt(exp));
+			}
+			else {
+				LocalVariableDeclaration local = createLocal(signature.returnType);
+				instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+				operandStack.push(new Operand(local));
+			}
 		}
 
 		
