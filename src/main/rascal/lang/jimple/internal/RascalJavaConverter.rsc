@@ -64,7 +64,7 @@ private void generateClass(map[str, str] aliases, UserType t, {Variant "|"}+ var
              '}"; 
   
   str classFileName = unparse(t) + ".java"; 
-  writeFile(|project://JimpleFramework/src/lang/jimple/internal/generated| + classFileName, code);            
+  writeFile(|project://JimpleFramework/src/main/java/lang/jimple/internal/generated| + classFileName, code);            
 }
 
 private str generateFactory(map[str, str] aliases, str base, Variant v) {
@@ -157,6 +157,8 @@ private str populateUserDefinedType(map[str, str] aliases, str base, str n) {
    case "Integer" : val = "vf.integer(<n>)";
    case "Boolean" : val = "vf.boolean(<n>)";
    case "Real"    : val = "vf.real(<n>)";
+   case "Float"  : val = "vf.real(<n>)";
+   case "Int"    : val = "vf.integer(<n>)";
    default        : val = "<n>.createVallangInstance(vf)"; 
  }
  return "IValue iv_<n> = <val>;"; 
@@ -168,7 +170,9 @@ private str populateListType(map[str, str] aliases, str base, str n) {
    case "String"  : val = "vf.string(v)";
    case "Integer" : val = "vf.integer(v)";
    case "Boolean" : val = "vf.boolean(v)";
-   case "Real"    : val = "vf.real(v)";
+   case "Float"    : val = "vf.real(v)";
+   case "Double"  : val = "vf.double(v)";
+   case "Long"    : val = "vf.long(v)";
    default        : val = "v.createVallangInstance(vf)"; 
  }
  return "IList iv_<n> = vf.list();
@@ -188,10 +192,12 @@ private str resolve(map[str, str] aliases, str t) {
      t = replaceAll(t, "]", "\>"); 
   }
   switch(t) {
-    case "str" : return "String"; 
-    case "int" : return "Integer";
-    case "bool": return "Boolean";  
-    case "real": return "Float"; 
+    case "str"   : return "String"; 
+    case "int"   : return "Integer";
+    case "bool"  : return "Boolean";  
+    case "real"  : return "Float"; 
+    case "Int"   : return "Long"; 
+    case "Float" : return "Double";  
     default: return replaceAll(t, "\\", "");
   }
 }

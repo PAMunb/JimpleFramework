@@ -1,4 +1,4 @@
-module \test::rascal::TestDecompiler
+module TestDecompiler
 
 import lang::jimple::Syntax;
 import lang::jimple::Decompiler; 

@@ -20,12 +20,20 @@ public abstract class Immediate extends JimpleAbstractDataType {
      return new c_local(localName);
    }
    
-   public static Immediate intValue(Integer iValue)  {
-     return new c_intValue(iValue);
+   public static Immediate intValue(Integer iv)  {
+     return new c_intValue(iv);
+   }
+   
+   public static Immediate longValue(Long lv)  {
+     return new c_longValue(lv);
    }
    
    public static Immediate floatValue(Float fv)  {
      return new c_floatValue(fv);
+   }
+   
+   public static Immediate doubleValue(Double fv)  {
+     return new c_doubleValue(fv);
    }
    
    public static Immediate stringValue(String sv)  {
@@ -70,12 +78,12 @@ public abstract class Immediate extends JimpleAbstractDataType {
    
    public static class c_intValue extends Immediate {
      
-     public Integer iValue;
+     public Integer iv;
      
    
-     public c_intValue(Integer iValue) {
+     public c_intValue(Integer iv) {
       
-        this.iValue = iValue;  
+        this.iv = iv;  
         
      }
      
@@ -83,18 +91,48 @@ public abstract class Immediate extends JimpleAbstractDataType {
      public IConstructor createVallangInstance(IValueFactory vf) {
    
        
-       IValue iv_iValue = vf.integer(iValue);
+       IValue iv_iv = vf.integer(iv);
        
        
        return vf.constructor(getVallangConstructor()
                 
-                , iv_iValue 
+                , iv_iv 
                 
                 ); 
      }
      @Override
      public String getConstructor() {
        return "intValue";
+     }
+   }
+   
+   public static class c_longValue extends Immediate {
+     
+     public Long lv;
+     
+   
+     public c_longValue(Long lv) {
+      
+        this.lv = lv;  
+        
+     }
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+   
+       
+       IValue iv_lv = vf.integer(lv);
+       
+       
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_lv 
+                
+                ); 
+     }
+     @Override
+     public String getConstructor() {
+       return "longValue";
      }
    }
    
@@ -125,6 +163,36 @@ public abstract class Immediate extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "floatValue";
+     }
+   }
+   
+   public static class c_doubleValue extends Immediate {
+     
+     public Double fv;
+     
+   
+     public c_doubleValue(Double fv) {
+      
+        this.fv = fv;  
+        
+     }
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+   
+       
+       IValue iv_fv = vf.real(fv);
+       
+       
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_fv 
+                
+                ); 
+     }
+     @Override
+     public String getConstructor() {
+       return "doubleValue";
      }
    }
    

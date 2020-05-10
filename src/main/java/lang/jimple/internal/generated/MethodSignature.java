@@ -1,19 +1,22 @@
 package lang.jimple.internal.generated;
 
-import java.util.List;
+import lang.jimple.internal.JimpleAbstractDataType; 
+import java.util.List; 
+import java.util.HashMap;
 
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
-import io.usethesource.vallang.IValueFactory;
-import lang.jimple.internal.JimpleAbstractDataType; 
+import io.usethesource.vallang.IValueFactory; 
 
 public abstract class MethodSignature extends JimpleAbstractDataType {
-    public String className;
+	
+	public String className;
+    
     public Type returnType;
+    
     public List<Type> formals;
     
-	
    @Override 
    public String getBaseType() { 
      return "MethodSignature";
@@ -27,7 +30,6 @@ public abstract class MethodSignature extends JimpleAbstractDataType {
 
    
    public static class c_methodSignature extends MethodSignature {
-     
      
    
      public c_methodSignature(String className, Type returnType, List<Type> formals) {

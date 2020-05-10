@@ -1,14 +1,20 @@
 package lang.jimple.internal.generated;
 
-import io.usethesource.vallang.IConstructor;
-import io.usethesource.vallang.IValue;
-import io.usethesource.vallang.IValueFactory;
 import lang.jimple.internal.JimpleAbstractDataType; 
+import java.util.List; 
+import java.util.HashMap;
+
+import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.IList;
+import io.usethesource.vallang.IValue;
+import io.usethesource.vallang.IValueFactory; 
 
 public abstract class LocalVariableDeclaration extends JimpleAbstractDataType {
 	public Type varType;
+    
     public String local;
- 
+    
+	
    @Override 
    public String getBaseType() { 
      return "LocalVariableDeclaration";
@@ -23,7 +29,9 @@ public abstract class LocalVariableDeclaration extends JimpleAbstractDataType {
    
    public static class c_localVariableDeclaration extends LocalVariableDeclaration {
      
-       public c_localVariableDeclaration(Type varType, String local) {
+     
+   
+     public c_localVariableDeclaration(Type varType, String local) {
       
         this.varType = varType;  
       

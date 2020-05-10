@@ -499,11 +499,27 @@ public class Decompiler {
 		
 		@Override
 		public void visitLdcInsn(Object value) {
-			if(value instanceof Integer) {
+			if((value instanceof Integer)) {
 				operandStack.push(new Operand(Type.TInteger(), Immediate.intValue((Integer)value)));
+			}
+			else if (value instanceof Float || (value instanceof Double)) {
+				operandStack.push(new Operand(Type.TFloat(), Immediate.floatValue((Float)value)));
+			}
+			else if(value instanceof Long) {
+				operandStack.push(new Operand(Type.TLong(), Immediate.longValue((Long)value)));	
+			}
+			else if(value instanceof Double) {
+				operandStack.push(new Operand(Type.TDouble(), Immediate.doubleValue((Double)value)));
 			}
 			else if (value instanceof String) {
 				operandStack.push(new Operand(Type.TString(), Immediate.stringValue((String)value)));
+			}
+			else if(value instanceof org.objectweb.asm.Type) {
+				int sort = ((org.objectweb.asm.Type)value).getSort();
+				switch(sort) {
+				 case org.objectweb.asm.Type.ARRAY  : break; 
+				 case org.objectweb.asm.Type.OBJECT : break;  
+				}
 			}
 			// TODO: new types here
 			super.visitLdcInsn(value);
@@ -577,7 +593,7 @@ public class Decompiler {
 		private void aNewArrayIns(Type type) {
 			Operand operand = operandStack.pop();
 			LocalVariableDeclaration newLocal = createLocal(Type.TArray(type));
-			Integer size = ((Immediate.c_intValue)operand.immediate).iValue;
+			Integer size = ((Immediate.c_intValue)operand.immediate).iv;
 			
 			List<ArrayDescriptor> dims = new ArrayList<>();
 			dims.add(ArrayDescriptor.fixedSize(size));	

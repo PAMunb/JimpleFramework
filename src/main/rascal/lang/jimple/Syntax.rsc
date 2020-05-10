@@ -1,14 +1,21 @@
 module lang::jimple::Syntax
 
+alias String = str;
+alias Int = int; 
+alias Long = Int; 
+alias Float = real;
+alias Double = Float;  
 alias Name = str;
 alias Label = str;
 alias Identifier = str; 
 
 data Immediate 
- = local(str localName) 
- | intValue(int iValue)
- | floatValue(real fv)
- | stringValue(str sv)
+ = local(String localName) 
+ | intValue(Int iv)
+ | longValue(Long lv)
+ | floatValue(Float fv)
+ | doubleValue(Double fv)
+ | stringValue(String sv)
  | nullValue(); 
  
 public data ClassOrInterfaceDeclaration 
@@ -77,7 +84,7 @@ data Statement
   ;        
  
  data CaseStmt 
-   = caseOption(int option, GotoStmt targetStmt) 
+   = caseOption(Int option, GotoStmt targetStmt) 
    | defaultOption(GotoStmt targetStmt)
    ; 
 
@@ -90,7 +97,7 @@ data Expression
   | instanceOf(Type baseType, Immediate immediate)
   | invokeExp(InvokeExp expression)
   | arraySubscript(Name name, Immediate immediate)
-  | stringSubscript(str string, Immediate immediate)
+  | stringSubscript(String string, Immediate immediate)
   | localFieldRef(Name local, Name className, Type fieldType, Name fieldName)
   | fieldRef(Name className, Type fieldType, Name fieldName)
   | and(Immediate lhs, Immediate rhs)
@@ -119,7 +126,7 @@ data Expression
   ;
   
 data ArrayDescriptor 
-  = fixedSize(int size)
+  = fixedSize(Int size)
   | variableSize() 
   ;
   
@@ -128,7 +135,7 @@ data InvokeExp
   | virtualInvoke(Name local, MethodSignature sig, list[Immediate] args)
   | interfaceInvoke(Name local, MethodSignature sig, list[Immediate] args)
   | staticMethodInvoke(MethodSignature sig, list[Immediate] args)
-  | dynamicInvoke(str string, UnnamedMethodSignature usig, list[Immediate] args1, MethodSignature sig, list[Immediate] args2)
+  | dynamicInvoke(String string, UnnamedMethodSignature usig, list[Immediate] args1, MethodSignature sig, list[Immediate] args2)
   ;   
 
 data FieldSignature 
