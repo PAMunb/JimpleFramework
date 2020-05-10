@@ -2,5 +2,4 @@ Manifest-Version: 0.0.1
 Main-Function: main
 Courses: courses
 Main-Module: Plugin
-Source: src
-
+Source: src/main/rascal,src/test/rascal
