@@ -2,19 +2,20 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
-import java.util.HashMap;
-
+import lombok.EqualsAndHashCode; 
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+@EqualsAndHashCode
 public abstract class Type extends JimpleAbstractDataType {
    @Override 
    public String getBaseType() { 
      return "Type";
    } 
 
+   
    
    public static Type TByte()  {
      return new c_TByte();
@@ -74,328 +75,357 @@ public abstract class Type extends JimpleAbstractDataType {
     
 
    
+   @EqualsAndHashCode
    public static class c_TByte extends Type {
      
    
-     public c_TByte() {
-        
-     }
+       public c_TByte() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TByte";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TBoolean extends Type {
      
    
-     public c_TBoolean() {
-        
-     }
+       public c_TBoolean() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TBoolean";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TShort extends Type {
      
    
-     public c_TShort() {
-        
-     }
+       public c_TShort() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TShort";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TCharacter extends Type {
      
    
-     public c_TCharacter() {
-        
-     }
+       public c_TCharacter() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TCharacter";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TInteger extends Type {
      
    
-     public c_TInteger() {
-        
-     }
+       public c_TInteger() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TInteger";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TFloat extends Type {
      
    
-     public c_TFloat() {
-        
-     }
+       public c_TFloat() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TFloat";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TDouble extends Type {
      
    
-     public c_TDouble() {
-        
-     }
+       public c_TDouble() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TDouble";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TLong extends Type {
      
    
-     public c_TLong() {
-        
-     }
+       public c_TLong() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TLong";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TObject extends Type {
      
      public String name;
      
    
-     public c_TObject(String name) {
-      
-        this.name = name;  
+       public c_TObject(String name) {
         
-     }
+          this.name = name;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_name = vf.string(name);
+         IValue iv_name = vf.string(name);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_name 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TObject";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TArray extends Type {
      
      public Type baseType;
      
    
-     public c_TArray(Type baseType) {
-      
-        this.baseType = baseType;  
+       public c_TArray(Type baseType) {
         
-     }
+          this.baseType = baseType;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_baseType = baseType.createVallangInstance(vf);
+         IValue iv_baseType = baseType.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_baseType 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TArray";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TVoid extends Type {
      
    
-     public c_TVoid() {
-        
-     }
+       public c_TVoid() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TVoid";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TString extends Type {
      
    
-     public c_TString() {
-        
-     }
+       public c_TString() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TString";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TNull extends Type {
      
    
-     public c_TNull() {
-        
-     }
+       public c_TNull() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TNull";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_TUnknown extends Type {
      
    
-     public c_TUnknown() {
-        
-     }
+       public c_TUnknown() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "TUnknown";
      }
    }
+    
     
 }

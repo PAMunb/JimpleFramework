@@ -2,19 +2,20 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
-import java.util.HashMap;
-
+import lombok.EqualsAndHashCode; 
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+@EqualsAndHashCode
 public abstract class Statement extends JimpleAbstractDataType {
    @Override 
    public String getBaseType() { 
      return "Statement";
    } 
 
+   
    
    public static Statement label(String label)  {
      return new c_label(label);
@@ -86,118 +87,127 @@ public abstract class Statement extends JimpleAbstractDataType {
     
 
    
+   @EqualsAndHashCode
    public static class c_label extends Statement {
      
      public String label;
      
    
-     public c_label(String label) {
-      
-        this.label = label;  
+       public c_label(String label) {
         
-     }
+          this.label = label;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_label = vf.string(label);
+         IValue iv_label = vf.string(label);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_label 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "label";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_breakpoint extends Statement {
      
    
-     public c_breakpoint() {
-        
-     }
+       public c_breakpoint() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "breakpoint";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_enterMonitor extends Statement {
      
      public Immediate immediate;
      
    
-     public c_enterMonitor(Immediate immediate) {
-      
-        this.immediate = immediate;  
+       public c_enterMonitor(Immediate immediate) {
         
-     }
+          this.immediate = immediate;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "enterMonitor";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_exitMonitor extends Statement {
      
      public Immediate immediate;
      
    
-     public c_exitMonitor(Immediate immediate) {
-      
-        this.immediate = immediate;  
+       public c_exitMonitor(Immediate immediate) {
         
-     }
+          this.immediate = immediate;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "exitMonitor";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_tableSwitch extends Statement {
      
      public Immediate immediate;
@@ -205,42 +215,44 @@ public abstract class Statement extends JimpleAbstractDataType {
      public List<CaseStmt> stmts;
      
    
-     public c_tableSwitch(Immediate immediate, List<CaseStmt> stmts) {
-      
-        this.immediate = immediate;  
-      
-        this.stmts = stmts;  
+       public c_tableSwitch(Immediate immediate, List<CaseStmt> stmts) {
         
-     }
+          this.immediate = immediate;  
+        
+          this.stmts = stmts;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       IList iv_stmts = vf.list();
+         IList iv_stmts = vf.list();
+         
+         for(CaseStmt v: stmts) {
+          iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
+         }
+                 
        
-       for(CaseStmt v: stmts) {
-        iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
-       }
-               
-       
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 , iv_stmts 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "tableSwitch";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_lookupSwitch extends Statement {
      
      public Immediate immediate;
@@ -248,42 +260,44 @@ public abstract class Statement extends JimpleAbstractDataType {
      public List<CaseStmt> stmts;
      
    
-     public c_lookupSwitch(Immediate immediate, List<CaseStmt> stmts) {
-      
-        this.immediate = immediate;  
-      
-        this.stmts = stmts;  
+       public c_lookupSwitch(Immediate immediate, List<CaseStmt> stmts) {
         
-     }
+          this.immediate = immediate;  
+        
+          this.stmts = stmts;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       IList iv_stmts = vf.list();
+         IList iv_stmts = vf.list();
+         
+         for(CaseStmt v: stmts) {
+          iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
+         }
+                 
        
-       for(CaseStmt v: stmts) {
-        iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
-       }
-               
-       
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 , iv_stmts 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "lookupSwitch";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_identity extends Statement {
      
      public String local;
@@ -293,43 +307,45 @@ public abstract class Statement extends JimpleAbstractDataType {
      public Type idType;
      
    
-     public c_identity(String local, String identifier, Type idType) {
-      
-        this.local = local;  
-      
-        this.identifier = identifier;  
-      
-        this.idType = idType;  
+       public c_identity(String local, String identifier, Type idType) {
         
-     }
+          this.local = local;  
+        
+          this.identifier = identifier;  
+        
+          this.idType = idType;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_local = vf.string(local);
+         IValue iv_local = vf.string(local);
        
-       IValue iv_identifier = vf.string(identifier);
+         IValue iv_identifier = vf.string(identifier);
        
-       IValue iv_idType = idType.createVallangInstance(vf);
+         IValue iv_idType = idType.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_local 
-                
+               
                 , iv_identifier 
-                
+               
                 , iv_idType 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "identity";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_identityNoType extends Statement {
      
      public String local;
@@ -337,37 +353,39 @@ public abstract class Statement extends JimpleAbstractDataType {
      public String identifier;
      
    
-     public c_identityNoType(String local, String identifier) {
-      
-        this.local = local;  
-      
-        this.identifier = identifier;  
+       public c_identityNoType(String local, String identifier) {
         
-     }
+          this.local = local;  
+        
+          this.identifier = identifier;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_local = vf.string(local);
+         IValue iv_local = vf.string(local);
        
-       IValue iv_identifier = vf.string(identifier);
+         IValue iv_identifier = vf.string(identifier);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_local 
-                
+               
                 , iv_identifier 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "identityNoType";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_assign extends Statement {
      
      public Variable var;
@@ -375,37 +393,39 @@ public abstract class Statement extends JimpleAbstractDataType {
      public Expression expression;
      
    
-     public c_assign(Variable var, Expression expression) {
-      
-        this.var = var;  
-      
-        this.expression = expression;  
+       public c_assign(Variable var, Expression expression) {
         
-     }
+          this.var = var;  
+        
+          this.expression = expression;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_var = var.createVallangInstance(vf);
+         IValue iv_var = var.createVallangInstance(vf);
        
-       IValue iv_expression = expression.createVallangInstance(vf);
+         IValue iv_expression = expression.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_var 
-                
+               
                 , iv_expression 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "assign";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_ifStmt extends Statement {
      
      public Expression exp;
@@ -413,221 +433,237 @@ public abstract class Statement extends JimpleAbstractDataType {
      public GotoStmt stmt;
      
    
-     public c_ifStmt(Expression exp, GotoStmt stmt) {
-      
-        this.exp = exp;  
-      
-        this.stmt = stmt;  
+       public c_ifStmt(Expression exp, GotoStmt stmt) {
         
-     }
+          this.exp = exp;  
+        
+          this.stmt = stmt;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_exp = exp.createVallangInstance(vf);
+         IValue iv_exp = exp.createVallangInstance(vf);
        
-       IValue iv_stmt = stmt.createVallangInstance(vf);
+         IValue iv_stmt = stmt.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_exp 
-                
+               
                 , iv_stmt 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "ifStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_retEmptyStmt extends Statement {
      
    
-     public c_retEmptyStmt() {
-        
-     }
+       public c_retEmptyStmt() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "retEmptyStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_retStmt extends Statement {
      
      public Immediate immediate;
      
    
-     public c_retStmt(Immediate immediate) {
-      
-        this.immediate = immediate;  
+       public c_retStmt(Immediate immediate) {
         
-     }
+          this.immediate = immediate;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "retStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_returnEmptyStmt extends Statement {
      
    
-     public c_returnEmptyStmt() {
-        
-     }
+       public c_returnEmptyStmt() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "returnEmptyStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_returnStmt extends Statement {
      
      public Immediate immediate;
      
    
-     public c_returnStmt(Immediate immediate) {
-      
-        this.immediate = immediate;  
+       public c_returnStmt(Immediate immediate) {
         
-     }
+          this.immediate = immediate;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "returnStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_throwStmt extends Statement {
      
      public Immediate immediate;
      
    
-     public c_throwStmt(Immediate immediate) {
-      
-        this.immediate = immediate;  
+       public c_throwStmt(Immediate immediate) {
         
-     }
+          this.immediate = immediate;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_immediate = immediate.createVallangInstance(vf);
+         IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "throwStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_invokeStmt extends Statement {
      
      public InvokeExp invokeExpression;
      
    
-     public c_invokeStmt(InvokeExp invokeExpression) {
-      
-        this.invokeExpression = invokeExpression;  
+       public c_invokeStmt(InvokeExp invokeExpression) {
         
-     }
+          this.invokeExpression = invokeExpression;  
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       IValue iv_invokeExpression = invokeExpression.createVallangInstance(vf);
+         IValue iv_invokeExpression = invokeExpression.createVallangInstance(vf);
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 , iv_invokeExpression 
-                
+               
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "invokeStmt";
      }
    }
    
+   @EqualsAndHashCode
    public static class c_nop extends Statement {
      
    
-     public c_nop() {
-        
-     }
+       public c_nop() {
+          
+       } 
      
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-   
+     
        
-       
+         
        return vf.constructor(getVallangConstructor()
                 
                 ); 
      }
+   
      @Override
      public String getConstructor() {
        return "nop";
      }
    }
+    
     
 }

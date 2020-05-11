@@ -1,7 +1,6 @@
 module lang::jimple::internal::RascalJavaConverter
 
-import IO;
-import Map; 
+import IO; 
 import List;
 import String; 
 
@@ -37,29 +36,35 @@ private void generateCode(Module m, map[str, str] aliases) {
 }
 
 private void generateClass(map[str, str] aliases, UserType t, {Variant "|"}+ variants) {
+  list[Variant] vs = [v | Variant v <- variants]; 
+  str modifier = size(vs) > 1 ? "abstract" : ""; 
   str code = "package lang.jimple.internal.generated;
              '
              'import lang.jimple.internal.JimpleAbstractDataType; 
              'import java.util.List; 
-             'import java.util.HashMap;
-             '
+             'import lombok.EqualsAndHashCode; 
              'import io.usethesource.vallang.IConstructor;
              'import io.usethesource.vallang.IList;
              'import io.usethesource.vallang.IValue;
              'import io.usethesource.vallang.IValueFactory; 
              '
-             'public abstract class <unparse(t)> extends JimpleAbstractDataType {
+             '@EqualsAndHashCode
+             'public <modifier> class <unparse(t)> extends JimpleAbstractDataType {
              '   @Override 
              '   public String getBaseType() { 
              '     return \"<unparse(t)>\";
              '   } 
              '
+             '   <if(size(vs) == 1){>
+             '     <generateSingleton(aliases, unparse(t), head(vs))>               
+             '   <} else {>
              '   <for(Variant v <- variants) {>
              '   <generateFactory(aliases, unparse(t), v)>
              '   <}> 
              '
              '   <for(Variant v <- variants) {>
              '   <generateSubClass(aliases, unparse(t), v)>
+             '   <}> 
              '   <}> 
              '}"; 
   
@@ -78,34 +83,46 @@ private str generateFactory(map[str, str] aliases, str base, Variant v) {
    return code;  
 }
 
+private str generateSingleton(map[str, str] aliases, str base, Variant v) {
+   str code = ""; 
+   switch(v) {
+     case (Variant)`<Name n>(<{TypeArg ","}* arguments>)` : 
+       code = "
+              ' <for(TypeArg arg <- arguments){>
+              '  <generateAttribute(aliases, arg, true)>;
+              ' <}>
+              '
+              ' public static <base> <n>(<intercalate(", ", [generateAttribute(aliases, arg, false) | TypeArg arg <- arguments])>)  {
+              '   return new <base>(<intercalate(", ", [generateAttributeName(arg) | TypeArg arg <- arguments])>);
+              ' }
+              ' 
+              ' <generateConstructor(aliases, base, [arg | TypeArg arg <- arguments])> 
+              ' <generateVallangInstance(aliases, [arg | TypeArg arg <- arguments])>
+              '
+              ' @Override
+              ' public String getConstructor() {
+              '    return \"<n>\";
+              ' }
+              '  
+              "; 
+   }
+   return code; 
+}
+
 private str generateSubClass(map[str, str] aliases, str base, Variant v) {
    str code = ""; 
    switch(v) {
      case (Variant)`<Name n>(<{TypeArg ","}* arguments>)` : 
-       code = "public static class c_<n> extends <base> {
+       code = "@EqualsAndHashCode
+              'public static class c_<n> extends <base> {
               '  <for(TypeArg arg <- arguments){>
               '  <generateAttribute(aliases, arg, true)>;
               '  <}>
               '
-              '  public c_<n>(<intercalate(", ", [generateAttribute(aliases, arg, false) | TypeArg arg <- arguments])>) {
-              '   <for(TypeArg arg <-arguments){>
-              '     this.<generateAttributeName(arg)> = <generateAttributeName(arg)>;  
-              '   <}>  
-              '  }
+              '  <generateConstructor(aliases, "c_" + unparse(n), [arg | TypeArg arg <- arguments])> 
               '  
-              '  @Override
-              '  public IConstructor createVallangInstance(IValueFactory vf) {
+              '  <generateVallangInstance(aliases, [arg | TypeArg arg <- arguments])>
               '
-              '    <for(TypeArg arg <- arguments){>
-              '    <populateMap(aliases, arg)>
-              '    <}>
-              '    
-              '    return vf.constructor(getVallangConstructor()
-              '             <for(TypeArg arg <- arguments){>
-              '             , iv_<generateAttributeName(arg)> 
-              '             <}>
-              '             ); 
-              '  }
               '  @Override
               '  public String getConstructor() {
               '    return \"<n>\";
@@ -115,6 +132,29 @@ private str generateSubClass(map[str, str] aliases, str base, Variant v) {
    return code; 
 }
 
+private str generateConstructor(map[str, str] aliases, str cn, list[TypeArg] arguments)  
+ = "  public <cn>(<intercalate(", ", [generateAttribute(aliases, arg, false) | TypeArg arg <- arguments])>) {
+   '   <for(TypeArg arg <-arguments){>
+   '     this.<generateAttributeName(arg)> = <generateAttributeName(arg)>;  
+   '   <}>  
+   '  }";
+ 
+
+private str generateVallangInstance(map[str, str] aliases, list[TypeArg] arguments) 
+ = "@Override
+   'public IConstructor createVallangInstance(IValueFactory vf) {
+   '
+   '  <for(TypeArg arg <- arguments){>
+   '    <populateMap(aliases, arg)>
+   '  <}>
+   '    
+   '  return vf.constructor(getVallangConstructor()
+   '           <for(TypeArg arg <- arguments){>
+   '           , iv_<generateAttributeName(arg)> 
+   '          <}>
+   '           ); 
+   '}";  
+ 
 private str generateAttribute(map[str, str] aliases, TypeArg arg, bool isPublic) {
   str prefix = isPublic ? "public " : "";  
   switch(arg) {
