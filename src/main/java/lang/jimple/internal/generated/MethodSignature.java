@@ -2,12 +2,15 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
-import lombok.EqualsAndHashCode; 
+
+import lombok.*; 
+
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+@Builder
 @EqualsAndHashCode
 public  class MethodSignature extends JimpleAbstractDataType {
    @Override 
@@ -22,18 +25,22 @@ public  class MethodSignature extends JimpleAbstractDataType {
       
        public Type returnType;
       
+       public String methodName;
+      
        public List<Type> formals;
       
      
-      public static MethodSignature methodSignature(String className, Type returnType, List<Type> formals)  {
-        return new MethodSignature(className, returnType, formals);
+      public static MethodSignature methodSignature(String className, Type returnType, String methodName, List<Type> formals)  {
+        return new MethodSignature(className, returnType, methodName, formals);
       }
       
-        public MethodSignature(String className, Type returnType, List<Type> formals) {
+        public MethodSignature(String className, Type returnType, String methodName, List<Type> formals) {
          
            this.className = className;  
          
            this.returnType = returnType;  
+         
+           this.methodName = methodName;  
          
            this.formals = formals;  
            
@@ -45,6 +52,8 @@ public  class MethodSignature extends JimpleAbstractDataType {
           IValue iv_className = vf.string(className);
         
           IValue iv_returnType = returnType.createVallangInstance(vf);
+        
+          IValue iv_methodName = vf.string(methodName);
         
           IList iv_formals = vf.list();
           
@@ -59,6 +68,8 @@ public  class MethodSignature extends JimpleAbstractDataType {
                  , iv_className 
                 
                  , iv_returnType 
+                
+                 , iv_methodName 
                 
                  , iv_formals 
                 

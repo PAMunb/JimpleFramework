@@ -2,6 +2,8 @@ package lang.jimple.internal;
 
 import static lang.jimple.internal.JimpleObjectFactory.assignmentStmt;
 import static lang.jimple.internal.JimpleObjectFactory.isInterface;
+import static lang.jimple.internal.JimpleObjectFactory.methodArgumentTypes;
+import static lang.jimple.internal.JimpleObjectFactory.methodReturnType;
 import static lang.jimple.internal.JimpleObjectFactory.methodSignature;
 import static lang.jimple.internal.JimpleObjectFactory.modifiers;
 import static lang.jimple.internal.JimpleObjectFactory.newArraySubscript;
@@ -13,6 +15,7 @@ import static lang.jimple.internal.JimpleObjectFactory.newMultExpression;
 import static lang.jimple.internal.JimpleObjectFactory.newPlusExpression;
 import static lang.jimple.internal.JimpleObjectFactory.newReminderExpression;
 import static lang.jimple.internal.JimpleObjectFactory.objectConstructor;
+import static lang.jimple.internal.JimpleObjectFactory.toJimpleValue;
 import static lang.jimple.internal.JimpleObjectFactory.type;
 
 import java.io.IOException;
@@ -47,6 +50,7 @@ import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Field;
 import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
+import lang.jimple.internal.generated.Immediate.c_iValue;
 import lang.jimple.internal.generated.InvokeExp;
 import lang.jimple.internal.generated.LocalVariableDeclaration;
 import lang.jimple.internal.generated.Method;
@@ -55,6 +59,7 @@ import lang.jimple.internal.generated.MethodSignature;
 import lang.jimple.internal.generated.Modifier;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
+import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
 
 /**
@@ -64,8 +69,11 @@ import lang.jimple.internal.generated.Variable;
  * @author rbonifacio
  */
 public class Decompiler {
+	private static final String INVOKE_DYNAMIC_FAKE_CLASS = "lang.jimple.InvokeDynamic";
+	
 	private final IValueFactory vf;
 	private IConstructor _class;
+	
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
 	}
@@ -156,7 +164,7 @@ public class Decompiler {
 			String methodName = mn.name;
 			
 			List<Type> methodFormalArgs = new ArrayList<>();
-			List<Type> methodExceptions = new ArrayList();
+			List<Type> methodExceptions = new ArrayList<>();
 			
 			for(org.objectweb.asm.Type t: org.objectweb.asm.Type.getArgumentTypes(mn.desc)) {
 				methodFormalArgs.add(type(t.getDescriptor()));
@@ -233,7 +241,7 @@ public class Decompiler {
 
 	}
 
-	class InstructionSetVisitor extends MethodVisitor {
+	class InstructionSetVisitor extends org.objectweb.asm.MethodVisitor {
 		class Operand {
 			Type type;
 			Immediate immediate;
@@ -472,8 +480,8 @@ public class Decompiler {
 		@Override
 		public void visitIntInsn(int opcode, int operand) {
 			switch(opcode) {
-			 case Opcodes.BIPUSH : pushConstantValue(type("I"), Immediate.intValue(operand)); break;
-			 case Opcodes.SIPUSH : pushConstantValue(type("I"), Immediate.intValue(operand)); break;
+			 case Opcodes.BIPUSH : pushConstantValue(type("I"), Immediate.iValue(Value.intValue(operand))); break;
+			 case Opcodes.SIPUSH : pushConstantValue(type("I"), Immediate.iValue(Value.intValue(operand))); break;
 			 case Opcodes.NEWARRAY : createNewArrayIns(operand); break;
 			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
 			}
@@ -491,29 +499,63 @@ public class Decompiler {
 			}
 		}
 		
+		/* 
+		 * This is really tough. 
+		 *  
+		 * The implementation here is based on the 
+		 * Eric Bodden's paper published at SOAP 2012.  
+		 */
 		@Override
-		public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
-			throw new RuntimeException("Invoke dynamic not implemented yet"); 
+		public void visitInvokeDynamicInsn(String name, String descriptor, Handle bsmh, Object... bootstrapMethodArguments) {
+			List<Immediate> bootstrapArgs = new ArrayList<>();
+			MethodSignature bootstrapMethod = methodSignature(bsmh);
+			
+			for(Object arg: bootstrapMethodArguments) {
+				bootstrapArgs.add(Immediate.iValue(toJimpleValue(arg)));
+			}
+			
+			Type methodType = methodReturnType(descriptor);
+			List<Type> argTypes = methodArgumentTypes(descriptor);
+			
+			MethodSignature method = MethodSignature.builder()
+					.className(INVOKE_DYNAMIC_FAKE_CLASS)
+					.returnType(methodType)
+					.methodName(name)
+					.formals(argTypes)
+					.build();
+			
+			List<Immediate> args = new ArrayList<>();
+			
+			for(int i = 0; i < argTypes.size(); i++) {
+				args.add(0, operandStack.pop().immediate);
+			}
+			
+			InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
+			
+			instructions.add(Statement.invokeStmt(exp));
 		}
 		
 		
 		
+		// TODO: Perhaps we should reuse the definition of 
+		// the method toJimpleValue. There, we can actually 
+		// return a tuple <Type, Value>.
 		@Override
 		public void visitLdcInsn(Object value) {
 			if((value instanceof Integer)) {
-				operandStack.push(new Operand(Type.TInteger(), Immediate.intValue((Integer)value)));
+				operandStack.push(new Operand(Type.TInteger(), Immediate.iValue(Value.intValue((Integer)value))));
 			}
 			else if (value instanceof Float) {
-				operandStack.push(new Operand(Type.TFloat(), Immediate.floatValue((Float)value)));
+				operandStack.push(new Operand(Type.TFloat(), Immediate.iValue(Value.floatValue((Float)value))));
 			}
 			else if(value instanceof Long) {
-				operandStack.push(new Operand(Type.TLong(), Immediate.longValue((Long)value)));	
+				operandStack.push(new Operand(Type.TLong(), Immediate.iValue(Value.longValue((Long)value))));	
 			}
 			else if(value instanceof Double) {
-				operandStack.push(new Operand(Type.TDouble(), Immediate.doubleValue((Double)value)));
+				operandStack.push(new Operand(Type.TDouble(), Immediate.iValue(Value.doubleValue((Double)value))));
 			}
 			else if (value instanceof String) {
-				operandStack.push(new Operand(Type.TString(), Immediate.stringValue((String)value)));
+				operandStack.push(new Operand(Type.TString(), Immediate.iValue(Value.stringValue((String)value))));
 			}
 			else if(value instanceof org.objectweb.asm.Type) {
 				int sort = ((org.objectweb.asm.Type)value).getSort();
@@ -527,11 +569,11 @@ public class Decompiler {
 		}
 
 		private void invokeMethodIns(String owner, String name, String descriptor, boolean isStatic, InvokeExpressionFactory factory) {
-			MethodSignature signature = methodSignature(owner, descriptor);
+			MethodSignature signature = methodSignature(owner, name, descriptor);
 			List<Immediate> args = new ArrayList<>();
 			
 			for(int i = 0; i < signature.formals.size(); i++) {
-				args.add(operandStack.pop().immediate);
+				args.add(0, operandStack.pop().immediate);
 			}
 			
 			InvokeExp exp = null; 
@@ -601,7 +643,11 @@ public class Decompiler {
 		private void aNewArrayIns(Type type) {
 			Operand operand = operandStack.pop();
 			LocalVariableDeclaration newLocal = createLocal(Type.TArray(type));
-			Integer size = ((Immediate.c_intValue)operand.immediate).iv;
+			c_iValue value = (Immediate.c_iValue)operand.immediate;
+			
+			assert (value.v instanceof Value.c_intValue);
+			
+			Integer size = ((Value.c_intValue)value.v).iv;
 			
 			List<ArrayDescriptor> dims = new ArrayList<>();
 			dims.add(ArrayDescriptor.fixedSize(size));	
@@ -621,7 +667,7 @@ public class Decompiler {
 		 * operand stack. 
 		 */
 		private void acconstNullIns() {
-			operandStack.push(new Operand(Type.TNull(), Immediate.nullValue()));
+			operandStack.push(new Operand(Type.TNull(), Immediate.iValue(Value.nullValue())));
 		}
 
 		/*
@@ -629,7 +675,7 @@ public class Decompiler {
 		 * operand stack. 
 		 */
 		private void loadIntConstIns(int value, String descriptor) {
-			operandStack.push(new Operand(type(descriptor), Immediate.intValue(value)));
+			operandStack.push(new Operand(type(descriptor), Immediate.iValue(Value.intValue(value))));
 		}
 
 		/*
@@ -637,7 +683,7 @@ public class Decompiler {
 		 * operand stack. 
 		 */
 		private void loadRealConstIns(float value, String descriptor) {
-			operandStack.push(new Operand(type(descriptor), Immediate.floatValue(value)));
+			operandStack.push(new Operand(type(descriptor), Immediate.iValue(Value.floatValue(value))));
 		}
 
 		

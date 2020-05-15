@@ -2,11 +2,14 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
-import lombok.EqualsAndHashCode; 
+
+import lombok.*; 
+
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
+
 
 @EqualsAndHashCode
 public abstract class Expression extends JimpleAbstractDataType {

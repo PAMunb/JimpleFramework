@@ -2,21 +2,30 @@ module lang::jimple::Syntax
 
 alias String = str;
 alias Int = int; 
-alias Long = Int; 
+alias Long = int; 
 alias Float = real;
-alias Double = Float;  
+alias Double = real;  
 alias Name = str;
 alias Label = str;
 alias Identifier = str; 
 
-data Immediate 
- = local(String localName) 
- | intValue(Int iv)
+data Value 
+ = intValue(Int iv)
  | longValue(Long lv)
  | floatValue(Float fv)
  | doubleValue(Double fv)
  | stringValue(String sv)
- | nullValue(); 
+ | methodValue(Type returnType, list[Type] formals)
+ | classValue(str name)
+ | methodHandle(MethodSignature methodSig)
+ | fieldHandle(FieldSignature fieldSig)
+ | nullValue()
+ ; 
+ 
+data Immediate 
+ = local(String localName) 
+ | iValue(Value v) 
+ ; 
  
 public data ClassOrInterfaceDeclaration 
  = classDecl(Type typeName,
@@ -135,7 +144,7 @@ data InvokeExp
   | virtualInvoke(Name local, MethodSignature sig, list[Immediate] args)
   | interfaceInvoke(Name local, MethodSignature sig, list[Immediate] args)
   | staticMethodInvoke(MethodSignature sig, list[Immediate] args)
-  | dynamicInvoke(String string, UnnamedMethodSignature usig, list[Immediate] args1, MethodSignature sig, list[Immediate] args2)
+  | dynamicInvoke(MethodSignature bsmSig, list[Immediate] bsmArgs, MethodSignature sig, list[Immediate] args)
   ;   
 
 data FieldSignature 
@@ -143,7 +152,7 @@ data FieldSignature
   ; 
   
 data MethodSignature 
-  = methodSignature(Name className, Type returnType, list[Type] formals)
+  = methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)
   ; 
   
 data UnnamedMethodSignature 
@@ -183,6 +192,10 @@ data Type
   | TArray(Type baseType)
   | TVoid()
   | TString()
+  | TMethodValue()
+  | TClassValue()
+  | TMethodHandle()
+  | TFieldHandle()
   | TNull()
   | TUnknown()            // it might be useful in the first phase of Jimple Body creation 
   ;  

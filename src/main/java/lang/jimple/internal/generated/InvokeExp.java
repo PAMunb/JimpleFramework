@@ -2,11 +2,14 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
-import lombok.EqualsAndHashCode; 
+
+import lombok.*; 
+
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
+
 
 @EqualsAndHashCode
 public abstract class InvokeExp extends JimpleAbstractDataType {
@@ -33,8 +36,8 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      return new c_staticMethodInvoke(sig, args);
    }
    
-   public static InvokeExp dynamicInvoke(String string, UnnamedMethodSignature usig, List<Immediate> args1, MethodSignature sig, List<Immediate> args2)  {
-     return new c_dynamicInvoke(string, usig, args1, sig, args2);
+   public static InvokeExp dynamicInvoke(MethodSignature bsmSig, List<Immediate> bsmArgs, MethodSignature sig, List<Immediate> args)  {
+     return new c_dynamicInvoke(bsmSig, bsmArgs, sig, args);
    }
     
 
@@ -246,28 +249,24 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_dynamicInvoke extends InvokeExp {
      
-     public String string;
+     public MethodSignature bsmSig;
      
-     public UnnamedMethodSignature usig;
-     
-     public List<Immediate> args1;
+     public List<Immediate> bsmArgs;
      
      public MethodSignature sig;
      
-     public List<Immediate> args2;
+     public List<Immediate> args;
      
    
-       public c_dynamicInvoke(String string, UnnamedMethodSignature usig, List<Immediate> args1, MethodSignature sig, List<Immediate> args2) {
+       public c_dynamicInvoke(MethodSignature bsmSig, List<Immediate> bsmArgs, MethodSignature sig, List<Immediate> args) {
         
-          this.string = string;  
+          this.bsmSig = bsmSig;  
         
-          this.usig = usig;  
-        
-          this.args1 = args1;  
+          this.bsmArgs = bsmArgs;  
         
           this.sig = sig;  
         
-          this.args2 = args2;  
+          this.args = args;  
           
        } 
      
@@ -275,38 +274,34 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      public IConstructor createVallangInstance(IValueFactory vf) {
      
        
-         IValue iv_string = vf.string(string);
+         IValue iv_bsmSig = bsmSig.createVallangInstance(vf);
        
-         IValue iv_usig = usig.createVallangInstance(vf);
-       
-         IList iv_args1 = vf.list();
+         IList iv_bsmArgs = vf.list();
          
-         for(Immediate v: args1) {
-          iv_args1 = iv_args1.append(v.createVallangInstance(vf));   
+         for(Immediate v: bsmArgs) {
+          iv_bsmArgs = iv_bsmArgs.append(v.createVallangInstance(vf));   
          }
                  
        
          IValue iv_sig = sig.createVallangInstance(vf);
        
-         IList iv_args2 = vf.list();
+         IList iv_args = vf.list();
          
-         for(Immediate v: args2) {
-          iv_args2 = iv_args2.append(v.createVallangInstance(vf));   
+         for(Immediate v: args) {
+          iv_args = iv_args.append(v.createVallangInstance(vf));   
          }
                  
        
          
        return vf.constructor(getVallangConstructor()
                 
-                , iv_string 
+                , iv_bsmSig 
                
-                , iv_usig 
-               
-                , iv_args1 
+                , iv_bsmArgs 
                
                 , iv_sig 
                
-                , iv_args2 
+                , iv_args 
                
                 ); 
      }

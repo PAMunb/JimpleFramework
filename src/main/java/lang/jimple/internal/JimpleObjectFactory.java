@@ -1,27 +1,25 @@
 package lang.jimple.internal;
 
-import static lang.jimple.internal.JimpleObjectFactory.type;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import javax.swing.text.html.HTML.Tag;
+
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
-import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 
-import io.usethesource.vallang.IConstructor;
-import io.usethesource.vallang.IList;
-import io.usethesource.vallang.IString;
-import io.usethesource.vallang.IValueFactory;
-// import io.usethesource.vallang.type.Type;
-import io.usethesource.vallang.type.TypeFactory;
-import io.usethesource.vallang.type.TypeStore;
+import lang.jimple.internal.Decompiler.InstructionSetVisitor.Operand;
 import lang.jimple.internal.generated.Expression;
+import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
-import lang.jimple.internal.generated.LocalVariableDeclaration;
 import lang.jimple.internal.generated.MethodSignature;
 import lang.jimple.internal.generated.Modifier;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
+import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
 
 public class JimpleObjectFactory {
@@ -59,22 +57,22 @@ public class JimpleObjectFactory {
 	}
 
 	public static Immediate newIntValueImmediate(int value) {
-		return Immediate.intValue(value);
+		return Immediate.iValue(Value.intValue(value));
 	}
 
 	public static Immediate newRealValueImmediate(float value) {
-		return Immediate.floatValue(value);
+		return Immediate.iValue(Value.floatValue(value));
 	}
 
 	public static Immediate newNullValueImmediate() {
-		return Immediate.nullValue();
+		return Immediate.iValue(Value.nullValue());
 	}
 
 	public static Immediate newLocalImmediate(String var) {
 		return Immediate.local(var);
 	}
 	
-	public static MethodSignature methodSignature(String owner, String descriptor) {
+	public static MethodSignature methodSignature(String owner, String name, String descriptor) {
 		org.objectweb.asm.Type methodType = org.objectweb.asm.Type.getMethodType(descriptor);
 		
 		Type returnType = type(methodType.getReturnType().getDescriptor());
@@ -85,7 +83,21 @@ public class JimpleObjectFactory {
 			formals.add(type(t.getDescriptor()));
 		}
 		
-		return MethodSignature.methodSignature(owner, returnType, formals);
+		return MethodSignature.methodSignature(owner,returnType, name, formals);
+	}
+	
+	public static Type methodReturnType(String descriptor) {
+		return type(org.objectweb.asm.Type.getReturnType(descriptor).getDescriptor());
+	}
+	
+	public static List<Type> methodArgumentTypes(String descriptor) {
+		org.objectweb.asm.Type[] args = org.objectweb.asm.Type.getArgumentTypes(descriptor);
+		
+		List<Type> res = new ArrayList<>();
+		for(org.objectweb.asm.Type t: args) {
+			res.add(type(t.getDescriptor()));
+		}
+		return res;
 	}
 	
 	public static Type type(String descriptor) {
@@ -119,6 +131,10 @@ public class JimpleObjectFactory {
 		return Type.TUnknown();
 	}
 
+	public static MethodSignature methodSignature(Handle handle) {
+		return MethodSignature.methodSignature(handle.getOwner(), methodReturnType(handle.getDesc()) , handle.getName(), methodArgumentTypes(handle.getDesc()));
+	}
+	
 	public static List<Modifier> modifiers(int access) {
 		List<Modifier> list = new ArrayList<Modifier>();
 		
@@ -161,8 +177,84 @@ public class JimpleObjectFactory {
 		return list;
 	}
 	
+	public static Value toJimpleValue(Object value) {
+		if((value instanceof Integer)) {
+			return Value.intValue((Integer)value);
+		}
+		else if (value instanceof Float) {
+			return Value.floatValue((Float)value);
+		}
+		else if(value instanceof Long) {
+			return Value.longValue((Long)value);	
+		}
+		else if(value instanceof Double) {
+			return Value.doubleValue((Double)value);
+		}
+		else if (value instanceof String) {
+			return Value.stringValue((String)value);
+		}
+		else if (value instanceof org.objectweb.asm.Type) {
+		      org.objectweb.asm.Type t = (org.objectweb.asm.Type) value;
+		      if (t.getSort() == org.objectweb.asm.Type.METHOD) {
+		    	  Type returnType = methodReturnType(t.getDescriptor());
+		    	  List<Type> formals = methodArgumentTypes(t.getDescriptor());
+		    	  
+		    	  return Value.methodValue(returnType, formals);
+		      }
+		      else {
+		    	  return Value.classValue(t.getDescriptor());
+		      }
+		}
+		else if(value instanceof org.objectweb.asm.Handle) {
+			org.objectweb.asm.Handle h = (org.objectweb.asm.Handle)value;
+			
+			if(isMethodHandle(h.getTag())) {
+				MethodSignature sig = MethodSignature.methodSignature(h.getOwner(), methodReturnType(h.getDesc()), h.getName(), methodArgumentTypes(h.getDesc()));
+				return Value.methodHandle(sig);
+			}
+			else {
+				FieldSignature sig = FieldSignature.fieldSignature(h.getOwner(), type(h.getDesc()), h.getName());
+				return Value.fieldHandle(sig);
+			}
+		}
+		throw new RuntimeException("Unknown constant type " + value.getClass());
+	}
+	
 	public static boolean isInterface(int access) {
 		return (access & Opcodes.ACC_INTERFACE) != 0; 
 	}
+	
+	private static boolean isMethodHandle(int tag) {
+		return  methodTags.contains(tag);
+	}
+	
+	private static Set<Integer> methodTags = methodTags(); 
+	private static Set<Integer> fieldTags = fieldTags();
+	
+	private static Set<Integer> methodTags() { 
+		Set<Integer> tags = new HashSet<>();
+		
+		tags.add(Opcodes.H_INVOKEVIRTUAL);
+		tags.add(Opcodes.H_INVOKESTATIC);
+		tags.add(Opcodes.H_INVOKESPECIAL);
+		tags.add(Opcodes.H_NEWINVOKESPECIAL);
+		tags.add(Opcodes.H_INVOKEINTERFACE);
+		
+		return tags; 
+	}
+	
+	private static Set<Integer> fieldTags() { 
+		Set<Integer> tags = new HashSet<>();
+	
+		tags.add(Opcodes.H_GETFIELD);
+		tags.add(Opcodes.H_GETSTATIC);
+		tags.add(Opcodes.H_GETSTATIC);
+		tags.add(Opcodes.H_PUTSTATIC);
+		
+		return tags; 
+	}
+	
+	
+	
 
 }

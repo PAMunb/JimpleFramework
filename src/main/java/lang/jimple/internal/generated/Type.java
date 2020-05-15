@@ -2,11 +2,14 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
-import lombok.EqualsAndHashCode; 
+
+import lombok.*; 
+
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
+
 
 @EqualsAndHashCode
 public abstract class Type extends JimpleAbstractDataType {
@@ -63,6 +66,22 @@ public abstract class Type extends JimpleAbstractDataType {
    
    public static Type TString()  {
      return new c_TString();
+   }
+   
+   public static Type TMethodValue()  {
+     return new c_TMethodValue();
+   }
+   
+   public static Type TClassValue()  {
+     return new c_TClassValue();
+   }
+   
+   public static Type TMethodHandle()  {
+     return new c_TMethodHandle();
+   }
+   
+   public static Type TFieldHandle()  {
+     return new c_TFieldHandle();
    }
    
    public static Type TNull()  {
@@ -376,6 +395,102 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "TString";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_TMethodValue extends Type {
+     
+   
+       public c_TMethodValue() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "TMethodValue";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_TClassValue extends Type {
+     
+   
+       public c_TClassValue() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "TClassValue";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_TMethodHandle extends Type {
+     
+   
+       public c_TMethodHandle() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "TMethodHandle";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_TFieldHandle extends Type {
+     
+   
+       public c_TFieldHandle() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "TFieldHandle";
      }
    }
    

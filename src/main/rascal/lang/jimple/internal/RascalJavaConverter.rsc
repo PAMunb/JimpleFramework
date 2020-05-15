@@ -38,16 +38,20 @@ private void generateCode(Module m, map[str, str] aliases) {
 private void generateClass(map[str, str] aliases, UserType t, {Variant "|"}+ variants) {
   list[Variant] vs = [v | Variant v <- variants]; 
   str modifier = size(vs) > 1 ? "abstract" : ""; 
+  str builder = size(vs) == 1 ? "@Builder" : ""; 
   str code = "package lang.jimple.internal.generated;
              '
              'import lang.jimple.internal.JimpleAbstractDataType; 
              'import java.util.List; 
-             'import lombok.EqualsAndHashCode; 
+             '
+             'import lombok.*; 
+             '
              'import io.usethesource.vallang.IConstructor;
              'import io.usethesource.vallang.IList;
              'import io.usethesource.vallang.IValue;
              'import io.usethesource.vallang.IValueFactory; 
              '
+             '<builder>
              '@EqualsAndHashCode
              'public <modifier> class <unparse(t)> extends JimpleAbstractDataType {
              '   @Override 
@@ -185,10 +189,13 @@ private str populateMap(map[str, str] aliases, TypeArg arg) {
   }
 }
 
-private str populateBasicType("str", str n)   = "IValue iv_<n> = vf.string(<n>);";
-private str populateBasicType("int", str n)   = "IValue iv_<n> = vf.integer(<n>);";
-private str populateBasicType("bool", str n)  = "IValue iv_<n> = vf.bool(<n>);";
-private str populateBasicType("real", str n)  = "IValue iv_<n> = vf.real(<n>);";
+private str populateBasicType("str", str n)     = "IValue iv_<n> = vf.string(<n>);";
+private str populateBasicType("int", str n)     = "IValue iv_<n> = vf.integer(<n>);";
+private str populateBasicType("bool", str n)    = "IValue iv_<n> = vf.bool(<n>);";
+private str populateBasicType("real", str n)    = "IValue iv_<n> = vf.real(<n>);";
+private str populateBasicType("Double", str n)  = "IValue iv_<n> = vf.real(<n>);";
+private str populateBasicType("Long", str n)    = "IValue iv_<n> = vf.integer(<n>);";
+
 
 private str populateUserDefinedType(map[str, str] aliases, str base, str n) {
  str val = ""; 
@@ -196,9 +203,9 @@ private str populateUserDefinedType(map[str, str] aliases, str base, str n) {
    case "String"  : val = "vf.string(<n>)";
    case "Integer" : val = "vf.integer(<n>)";
    case "Boolean" : val = "vf.boolean(<n>)";
-   case "Real"    : val = "vf.real(<n>)";
-   case "Float"  : val = "vf.real(<n>)";
-   case "Int"    : val = "vf.integer(<n>)";
+   case "Float"    : val = "vf.real(<n>)";
+   case "Double"  : val = "vf.real(<n>)";
+   case "Long"    : val = "vf.integer(<n>)";
    default        : val = "<n>.createVallangInstance(vf)"; 
  }
  return "IValue iv_<n> = <val>;"; 
@@ -210,9 +217,9 @@ private str populateListType(map[str, str] aliases, str base, str n) {
    case "String"  : val = "vf.string(v)";
    case "Integer" : val = "vf.integer(v)";
    case "Boolean" : val = "vf.boolean(v)";
-   case "Float"    : val = "vf.real(v)";
-   case "Double"  : val = "vf.double(v)";
-   case "Long"    : val = "vf.long(v)";
+   case "Float"   : val = "vf.real(v)";
+   case "Double"  : val = "vf.real(v)";
+   case "Long"    : val = "vf.integer(v)";
    default        : val = "v.createVallangInstance(vf)"; 
  }
  return "IList iv_<n> = vf.list();
@@ -224,6 +231,16 @@ private str populateListType(map[str, str] aliases, str base, str n) {
 }
 
 private str resolve(map[str, str] aliases, str t) {
+  // these are two special cases here. 
+  // lets do a workaround here, because 
+  // we cannot differentiate int and long in Rascal. 
+  // the same is true beteen real and double
+  switch(t) {
+    case "Long"  : return "Long";
+    case "Double": return "Double";  
+  } 
+
+  // this is the normal case. 
   if(t in aliases) {
     t = aliases[t]; 
   } 
@@ -236,8 +253,6 @@ private str resolve(map[str, str] aliases, str t) {
     case "int"   : return "Integer";
     case "bool"  : return "Boolean";  
     case "real"  : return "Float"; 
-    case "Int"   : return "Long"; 
-    case "Float" : return "Double";  
     default: return replaceAll(t, "\\", "");
   }
 }
