@@ -15,7 +15,7 @@ import static lang.jimple.internal.JimpleObjectFactory.newMultExpression;
 import static lang.jimple.internal.JimpleObjectFactory.newPlusExpression;
 import static lang.jimple.internal.JimpleObjectFactory.newReminderExpression;
 import static lang.jimple.internal.JimpleObjectFactory.objectConstructor;
-import static lang.jimple.internal.JimpleObjectFactory.toJimpleValue;
+import static lang.jimple.internal.JimpleObjectFactory.toJimpleTypedValue;
 import static lang.jimple.internal.JimpleObjectFactory.type;
 
 import java.io.IOException;
@@ -30,6 +30,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
@@ -44,11 +45,13 @@ import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IValueFactory;
 import lang.jimple.internal.generated.ArrayDescriptor;
+import lang.jimple.internal.generated.CaseStmt;
 import lang.jimple.internal.generated.CatchClause;
 import lang.jimple.internal.generated.ClassOrInterfaceDeclaration;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Field;
 import lang.jimple.internal.generated.FieldSignature;
+import lang.jimple.internal.generated.GotoStmt;
 import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.Immediate.c_iValue;
 import lang.jimple.internal.generated.InvokeExp;
@@ -61,6 +64,7 @@ import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
 import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
+import lang.jimple.util.Pair;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -254,6 +258,11 @@ public class Decompiler {
 			Operand(LocalVariableDeclaration localDeclaration) {
 				this.type = localDeclaration.varType;
 				this.immediate = Immediate.local(localDeclaration.local);
+			}
+			
+			Operand(Pair<Type, Value> typedValue) {
+				this.type = typedValue.getFirst();
+				this.immediate = Immediate.iValue(typedValue.getSecond());
 			}
 		}
 
@@ -497,13 +506,16 @@ public class Decompiler {
 			 case Opcodes.INVOKEINTERFACE : invokeMethodIns(owner, name, descriptor, false, (r, s, args) -> InvokeExp.interfaceInvoke(r, s, args)); break;
 			 default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);
 			}
+			super.visitMethodInsn(opcode, owner, name, descriptor, isInterfaceInvoke);
 		}
 		
 		/* 
 		 * This is really tough. 
 		 *  
 		 * The implementation here is based on the 
-		 * Eric Bodden's paper published at SOAP 2012.  
+		 * Eric Bodden's paper published at SOAP 2012. 
+		 * <i>InvokeDynamic support in Soot</
+		 * i> 
 		 */
 		@Override
 		public void visitInvokeDynamicInsn(String name, String descriptor, Handle bsmh, Object... bootstrapMethodArguments) {
@@ -511,7 +523,7 @@ public class Decompiler {
 			MethodSignature bootstrapMethod = methodSignature(bsmh);
 			
 			for(Object arg: bootstrapMethodArguments) {
-				bootstrapArgs.add(Immediate.iValue(toJimpleValue(arg)));
+				bootstrapArgs.add(Immediate.iValue(toJimpleTypedValue(arg).getSecond()));
 			}
 			
 			Type methodType = methodReturnType(descriptor);
@@ -533,40 +545,91 @@ public class Decompiler {
 			InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
 			
 			instructions.add(Statement.invokeStmt(exp));
+			super.visitInvokeDynamicInsn(name, descriptor, bsmh, bootstrapMethodArguments);
 		}
 		
 		
-		
-		// TODO: Perhaps we should reuse the definition of 
-		// the method toJimpleValue. There, we can actually 
-		// return a tuple <Type, Value>.
 		@Override
 		public void visitLdcInsn(Object value) {
-			if((value instanceof Integer)) {
-				operandStack.push(new Operand(Type.TInteger(), Immediate.iValue(Value.intValue((Integer)value))));
-			}
-			else if (value instanceof Float) {
-				operandStack.push(new Operand(Type.TFloat(), Immediate.iValue(Value.floatValue((Float)value))));
-			}
-			else if(value instanceof Long) {
-				operandStack.push(new Operand(Type.TLong(), Immediate.iValue(Value.longValue((Long)value))));	
-			}
-			else if(value instanceof Double) {
-				operandStack.push(new Operand(Type.TDouble(), Immediate.iValue(Value.doubleValue((Double)value))));
-			}
-			else if (value instanceof String) {
-				operandStack.push(new Operand(Type.TString(), Immediate.iValue(Value.stringValue((String)value))));
-			}
-			else if(value instanceof org.objectweb.asm.Type) {
-				int sort = ((org.objectweb.asm.Type)value).getSort();
-				switch(sort) {
-				 case org.objectweb.asm.Type.ARRAY  : break; 
-				 case org.objectweb.asm.Type.OBJECT : break;  
-				}
-			}
-			// TODO: new types here
+			operandStack.push(new Operand(toJimpleTypedValue(value)));
+			
 			super.visitLdcInsn(value);
 		}
+		
+
+		@Override
+		public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+			Immediate key = operandStack.pop().immediate;
+			
+			List<CaseStmt> caseStmts = new ArrayList<>();
+			
+			for(int i = 0; i < keys.length; i++) {
+				caseStmts.add(CaseStmt.caseOption(keys[i], labels[i].toString()));
+			}
+			
+			if(dflt != null) {
+				caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
+			}
+			
+			instructions.add(Statement.lookupSwitch(key, caseStmts));
+			super.visitLookupSwitchInsn(dflt, keys, labels);
+		}
+	
+		@Override
+		public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
+			Immediate key = operandStack.pop().immediate;
+			List<CaseStmt> caseStmts = new ArrayList<>();
+			
+			for(Label label : labels) {
+				caseStmts.add(CaseStmt.caseOption(label.getOffset(), label.toString()));
+			}
+			
+			if(dflt != null) {
+				caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
+			}
+			instructions.add(Statement.tableSwitch(key, min, max, caseStmts));
+			super.visitTableSwitchInsn(min, max, dflt, labels);
+		}
+		
+		@Override
+		public void visitJumpInsn(int opcode, Label label) {
+			if(opcode == Opcodes.GOTO) {
+				instructions.add(Statement.gotoStmt(label.toString()));
+			}
+			else if(opcode == Opcodes.JSR) {
+				throw RuntimeExceptionFactory.illegalArgument(vf.string("unsupported instruction JSR" + opcode), null, null);
+			}
+			else {
+				Expression exp = null; 
+				Immediate lhs = operandStack.pop().immediate;
+				Immediate rhs = Immediate.iValue(Value.intValue(0));
+				switch(opcode) {
+				  case Opcodes.IFEQ: exp = Expression.cmpeq(lhs, rhs); break; 
+				  case Opcodes.IFNE: exp = Expression.cmpne(lhs, rhs); break;
+				  case Opcodes.IFLT: exp = Expression.cmplt(lhs, rhs); break;
+				  case Opcodes.IFLE: exp = Expression.cmple(lhs, rhs); break;
+				  case Opcodes.IFGT: exp = Expression.cmpgt(lhs, rhs); break; 
+				  case Opcodes.IFGE: exp = Expression.cmpge(lhs, rhs); break; 
+				  case Opcodes.IF_ICMPEQ: rhs = operandStack.pop().immediate; exp = Expression.cmpeq(lhs, rhs); break; 
+				  case Opcodes.IF_ICMPNE: rhs = operandStack.pop().immediate; exp = Expression.cmpne(lhs, rhs); break;
+				  case Opcodes.IF_ICMPLT: rhs = operandStack.pop().immediate; exp = Expression.cmplt(lhs, rhs); break;
+				  case Opcodes.IF_ICMPGE: rhs = operandStack.pop().immediate; exp = Expression.cmpge(lhs, rhs); break;
+				  case Opcodes.IF_ICMPGT: rhs = operandStack.pop().immediate; exp = Expression.cmpgt(lhs, rhs); break;
+				  case Opcodes.IF_ICMPLE: rhs = operandStack.pop().immediate; exp = Expression.cmple(lhs, rhs); break;
+				  case Opcodes.IF_ACMPEQ: rhs = operandStack.pop().immediate; exp = Expression.cmpeq(lhs, rhs); break;
+				  case Opcodes.IF_ACMPNE: rhs = operandStack.pop().immediate; exp = Expression.cmpne(lhs, rhs); break;
+				  case Opcodes.IFNULL: exp = Expression.isNull(lhs); break;
+				  case Opcodes.IFNONNULL: exp = Expression.isNotNull(lhs); break;
+				  default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);	
+				}
+				instructions.add(Statement.ifStmt(exp, label.toString()));
+			}
+			super.visitJumpInsn(opcode, label);
+		}
+		
+		//IFNULL or IFNONNULL
+		
+		// auxiliarly methods. 
 
 		private void invokeMethodIns(String owner, String name, String descriptor, boolean isStatic, InvokeExpressionFactory factory) {
 			MethodSignature signature = methodSignature(owner, name, descriptor);
@@ -586,7 +649,7 @@ public class Decompiler {
 				exp = factory.createInvokeExpression(null, signature, args);
 			}
 			
-			if(signature.returnType.equals(Type.TVoid())) {   // TODO: This test does not work because equality is undefined. We have to implement this in the Jimple2Java compiler
+			if(signature.returnType.equals(Type.TVoid())) { 
 			   instructions.add(Statement.invokeStmt(exp));
 			}
 			else {

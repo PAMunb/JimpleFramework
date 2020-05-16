@@ -72,6 +72,14 @@ public abstract class Expression extends JimpleAbstractDataType {
      return new c_reminder(lhs, rhs);
    }
    
+   public static Expression isNull(Immediate immediate)  {
+     return new c_isNull(immediate);
+   }
+   
+   public static Expression isNotNull(Immediate immediate)  {
+     return new c_isNotNull(immediate);
+   }
+   
    public static Expression cmp(Immediate lhs, Immediate rhs)  {
      return new c_cmp(lhs, rhs);
    }
@@ -680,6 +688,70 @@ public abstract class Expression extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "reminder";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_isNull extends Expression {
+     
+     public Immediate immediate;
+     
+   
+       public c_isNull(Immediate immediate) {
+        
+          this.immediate = immediate;  
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_immediate 
+               
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "isNull";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_isNotNull extends Expression {
+     
+     public Immediate immediate;
+     
+   
+       public c_isNotNull(Immediate immediate) {
+        
+          this.immediate = immediate;  
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_immediate 
+               
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "isNotNull";
      }
    }
    

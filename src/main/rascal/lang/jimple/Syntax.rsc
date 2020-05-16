@@ -77,27 +77,26 @@ data Statement
   | breakpoint()
   | enterMonitor(Immediate immediate)
   | exitMonitor(Immediate immediate)
-  | tableSwitch(Immediate immediate, list[CaseStmt] stmts)
+  | tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)
   | lookupSwitch(Immediate immediate, list[CaseStmt] stmts)
   | identity(Name local, Name identifier, Type idType)
   | identityNoType(Name local, Name identifier)
   | assign(Variable var, Expression expression)
-  | ifStmt(Expression exp, GotoStmt stmt)
+  | ifStmt(Expression exp, Label targetStmt)
   | retEmptyStmt()
   | retStmt(Immediate immediate)
   | returnEmptyStmt() 
   | returnStmt(Immediate immediate)
   | throwStmt(Immediate immediate)
   | invokeStmt(InvokeExp invokeExpression)
+  | gotoStmt(Label label)
   | nop()
   ;        
  
  data CaseStmt 
-   = caseOption(Int option, GotoStmt targetStmt) 
-   | defaultOption(GotoStmt targetStmt)
+   = caseOption(Int option, Label targetStmt) 
+   | defaultOption(Label targetStmt)
    ; 
-
-data GotoStmt = gotoStmt(Label label); 
 
 data Expression 
   = newInstance(Type instanceType)
@@ -113,6 +112,8 @@ data Expression
   | or(Immediate lhs, Immediate rhs)
   | xor(Immediate lhs, Immediate rhs)
   | reminder(Immediate lhs, Immediate rhs)
+  | isNull(Immediate immediate)
+  | isNotNull(Immediate immediate)
   | cmp(Immediate lhs, Immediate rhs) 
   | cmpg(Immediate lhs, Immediate rhs) 
   | cmpl(Immediate lhs, Immediate rhs)

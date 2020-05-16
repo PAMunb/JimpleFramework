@@ -11,6 +11,7 @@ import javax.swing.text.html.HTML.Tag;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 
+import io.usethesource.vallang.io.binary.util.TaggedInt;
 import lang.jimple.internal.Decompiler.InstructionSetVisitor.Operand;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.FieldSignature;
@@ -21,6 +22,7 @@ import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
 import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
+import lang.jimple.util.Pair;
 
 public class JimpleObjectFactory {
 
@@ -177,21 +179,21 @@ public class JimpleObjectFactory {
 		return list;
 	}
 	
-	public static Value toJimpleValue(Object value) {
+	public static Pair<Type, Value> toJimpleTypedValue(Object value) {
 		if((value instanceof Integer)) {
-			return Value.intValue((Integer)value);
+			return new Pair<Type, Value>(Type.TInteger(), Value.intValue((Integer)value));
 		}
 		else if (value instanceof Float) {
-			return Value.floatValue((Float)value);
+			return new Pair<Type, Value>(Type.TFloat(), Value.floatValue((Float)value));
 		}
 		else if(value instanceof Long) {
-			return Value.longValue((Long)value);	
+			return new Pair<Type, Value>(Type.TLong(), Value.longValue((Long)value));	
 		}
 		else if(value instanceof Double) {
-			return Value.doubleValue((Double)value);
+			return new Pair<Type, Value>(Type.TDouble(), Value.doubleValue((Double)value));
 		}
 		else if (value instanceof String) {
-			return Value.stringValue((String)value);
+			return new Pair<Type, Value>(Type.TString(), Value.stringValue((String)value));
 		}
 		else if (value instanceof org.objectweb.asm.Type) {
 		      org.objectweb.asm.Type t = (org.objectweb.asm.Type) value;
@@ -199,10 +201,10 @@ public class JimpleObjectFactory {
 		    	  Type returnType = methodReturnType(t.getDescriptor());
 		    	  List<Type> formals = methodArgumentTypes(t.getDescriptor());
 		    	  
-		    	  return Value.methodValue(returnType, formals);
+		    	  return new Pair<Type, Value>(Type.TMethodValue(), Value.methodValue(returnType, formals));
 		      }
 		      else {
-		    	  return Value.classValue(t.getDescriptor());
+		    	  return new Pair<Type, Value>(Type.TClassValue(), Value.classValue(t.getDescriptor()));
 		      }
 		}
 		else if(value instanceof org.objectweb.asm.Handle) {
@@ -210,11 +212,11 @@ public class JimpleObjectFactory {
 			
 			if(isMethodHandle(h.getTag())) {
 				MethodSignature sig = MethodSignature.methodSignature(h.getOwner(), methodReturnType(h.getDesc()), h.getName(), methodArgumentTypes(h.getDesc()));
-				return Value.methodHandle(sig);
+				return new Pair<Type, Value>(Type.TMethodHandle(), Value.methodHandle(sig));
 			}
 			else {
 				FieldSignature sig = FieldSignature.fieldSignature(h.getOwner(), type(h.getDesc()), h.getName());
-				return Value.fieldHandle(sig);
+				return new Pair<Type, Value>(Type.TFieldHandle(), Value.fieldHandle(sig));
 			}
 		}
 		throw new RuntimeException("Unknown constant type " + value.getClass());
@@ -254,7 +256,4 @@ public class JimpleObjectFactory {
 		return tags; 
 	}
 	
-	
-	
-
 }

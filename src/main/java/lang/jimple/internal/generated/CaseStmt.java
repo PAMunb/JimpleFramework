@@ -20,11 +20,11 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
 
    
    
-   public static CaseStmt caseOption(Integer option, GotoStmt targetStmt)  {
+   public static CaseStmt caseOption(Integer option, String targetStmt)  {
      return new c_caseOption(option, targetStmt);
    }
    
-   public static CaseStmt defaultOption(GotoStmt targetStmt)  {
+   public static CaseStmt defaultOption(String targetStmt)  {
      return new c_defaultOption(targetStmt);
    }
     
@@ -35,10 +35,10 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      
      public Integer option;
      
-     public GotoStmt targetStmt;
+     public String targetStmt;
      
    
-       public c_caseOption(Integer option, GotoStmt targetStmt) {
+       public c_caseOption(Integer option, String targetStmt) {
         
           this.option = option;  
         
@@ -52,7 +52,7 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
        
          IValue iv_option = vf.integer(option);
        
-         IValue iv_targetStmt = targetStmt.createVallangInstance(vf);
+         IValue iv_targetStmt = vf.string(targetStmt);
        
          
        return vf.constructor(getVallangConstructor()
@@ -73,10 +73,10 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_defaultOption extends CaseStmt {
      
-     public GotoStmt targetStmt;
+     public String targetStmt;
      
    
-       public c_defaultOption(GotoStmt targetStmt) {
+       public c_defaultOption(String targetStmt) {
         
           this.targetStmt = targetStmt;  
           
@@ -86,7 +86,7 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      public IConstructor createVallangInstance(IValueFactory vf) {
      
        
-         IValue iv_targetStmt = targetStmt.createVallangInstance(vf);
+         IValue iv_targetStmt = vf.string(targetStmt);
        
          
        return vf.constructor(getVallangConstructor()

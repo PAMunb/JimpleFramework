@@ -36,8 +36,8 @@ public abstract class Statement extends JimpleAbstractDataType {
      return new c_exitMonitor(immediate);
    }
    
-   public static Statement tableSwitch(Immediate immediate, List<CaseStmt> stmts)  {
-     return new c_tableSwitch(immediate, stmts);
+   public static Statement tableSwitch(Immediate immediate, Integer min, Integer max, List<CaseStmt> stmts)  {
+     return new c_tableSwitch(immediate, min, max, stmts);
    }
    
    public static Statement lookupSwitch(Immediate immediate, List<CaseStmt> stmts)  {
@@ -56,8 +56,8 @@ public abstract class Statement extends JimpleAbstractDataType {
      return new c_assign(var, expression);
    }
    
-   public static Statement ifStmt(Expression exp, GotoStmt stmt)  {
-     return new c_ifStmt(exp, stmt);
+   public static Statement ifStmt(Expression exp, String targetStmt)  {
+     return new c_ifStmt(exp, targetStmt);
    }
    
    public static Statement retEmptyStmt()  {
@@ -82,6 +82,10 @@ public abstract class Statement extends JimpleAbstractDataType {
    
    public static Statement invokeStmt(InvokeExp invokeExpression)  {
      return new c_invokeStmt(invokeExpression);
+   }
+   
+   public static Statement gotoStmt(String label)  {
+     return new c_gotoStmt(label);
    }
    
    public static Statement nop()  {
@@ -215,12 +219,20 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
+     public Integer min;
+     
+     public Integer max;
+     
      public List<CaseStmt> stmts;
      
    
-       public c_tableSwitch(Immediate immediate, List<CaseStmt> stmts) {
+       public c_tableSwitch(Immediate immediate, Integer min, Integer max, List<CaseStmt> stmts) {
         
           this.immediate = immediate;  
+        
+          this.min = min;  
+        
+          this.max = max;  
         
           this.stmts = stmts;  
           
@@ -231,6 +243,10 @@ public abstract class Statement extends JimpleAbstractDataType {
      
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+         IValue iv_min = vf.integer(min);
+       
+         IValue iv_max = vf.integer(max);
        
          IList iv_stmts = vf.list();
          
@@ -243,6 +259,10 @@ public abstract class Statement extends JimpleAbstractDataType {
        return vf.constructor(getVallangConstructor()
                 
                 , iv_immediate 
+               
+                , iv_min 
+               
+                , iv_max 
                
                 , iv_stmts 
                
@@ -433,14 +453,14 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public Expression exp;
      
-     public GotoStmt stmt;
+     public String targetStmt;
      
    
-       public c_ifStmt(Expression exp, GotoStmt stmt) {
+       public c_ifStmt(Expression exp, String targetStmt) {
         
           this.exp = exp;  
         
-          this.stmt = stmt;  
+          this.targetStmt = targetStmt;  
           
        } 
      
@@ -450,14 +470,14 @@ public abstract class Statement extends JimpleAbstractDataType {
        
          IValue iv_exp = exp.createVallangInstance(vf);
        
-         IValue iv_stmt = stmt.createVallangInstance(vf);
+         IValue iv_targetStmt = vf.string(targetStmt);
        
          
        return vf.constructor(getVallangConstructor()
                 
                 , iv_exp 
                
-                , iv_stmt 
+                , iv_targetStmt 
                
                 ); 
      }
@@ -641,6 +661,38 @@ public abstract class Statement extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "invokeStmt";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_gotoStmt extends Statement {
+     
+     public String label;
+     
+   
+       public c_gotoStmt(String label) {
+        
+          this.label = label;  
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         IValue iv_label = vf.string(label);
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_label 
+               
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "gotoStmt";
      }
    }
    
