@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import org.objectweb.asm.ClassReader;
@@ -51,7 +53,6 @@ import lang.jimple.internal.generated.ClassOrInterfaceDeclaration;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Field;
 import lang.jimple.internal.generated.FieldSignature;
-import lang.jimple.internal.generated.GotoStmt;
 import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.Immediate.c_iValue;
 import lang.jimple.internal.generated.InvokeExp;
@@ -105,7 +106,8 @@ public class Decompiler {
 			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
 		}
 	}
-
+	
+	
 	/*
 	 * an ASM class visitor that traverses a class byte code and generates a Jimple
 	 * class.
@@ -170,6 +172,7 @@ public class Decompiler {
 			List<Type> methodFormalArgs = new ArrayList<>();
 			List<Type> methodExceptions = new ArrayList<>();
 			
+			
 			for(org.objectweb.asm.Type t: org.objectweb.asm.Type.getArgumentTypes(mn.desc)) {
 				methodFormalArgs.add(type(t.getDescriptor()));
 			}
@@ -198,6 +201,7 @@ public class Decompiler {
 			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
 					
 			mn.instructions.accept(insVisitor);
+			insVisitor.clearUnusedLabelInstructions();
 			stmts = insVisitor.instructions;
 			
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses); 
@@ -272,6 +276,13 @@ public class Decompiler {
 		int locals;
 
 		List<Statement> instructions;
+		
+		// we use this set to keep track of the referenced labels.
+		// afterwards we can remove labeled instructions that are 
+		// not refered to in the bytecode. 
+		Set<String> referencedLabels = new HashSet<>();     
+					                                                 
+					
 
 		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables) {
 			super(version);
@@ -280,6 +291,11 @@ public class Decompiler {
 			auxiliarlyLocalVariables = new ArrayList<>();
 			locals = localVariables.size();
 			instructions = new ArrayList<>();
+		}
+		
+		@Override
+		public void visitLabel(Label label) {
+			instructions.add(Statement.label(label.toString()));
 		}
 
 		/*
@@ -624,6 +640,7 @@ public class Decompiler {
 				}
 				instructions.add(Statement.ifStmt(exp, label.toString()));
 			}
+			referencedLabels.add(label.toString());
 			super.visitJumpInsn(opcode, label);
 		}
 		
@@ -1162,5 +1179,25 @@ public class Decompiler {
 			}
 			aNewArrayIns(type);
 		}
+	
+		public void clearUnusedLabelInstructions() {
+			List<Statement> toRemove = new ArrayList<>();
+			
+			for(Statement s: instructions) {
+				if(s instanceof Statement.c_label) {
+					Statement.c_label labelIns = (Statement.c_label)s; 
+					if(!referencedLabels.contains(labelIns.label)) {
+						toRemove.add(labelIns);
+					}
+				}
+			}
+			
+			for(Statement s: toRemove) {
+				instructions.remove(s);
+			}
+		}
+		
 	}
+	
+	
 }
