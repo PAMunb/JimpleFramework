@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -1182,22 +1183,42 @@ public class Decompiler {
 	
 		public void clearUnusedLabelInstructions() {
 			List<Statement> toRemove = new ArrayList<>();
+			Map<String, Integer> newLabels = new HashMap<>();
 			
+			int count = 1; 
+			
+			// compute the labels that are used in jump instructions (goto / if) 
 			for(Statement s: instructions) {
 				if(s instanceof Statement.c_label) {
 					Statement.c_label labelIns = (Statement.c_label)s; 
 					if(!referencedLabels.contains(labelIns.label)) {
 						toRemove.add(labelIns);
 					}
+					else {
+						newLabels.put(labelIns.label, count);
+						labelIns.label = String.format("label%d:", count++);  // update the label to a more user friendly string
+					}
 				}
 			}
 			
+			// remove unused labels ...
 			for(Statement s: toRemove) {
 				instructions.remove(s);
+			}
+			
+			// update the references to the "user friendly" labels
+			for(Statement s: instructions) {
+				if(s instanceof Statement.c_gotoStmt) {
+					Statement.c_gotoStmt g = (Statement.c_gotoStmt)s; 
+					g.label = newLabels.containsKey(g.label) ? String.format("label%d:", newLabels.get(g.label)) : g.label;
+				}
+				else if(s instanceof Statement.c_ifStmt) {
+					Statement.c_ifStmt i = (Statement.c_ifStmt)s;
+					i.targetStmt = newLabels.containsKey(i.targetStmt) ? String.format("label%d:", newLabels.get(i.targetStmt)) : i.targetStmt;
+				}
 			}
 		}
 		
 	}
-	
 	
 }
