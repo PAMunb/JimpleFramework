@@ -82,14 +82,14 @@ data Statement
   | identity(Name local, Name identifier, Type idType)
   | identityNoType(Name local, Name identifier)
   | assign(Variable var, Expression expression)
-  | ifStmt(Expression exp, Label targetStmt)
+  | ifStmt(Expression exp, Label target)
   | retEmptyStmt()
   | retStmt(Immediate immediate)
   | returnEmptyStmt() 
   | returnStmt(Immediate immediate)
   | throwStmt(Immediate immediate)
   | invokeStmt(InvokeExp invokeExpression)
-  | gotoStmt(Label label)
+  | gotoStmt(Label target)
   | nop()
   ;        
  

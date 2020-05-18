@@ -34,7 +34,6 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.LocalVariableNode;
@@ -618,25 +617,25 @@ public class Decompiler {
 			}
 			else {
 				Expression exp = null; 
-				Immediate lhs = operandStack.pop().immediate;
-				Immediate rhs = Immediate.iValue(Value.intValue(0));
+				Immediate first = operandStack.pop().immediate;
+				Immediate second = Immediate.iValue(Value.intValue(0));
 				switch(opcode) {
-				  case Opcodes.IFEQ: exp = Expression.cmpeq(lhs, rhs); break; 
-				  case Opcodes.IFNE: exp = Expression.cmpne(lhs, rhs); break;
-				  case Opcodes.IFLT: exp = Expression.cmplt(lhs, rhs); break;
-				  case Opcodes.IFLE: exp = Expression.cmple(lhs, rhs); break;
-				  case Opcodes.IFGT: exp = Expression.cmpgt(lhs, rhs); break; 
-				  case Opcodes.IFGE: exp = Expression.cmpge(lhs, rhs); break; 
-				  case Opcodes.IF_ICMPEQ: rhs = operandStack.pop().immediate; exp = Expression.cmpeq(lhs, rhs); break; 
-				  case Opcodes.IF_ICMPNE: rhs = operandStack.pop().immediate; exp = Expression.cmpne(lhs, rhs); break;
-				  case Opcodes.IF_ICMPLT: rhs = operandStack.pop().immediate; exp = Expression.cmplt(lhs, rhs); break;
-				  case Opcodes.IF_ICMPGE: rhs = operandStack.pop().immediate; exp = Expression.cmpge(lhs, rhs); break;
-				  case Opcodes.IF_ICMPGT: rhs = operandStack.pop().immediate; exp = Expression.cmpgt(lhs, rhs); break;
-				  case Opcodes.IF_ICMPLE: rhs = operandStack.pop().immediate; exp = Expression.cmple(lhs, rhs); break;
-				  case Opcodes.IF_ACMPEQ: rhs = operandStack.pop().immediate; exp = Expression.cmpeq(lhs, rhs); break;
-				  case Opcodes.IF_ACMPNE: rhs = operandStack.pop().immediate; exp = Expression.cmpne(lhs, rhs); break;
-				  case Opcodes.IFNULL: exp = Expression.isNull(lhs); break;
-				  case Opcodes.IFNONNULL: exp = Expression.isNotNull(lhs); break;
+				  case Opcodes.IFEQ: exp = Expression.cmpeq(first, second); break; 
+				  case Opcodes.IFNE: exp = Expression.cmpne(first, second); break;
+				  case Opcodes.IFLT: exp = Expression.cmplt(first, second); break;
+				  case Opcodes.IFLE: exp = Expression.cmple(first, second); break;
+				  case Opcodes.IFGT: exp = Expression.cmpgt(first, second); break; 
+				  case Opcodes.IFGE: exp = Expression.cmpge(first, second); break; 
+				  case Opcodes.IF_ICMPEQ: second = operandStack.pop().immediate; exp = Expression.cmpeq(second, first); break; 
+				  case Opcodes.IF_ICMPNE: second = operandStack.pop().immediate; exp = Expression.cmpne(second, first); break;
+				  case Opcodes.IF_ICMPLT: second = operandStack.pop().immediate; exp = Expression.cmplt(second, first); break;
+				  case Opcodes.IF_ICMPGE: second = operandStack.pop().immediate; exp = Expression.cmpge(second, first); break;
+				  case Opcodes.IF_ICMPGT: second = operandStack.pop().immediate; exp = Expression.cmpgt(second, first); break;
+				  case Opcodes.IF_ICMPLE: second = operandStack.pop().immediate; exp = Expression.cmple(second, first); break;
+				  case Opcodes.IF_ACMPEQ: second = operandStack.pop().immediate; exp = Expression.cmpeq(second, first); break;
+				  case Opcodes.IF_ACMPNE: second = operandStack.pop().immediate; exp = Expression.cmpne(second, first); break;
+				  case Opcodes.IFNULL: exp = Expression.isNull(first); break;
+				  case Opcodes.IFNONNULL: exp = Expression.isNotNull(first); break;
 				  default: throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null, null);	
 				}
 				instructions.add(Statement.ifStmt(exp, label.toString()));
@@ -787,8 +786,8 @@ public class Decompiler {
 		 * Instructions supporting binarya operations. 
 		 */
 		private void binOperatorIns(Type type, BinExpressionFactory factory) {
-			Operand lhs = operandStack.pop();
 			Operand rhs = operandStack.pop();
+			Operand lhs = operandStack.pop();
 
 			LocalVariableDeclaration newLocal = createLocal(type);
 			
@@ -1210,11 +1209,11 @@ public class Decompiler {
 			for(Statement s: instructions) {
 				if(s instanceof Statement.c_gotoStmt) {
 					Statement.c_gotoStmt g = (Statement.c_gotoStmt)s; 
-					g.label = newLabels.containsKey(g.label) ? String.format("label%d:", newLabels.get(g.label)) : g.label;
+					g.target = newLabels.containsKey(g.target) ? String.format("label%d:", newLabels.get(g.target)) : g.target;
 				}
 				else if(s instanceof Statement.c_ifStmt) {
 					Statement.c_ifStmt i = (Statement.c_ifStmt)s;
-					i.targetStmt = newLabels.containsKey(i.targetStmt) ? String.format("label%d:", newLabels.get(i.targetStmt)) : i.targetStmt;
+					i.target = newLabels.containsKey(i.target) ? String.format("label%d:", newLabels.get(i.target)) : i.target;
 				}
 			}
 		}

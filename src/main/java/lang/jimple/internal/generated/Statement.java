@@ -56,8 +56,8 @@ public abstract class Statement extends JimpleAbstractDataType {
      return new c_assign(var, expression);
    }
    
-   public static Statement ifStmt(Expression exp, String targetStmt)  {
-     return new c_ifStmt(exp, targetStmt);
+   public static Statement ifStmt(Expression exp, String target)  {
+     return new c_ifStmt(exp, target);
    }
    
    public static Statement retEmptyStmt()  {
@@ -84,8 +84,8 @@ public abstract class Statement extends JimpleAbstractDataType {
      return new c_invokeStmt(invokeExpression);
    }
    
-   public static Statement gotoStmt(String label)  {
-     return new c_gotoStmt(label);
+   public static Statement gotoStmt(String target)  {
+     return new c_gotoStmt(target);
    }
    
    public static Statement nop()  {
@@ -453,14 +453,14 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public Expression exp;
      
-     public String targetStmt;
+     public String target;
      
    
-       public c_ifStmt(Expression exp, String targetStmt) {
+       public c_ifStmt(Expression exp, String target) {
         
           this.exp = exp;  
         
-          this.targetStmt = targetStmt;  
+          this.target = target;  
           
        } 
      
@@ -470,14 +470,14 @@ public abstract class Statement extends JimpleAbstractDataType {
        
          IValue iv_exp = exp.createVallangInstance(vf);
        
-         IValue iv_targetStmt = vf.string(targetStmt);
+         IValue iv_target = vf.string(target);
        
          
        return vf.constructor(getVallangConstructor()
                 
                 , iv_exp 
                
-                , iv_targetStmt 
+                , iv_target 
                
                 ); 
      }
@@ -667,12 +667,12 @@ public abstract class Statement extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_gotoStmt extends Statement {
      
-     public String label;
+     public String target;
      
    
-       public c_gotoStmt(String label) {
+       public c_gotoStmt(String target) {
         
-          this.label = label;  
+          this.target = target;  
           
        } 
      
@@ -680,12 +680,12 @@ public abstract class Statement extends JimpleAbstractDataType {
      public IConstructor createVallangInstance(IValueFactory vf) {
      
        
-         IValue iv_label = vf.string(label);
+         IValue iv_target = vf.string(target);
        
          
        return vf.constructor(getVallangConstructor()
                 
-                , iv_label 
+                , iv_target 
                
                 ); 
      }
