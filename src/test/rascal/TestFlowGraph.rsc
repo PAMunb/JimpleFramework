@@ -16,7 +16,11 @@ test bool testSimpleGraph() {
   
   g = forwardFlowGraph(b);
   
-  return size(g) == 4 && g == {<startNode(), stmtNode(s1)>, <stmtNode(s1), stmtNode(s2)>, <stmtNode(s2), stmtNode(s3)>, <stmtNode(s3), endNode()>}; 	
+  return size(g) == 4 && g == { <entryNode(), stmtNode(s1)>
+                              , <stmtNode(s1), stmtNode(s2)>
+                              , <stmtNode(s2), stmtNode(s3)>
+                              , <stmtNode(s3), exitNode()>
+                              }; 	
 }
 
 test bool testMapLabels() {
@@ -52,7 +56,7 @@ test bool testFactorialFlowGraph() {
   
   g = forwardFlowGraph(factorialMethodBody);
   
-  return size(g) == 9 && g == { <startNode(), stmtNode(s1)>
+  return size(g) == 9 && g == { <entryNode(), stmtNode(s1)>
                               , <stmtNode(s1), stmtNode(s3)> 
                               , <stmtNode(s3), stmtNode(s4)> 
                               , <stmtNode(s3), stmtNode(s9)>
@@ -60,6 +64,6 @@ test bool testFactorialFlowGraph() {
                               , <stmtNode(s5), stmtNode(s6)>
                               , <stmtNode(s6), stmtNode(s7)>
                               , <stmtNode(s7), stmtNode(s3)>
-                              , <stmtNode(s9), endNode()> 
+                              , <stmtNode(s9), exitNode()> 
                               }; 
 }

@@ -7,8 +7,8 @@ import lang::jimple::Syntax;
 
 alias FlowGraph = Graph[Node]; 
 
-data Node = startNode()
-          | endNode()
+data Node = entryNode()
+          | exitNode()
           | skipNode()
           | stmtNode(Statement s)
           ;
@@ -18,7 +18,7 @@ public FlowGraph empty() = {};
 public FlowGraph forwardFlowGraph(MethodBody body) {
   switch(body) {
     case signatureOnly() : return empty();
-    case methodBody(_, stmts, _): return buildGraph(mapLabels(stmts), stmts, startNode(), {}); 
+    case methodBody(_, stmts, _): return buildGraph(mapLabels(stmts), stmts, entryNode(), {}); 
   }
   
   return empty();
@@ -27,7 +27,7 @@ public FlowGraph forwardFlowGraph(MethodBody body) {
 private FlowGraph buildGraph(map[Label, Statement] labels, list[Statement] stmts, Node current, FlowGraph g) {
   FlowGraph res = empty();  
   switch(stmts) {
-    case [] : res = <current, endNode()> + g;
+    case [] : res = <current, exitNode()> + g;
     case [label(str _), *NS] : res = buildGraph(labels, [*NS], current, g);
     case [gotoStmt(str l), *NS]: { 
       newNode = stmtNode(gotoStmt(l));
