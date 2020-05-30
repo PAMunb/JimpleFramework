@@ -2,11 +2,9 @@ module lang::jimple::analysis::dataflow::ReachDefinition
 
 import lang::jimple::Syntax; 
 import lang::jimple::analysis::FlowGraph; 
-
-import IO; 
-
+ 
 alias Definition = Statement; 
-alias UseSet = set[Statement]; 
+//alias UseSet = set[Statement]; 
 alias LocalVariable = str;
 alias Abstraction = map[Node, set[Definition]];
 
@@ -21,14 +19,11 @@ public tuple[Abstraction inSet, Abstraction outSet] reachDefinition(MethodBody b
    
    map[Node, set[Definition]] outSet = (entryNode() : {}) + ( stmtNode(n) : {} | <stmtNode(n), _> <- g); 
    
-   bool fixedPoint = false; 
-   while(! fixedPoint) {
-      temp = outSet; 
+   solve(outSet) {
       for(s <- b.stmts) {
           inSet[stmtNode(s)]  = ({} | it + outSet[from] | <from, to> <- g, to := stmtNode(s)); 
   	      outSet[stmtNode(s)] = genSet[s] + (inSet[stmtNode(s)] - killSet[s]);      
       }
-      fixedPoint = temp == outSet; 
    }
    return <inSet, outSet>;
 }

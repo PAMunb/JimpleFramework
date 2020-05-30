@@ -5,6 +5,7 @@ import lang::jimple::analysis::FlowGraph;
 import lang::jimple::analysis::dataflow::ReachDefinition;
 
 import Map; 
+import IO;
 
 Statement s1 = assign(localVariable("l1"), immediate(local("l0"))); 
 Statement s2 = label("label1:"); 
@@ -26,5 +27,22 @@ test bool testLoadDefinitions() {
 
 test bool testReachDefinitions() {
   tuple[Abstraction inSet, Abstraction outSet] reachDefs = reachDefinition(b, loadDefinitions(b.stmts)); 
-  return size(reachDefs.inSet) > 1;
+  println(size(reachDefs.outSet));
+  return size(reachDefs.inSet)  == 9                     // the flow graph is discarding labels  
+      && size(reachDefs.outSet) == 10                    // 1 more due to the entryNode()
+      && reachDefs.inSet[stmtNode(s1)]  == {}
+      && reachDefs.outSet[stmtNode(s1)] == {s1}
+      && reachDefs.inSet[stmtNode(s3)] == {s1,s4,s5,s6}
+      && reachDefs.outSet[stmtNode(s3)] == {s1,s4,s5,s6}
+      && reachDefs.inSet[stmtNode(s4)]  == {s1,s4,s5,s6} 
+      && reachDefs.outSet[stmtNode(s4)] == {s1,s4,s5,s6}
+      && reachDefs.inSet[stmtNode(s5)]  == {s1,s4,s5,s6} 
+      && reachDefs.outSet[stmtNode(s5)] == {s1,s4,s5,s6}
+      && reachDefs.inSet[stmtNode(s6)]  == {s1,s4,s5,s6} 
+      && reachDefs.outSet[stmtNode(s6)] == {s4,s5,s6}
+      && reachDefs.inSet[stmtNode(s7)]  == {s4,s5,s6} 
+      && reachDefs.outSet[stmtNode(s7)] == {s4,s5,s6}
+      && reachDefs.inSet[stmtNode(s9)]  == {s1,s4,s5,s6} 
+      && reachDefs.outSet[stmtNode(s9)] == {s1,s4,s5,s6}
+      ; 
 }
