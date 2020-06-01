@@ -1,58 +1,25 @@
-module lang::jimple::analysis::dataflow::ReachDefinition
+module lang::jimple::analysis::dataflow::ReachDefinition  
 
-import lang::jimple::Syntax; 
-import lang::jimple::analysis::FlowGraph; 
- 
-alias Definition = Statement; 
-//alias UseSet = set[Statement]; 
-alias LocalVariable = str;
-alias Abstraction = map[Node, set[Definition]];
+import lang::jimple::Syntax;
+extend lang::jimple::analysis::dataflow::Framework; 
 
+@synopsis{ the set of transfer functions for reach definition analysis }  
+private TransferFunctions[Statement] tf 
+   = transfer( set[Statement] () { return bottomFunction(); }
+             , set[Definition] (Statement s) { return genFunction(s); } 
+             , set[Definition] (Statement s) { return killFunction(s); } 
+             ); 
 
-public tuple[Abstraction inSet, Abstraction outSet] reachDefinition(MethodBody b, map[LocalVariable, set[Definition]] defs) {
-   map[Statement, set[Definition]] genSet  = ( s : gen(s) | Statement s <- b.stmts); 
-   map[Statement, set[Definition]] killSet = ( s : kill(s, defs) | Statement s <- b.stmts); 
-  
-   g = forwardFlowGraph(b);
-   
-   map[Node, set[Definition]] inSet = ();
-   
-   map[Node, set[Definition]] outSet = (entryNode() : {}) + ( stmtNode(n) : {} | <stmtNode(n), _> <- g); 
-   
-   solve(outSet) {
-      for(s <- b.stmts) {
-          inSet[stmtNode(s)]  = ({} | it + outSet[from] | <from, to> <- g, to := stmtNode(s)); 
-  	      outSet[stmtNode(s)] = genSet[s] + (inSet[stmtNode(s)] - killSet[s]);      
-      }
-   }
-   return <inSet, outSet>;
-}
+@synopsis{ an instance of the dataflow framework for reach definitions }  
+public DFA[Statement] rd = dfa(Forward(), Union(), tf);
 
-@synopsis{ the gen function of reachability analysis }  
+@synopsis{ the bottom function... only returning the empty set }  
+private set[Statement] bottomFunction() = {};
 
-set[Definition] gen(assign(localVariable(v), e)) = {assign(localVariable(v), e)}; 
-set[Definition] gen(_) = {};    
+@synopsis{ the gen function for reach definition analysis }  
+private set[Definition] genFunction(assign(localVariable(v), e)) = {assign(localVariable(v), e)}; 
+private set[Definition] genFunction(_) = {};    
 
-@synopsis{ the kill function of reachability analysis }  
-
-set[Definition] kill(assign(localVariable(v), _), map[LocalVariable, set[Definition]] defs) = defs[v]; 
-set[Definition] kill(_, map[LocalVariable, set[Definition]] defs) = {}; 
-
- 
-@synopsis{recovers the local definitions of each variable.}  
-
-map[LocalVariable, set[Definition]] loadDefinitions([]) = (); 
-
-map[LocalVariable, set[Definition]] loadDefinitions([assign(localVariable(v), e), *Statement SS]) = defs + (v : (assign(localVariable(v), e) + defs[v]))
-  when defs := loadDefinitions(SS)
-     , v in defs
-     ;
-
-map[LocalVariable, set[Definition]] loadDefinitions([assign(localVariable(v), e), *Statement SS]) = defs + (v : { (assign(localVariable(v), e)) } )
-  when defs := loadDefinitions(SS)
-     , v notin defs
-     ; 
-           
-map[LocalVariable, set[Definition]] loadDefinitions([_, *Statement SS]) = defs
-   when defs := loadDefinitions(SS)
-      ;
+@synopsis{ the kill function for reach definition analysis }  
+private set[Definition] killFunction(assign(localVariable(v), _)) = localDefs[v]; 
+private set[Definition] killFunction(_) = {}; 

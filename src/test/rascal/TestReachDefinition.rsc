@@ -3,7 +3,7 @@ module TestReachDefinition
 import lang::jimple::Syntax;
 import lang::jimple::analysis::FlowGraph;
 import lang::jimple::analysis::dataflow::Framework; 
-import lang::jimple::analysis::dataflow::RD; 
+import lang::jimple::analysis::dataflow::ReachDefinition; 
 
 import Map; 
 
