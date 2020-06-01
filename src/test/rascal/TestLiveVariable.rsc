@@ -25,7 +25,7 @@ MethodBody b = methodBody([], ss, []);
 
 test bool testReachDefinitions() {
   // tuple[Abstraction inSet, Abstraction outSet] reachDefs = reachDefinition(b, loadDefinitions(b.stmts)); 
-  tuple[map[Node, set[LocalVariable]] inSet, map[Node, set[LocalVariable]] outSet] lvs = run(lv, b);
+  tuple[map[Node, set[LocalVariable]] inSet, map[Node, set[LocalVariable]] outSet] lvs = execute(lv, b);
   return lvs.outSet[stmtNode(s9)] == { }
       && lvs.inSet[stmtNode(s9)]  == {"l1"}  
       && lvs.outSet[stmtNode(s7)] == {"l1", "l0"}

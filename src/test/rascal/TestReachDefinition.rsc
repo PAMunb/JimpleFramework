@@ -27,7 +27,7 @@ MethodBody b = methodBody([], ss, []);
 
 test bool testReachDefinitions() {
   // tuple[Abstraction inSet, Abstraction outSet] reachDefs = reachDefinition(b, loadDefinitions(b.stmts)); 
-  tuple[map[Node, set[Statement]] inSet, map[Node, set[Statement]] outSet] reachDefs = run(rd, b);
+  tuple[map[Node, set[Statement]] inSet, map[Node, set[Statement]] outSet] reachDefs = execute(rd, b);
   return size(reachDefs.inSet)  == 9                     // the current flow graph impl is discarding labels  
       && size(reachDefs.outSet) == 10                    // 1 more due to the entryNode()
       && reachDefs.inSet[stmtNode(s1)]  == {}
