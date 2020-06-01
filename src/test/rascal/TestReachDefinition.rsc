@@ -2,10 +2,10 @@ module TestReachDefinition
 
 import lang::jimple::Syntax;
 import lang::jimple::analysis::FlowGraph;
-import lang::jimple::analysis::dataflow::ReachDefinition;
+import lang::jimple::analysis::dataflow::Framework; 
+import lang::jimple::analysis::dataflow::RD; 
 
 import Map; 
-import IO;
 
 Statement s1 = assign(localVariable("l1"), immediate(local("l0"))); 
 Statement s2 = label("label1:"); 
@@ -21,14 +21,14 @@ list[Statement] ss = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
   
 MethodBody b = methodBody([], ss, []);
 
-test bool testLoadDefinitions() {
-  return loadDefinitions(b.stmts) == ("l1" : {s1, s6}, "l0" : {s4}, "l2" : {s5}); 
-}
+//test bool testLoadDefinitions() {
+//  return loadDefinitions(b.stmts) == ("l1" : {s1, s6}, "l0" : {s4}, "l2" : {s5}); 
+//}
 
 test bool testReachDefinitions() {
-  tuple[Abstraction inSet, Abstraction outSet] reachDefs = reachDefinition(b, loadDefinitions(b.stmts)); 
-  println(size(reachDefs.outSet));
-  return size(reachDefs.inSet)  == 9                     // the flow graph is discarding labels  
+  // tuple[Abstraction inSet, Abstraction outSet] reachDefs = reachDefinition(b, loadDefinitions(b.stmts)); 
+  tuple[map[Node, set[Statement]] inSet, map[Node, set[Statement]] outSet] reachDefs = run(rd, b);
+  return size(reachDefs.inSet)  == 9                     // the current flow graph impl is discarding labels  
       && size(reachDefs.outSet) == 10                    // 1 more due to the entryNode()
       && reachDefs.inSet[stmtNode(s1)]  == {}
       && reachDefs.outSet[stmtNode(s1)] == {s1}

@@ -1,8 +1,10 @@
 module lang::jimple::analysis::FlowGraph
 
-import analysis::graphs::Graph;
 
 import lang::jimple::Syntax;
+
+import Relation;
+import analysis::graphs::Graph;
 
 
 alias FlowGraph = Graph[Node]; 
@@ -17,12 +19,12 @@ public FlowGraph empty() = {};
 
 public FlowGraph forwardFlowGraph(MethodBody body) {
   switch(body) {
-    case signatureOnly() : return empty();
     case methodBody(_, stmts, _): return buildGraph(mapLabels(stmts), stmts, entryNode(), {}); 
   }
-  
   return empty();
 }
+
+public FlowGraph backwardFlowGraph(MethodBody body) = invert(forwardFlowGraph(body));
 
 private FlowGraph buildGraph(map[Label, Statement] labels, list[Statement] stmts, Node current, FlowGraph g) {
   FlowGraph res = empty();  
