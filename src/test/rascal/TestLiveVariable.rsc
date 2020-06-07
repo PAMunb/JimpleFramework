@@ -5,9 +5,6 @@ import lang::jimple::analysis::FlowGraph;
 import lang::jimple::analysis::dataflow::Framework; 
 import lang::jimple::analysis::dataflow::LiveVariable; 
 
-import Map; 
-import IO;
-
 Statement s1 = assign(localVariable("l1"), immediate(local("l0"))); 
 Statement s2 = label("label1:"); 
 Statement s3 = ifStmt(cmple(local("l0"), iValue(intValue(0))), "label2:");
