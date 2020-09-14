@@ -9,41 +9,24 @@ test bool testDominanceFrontier() {
 	
 	Statement s2 = ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:");
 	Statement s3 = assign(localVariable("v1"), immediate(iValue(intValue(1)))); 
-	Statement s4 = gotoStmt("label2:");
+	Statement s4 = gotoStmt("print");
 	
 	Statement s5 = label("label1:");
   	Statement s6 = assign(localVariable("v1"), immediate(iValue(intValue(2)))); 
-  	Statement s7 = gotoStmt("label2:");
+  	Statement s7 = gotoStmt("print");
   	
-  	Statement s8 = label("label2:");
-  	Statement s9 = label("print");
-  
-  	Statement s10 = returnStmt(local("v2"));  
+  	Statement s8 = label("print");  
+  	Statement s9 = returnStmt(local("v2"));  
 
-	list[Statement] stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10]; 
+	list[Statement] stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9]; 
   
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	
   	result = createDominanceFrontier(flowGraph);
-  	
-  	/*
-  	result = createDominanceSet(flowGraph);
-  
-  
-  	map[Node, set[Node]] expectation = (
-		entryNode(): {entryNode()},
-		stmtNode(s1): {entryNode(), stmtNode(s1)},
-		stmtNode(s2): {entryNode(), stmtNode(s1), stmtNode(s2)},
-		stmtNode(s3): {entryNode(), stmtNode(s1), stmtNode(s2), stmtNode(s3)},
-		stmtNode(s4): {entryNode(), stmtNode(s1), stmtNode(s2), stmtNode(s3), stmtNode(s4)},
-		stmtNode(s6): {entryNode(), stmtNode(s1), stmtNode(s2), stmtNode(s6)},
-		stmtNode(s9): {entryNode(), stmtNode(s1), stmtNode(s2), stmtNode(s6), stmtNode(s9)}
+	
+	return result == (
+		stmtNode(s3): {stmtNode(gotoStmt("print"))},
+		stmtNode(s6): {stmtNode(gotoStmt("print"))}
 	);
-  
-	return createDominanceSet(flowGraph) == expectation; 
-	
-	*/
-	
-	return true;
 }
