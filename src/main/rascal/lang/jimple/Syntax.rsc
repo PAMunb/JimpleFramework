@@ -25,6 +25,7 @@ data Value
 data Immediate 
  = local(String localName) 
  | iValue(Value v) 
+ | caughtException()
  ; 
  
 public data ClassOrInterfaceDeclaration 

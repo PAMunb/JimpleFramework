@@ -27,6 +27,10 @@ public abstract class Immediate extends JimpleAbstractDataType {
    public static Immediate iValue(Value v)  {
      return new c_iValue(v);
    }
+   
+   public static Immediate caughtException()  {
+     return new c_caughtException();
+   }
     
 
    
@@ -91,6 +95,30 @@ public abstract class Immediate extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "iValue";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_caughtException extends Immediate {
+     
+   
+       public c_caughtException() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "caughtException";
      }
    }
     

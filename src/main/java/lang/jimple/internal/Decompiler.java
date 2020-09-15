@@ -198,7 +198,7 @@ public class Decompiler {
 			}
 			
 			//TODO: uncomment the following lines to decompile the instructions. 
-			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables);
+			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables, catchClauses);
 					
 			mn.instructions.accept(insVisitor);
 			insVisitor.clearUnusedLabelInstructions();
@@ -282,20 +282,27 @@ public class Decompiler {
 		// not refered to in the bytecode. 
 		Set<String> referencedLabels = new HashSet<>();     
 					                                                 
-					
+		HashMap<String, CatchClause> catchClauses = new HashMap<>();			
 
-		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables) {
+		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
 			super(version);
 			this.localVariables = localVariables;
 			operandStack = new Stack<>();
 			auxiliarlyLocalVariables = new ArrayList<>();
 			locals = localVariables.size();
 			instructions = new ArrayList<>();
+			
+			catchClauses.forEach(c -> this.catchClauses.put(c.with, c));
 		}
 		
 		@Override
 		public void visitLabel(Label label) {
 			instructions.add(Statement.label(label.toString()));
+			if(catchClauses.containsKey(label.toString())) {
+				CatchClause c = catchClauses.get(label.toString());
+				operandStack.push(new Operand(c.exception, Immediate.caughtException()));
+				referencedLabels.add(label.toString());
+			}
 		}
 
 		/*
