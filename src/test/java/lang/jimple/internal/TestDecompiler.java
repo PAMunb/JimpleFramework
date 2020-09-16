@@ -60,6 +60,7 @@ public class TestDecompiler {
 			Decompiler decompiler = new Decompiler(vf);
 			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
 			
+			
 			assertNotNull(c);
 		}
 		catch(Exception e) {
@@ -67,5 +68,25 @@ public class TestDecompiler {
 			fail(e.getLocalizedMessage());
 		}
 	}
+	
+	@Test 
+	public void decompileSlf4JMDCClass() {
+		try {
+			File classFile = new File("./target/test-classes/slf4j/org/slf4j/MDC.class"); 
+			assertNotNull(classFile);
+			
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			
+			assertNotNull(c);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+	
+	
 
 }
