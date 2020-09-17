@@ -51,11 +51,19 @@ public ClassDecompiler safeDecompile(loc classFile) {
 data Analysis[&T] = Analysis(&T (ExecutionContext) run);  
                   
 
-public &T execute(list[str] classPath, list[str] entryPoints, Analysis[&T] analysis) {
-	locations = mapper(classPath, toLocation); 
-	return execute(locations, entryPoints, analysis); 
-}
 
+/*
+ * This is our current execution framework. 
+ *
+ * It first decompiles all classes in the <code>classPath</code>, 
+ * and builds a class and method tables. We set all methods whose signature 
+ * are in the <code>entryPoints</code> as being an "entry point" of 
+ * the analysis. Finally, it executes the analysis considering the resulting 
+ * execution context. 
+ * 
+ * TODO: we should compute the signature of the method before checking if it is 
+ * in the <code>entryPoints</code>. 
+ */ 
 public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis) {
 	list[ClassDecompiler] classes = loadClasses(classPath);
 	
@@ -66,9 +74,18 @@ public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analy
 	return analysis.run(ExecutionContext(ct, mt));
 } 
 
+/* Instead of using a list of locations, the execute function 
+ * also works when we define the <code>classPath</code>
+ * as a list of strings.  
+ */
+public &T execute(list[str] classPath, list[str] entryPoints, Analysis[&T] analysis) {
+	locations = mapper(classPath, toLocation); 
+	return execute(locations, entryPoints, analysis); 
+}
+
+/* some auxiliarly functions to load all classes on a given class path */ 
 public list[ClassDecompiler] loadClasses([]) = [];
-public list[ClassDecompiler] loadClasses([c, *cs]) 
-  = mapper(findClassFiles(c), safeDecompile) + loadClasses(cs); 
+public list[ClassDecompiler] loadClasses([c, *cs]) = mapper(findClassFiles(c), safeDecompile) + loadClasses(cs); 
 
 public list[loc] findClassFiles(str classPathEntry) = findAllFiles(toLocation(classPathEntry), "class");
 public list[loc] findClassFiles(loc location) = findAllFiles(location, "class");
