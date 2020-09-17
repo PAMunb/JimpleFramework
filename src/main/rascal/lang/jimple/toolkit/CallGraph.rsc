@@ -5,7 +5,6 @@ import lang::jimple::Syntax;
 
 import List; 
 import Map; 
-import IO; 
 
 alias MethodMap = map[str, str]; 
 
@@ -58,5 +57,4 @@ CGModel computeCallGraph(TObject(cn), [method(_, _, mn, args, _, body), *ms], CG
 }
 
 str methodSignature(methodSignature(cn, _, mn, args)) = methodSignature(cn, mn, args); 
-
 str methodSignature(Name cn, Name mn, args) =  "<cn>.<mn>(<intercalate(",", args)>)";
