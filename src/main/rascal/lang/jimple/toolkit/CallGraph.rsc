@@ -25,8 +25,7 @@ CGModel computeCallGraph(ExecutionContext ctx) {
    }  
    
    for(c <- methods) {
-     println("goo");
-   	 cg = computeCallGraph(c, methods[c], cg);
+     cg = computeCallGraph(c, methods[c], cg);
    }  	
    	
    return cg;
