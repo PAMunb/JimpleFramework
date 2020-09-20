@@ -6,6 +6,11 @@ import lang::jimple::Syntax;
 import List; 
 import Map; 
 
+/* ISSUES:
+ * - #3: A new call graph analysis that starts from the entry points.
+ *
+ */
+
 /* 
  * a map from method signatures 
  * to simple names (e.g., M1, M2, ...)
