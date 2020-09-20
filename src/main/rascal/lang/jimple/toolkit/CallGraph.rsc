@@ -6,6 +6,8 @@ import lang::jimple::Syntax;
 import List; 
 import Map; 
 
+import String;
+
 /* ISSUES:
  * - #3: A new call graph analysis that starts from the entry points.
  *
@@ -26,7 +28,7 @@ alias MethodMap = map[str, str];
  * This is the Rascal's approach for modelling 
  * graphs.  
  */ 
-alias CG = rel[str, str];
+alias CG = rel[str from, str to];
 
 /* 
  * The CGModel (call-graph model) is an algebraic 
@@ -90,5 +92,6 @@ CGModel computeCallGraph(TObject(cn), [method(_, _, mn, args, _, body), *ms], CG
   return computeCallGraph(TObject(cn), ms, CGModel(cg, mm)); 
 }
 
+//TODO: move methods
 str methodSignature(methodSignature(cn, _, mn, args)) = methodSignature(cn, mn, args); 
-str methodSignature(Name cn, Name mn, args) =  "<cn>.<mn>(<intercalate(",", args)>)";
+str methodSignature(Name cn, Name mn, args) =  "<replaceAll(cn, "/", ".")>.<mn>(<intercalate(",", args)>)";
