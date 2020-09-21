@@ -27,12 +27,14 @@ public void main(){
 
     //files = [|project://JimpleFramework/src/test/resources/|];
     files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
-    es = ["execute"];//"samples.TestCallGraph.execute()":
+    es = ["A"];//"samples.TestCallGraph.execute()":
     
-    CGModel model = execute(files, es, Analysis(computeCallGraph));
-    //CGModel model = execute(files, es, Analysis(novo));
-    //println(model.cg);
+    //CGModel model = execute(files, es, Analysis(computeCallGraph));
+    CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
+    println(model.cg);
     
+    
+    /*
     CG cg = model.cg;
     mm = invert(model.methodMap);
     println("\n\n");
@@ -67,6 +69,10 @@ public void main(){
     //TODO: alterar CallGraph.rsc --> alias CG = rel[str from, str to];
     edges = [edge(c.from,c.to) | c <- cg];    
     render(graph(nodes, edges, hint("layered"), std(size(20)), gap(10)));
+    */
+    
+    
+    
    
     
     //http://tutor.rascal-mpl.org/Recipes/Recipes.html#/Recipes/Common/CallLifting/CallLifting.html

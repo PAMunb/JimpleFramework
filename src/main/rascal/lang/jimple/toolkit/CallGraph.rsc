@@ -7,6 +7,7 @@ import List;
 import Map; 
 
 import String;
+import IO;
 
 /* ISSUES:
  * - #3: A new call graph analysis that starts from the entry points.
@@ -60,6 +61,65 @@ CGModel computeCallGraph(ExecutionContext ctx) {
    }  	
    
    return cg;
+}
+
+CGModel computeCallGraphNovo(ExecutionContext ctx) {
+   cg = emptyModel; 
+   
+   list[MethodSignature] methods = []; 
+   
+   top-down visit(ctx) {
+     case classDecl(TObject(cn), _, _, _, _, mss): {
+            //methods[n] = mss; 
+            methods = methods + [methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx];
+            //TODO methods = methods + [methodSignature(cn, r, n, f), method(m,r,n,f,e,b) in mss | /Method(method(m,r,n,f,e,b),true) <- ctx];
+            //println("========= "); println([methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx]);            
+            //println("====");//println({name | method(_,_,name,_,_,_) <- mss });
+            //println({name | method(_,_,name,_,_,_) <- mss });
+            //println("****");println(ctx.mt["A"]);
+            //funciona !!!!!!!!!!!!!!!!
+            //println("&&&&&");println([m | /Method(m,true) <- ctx]);
+            //aaa = [method | \Method(mss, true)];
+            //println(aaa);
+        }
+    //case Method(method(_, _, n, _, _, _),true): {
+    //    print("...............");println(n);
+    //    }
+   }  
+   
+   for(m <- methods) {
+     cg = computeCallGraphNovo(m, cg, ctx);
+   }  	
+   
+   return cg;
+}
+
+CGModel computeCallGraphNovo(_, CGModel model, _) = model;
+CGModel computeCallGraphNovo(methodSignature(cn, r, mn, args), CGModel model, ExecutionContext ctx) {
+	println("\n\ncomputeCallGraphNovo ....");
+	print("\tmethod=");println(mn);
+  mm = model.methodMap; 
+  cg = model.cg; 
+  
+  str sig1 = methodSignature(cn, mn, args);
+  
+  if(! (sig1 in mm)) {
+  	mm[sig1] = "M" + "<size(mm) + 1>"; 
+  }
+  
+  
+  innermost visit(ctx.mt[mn].method.body) {
+    case virtualInvoke(_, sig, _): {
+      sig2 = methodSignature(sig); 
+      if(! (sig2 in mm)) {
+        mm[sig2] = "M" + "<size(mm) + 1>"; 
+      }
+      cg = cg + <mm[sig1], mm[sig2]>;   
+      return computeCallGraphNovo(sig, CGModel(cg, mm), ctx);   
+    } 
+  }
+  
+  return CGModel(cg, mm); 
 }
 
 /* 
