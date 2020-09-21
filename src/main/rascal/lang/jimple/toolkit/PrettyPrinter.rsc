@@ -2,7 +2,8 @@ module lang::jimple::toolkit::PrettyPrinter
 
 import lang::jimple::Syntax;
 import lang::jimple::core::Context; 
-
+import List;
+import IO;
 
 /* 
 	Modifiers 
@@ -37,18 +38,38 @@ str prettyPrint(Type::TVoid()) = "void";
 
 /* 
 	Functions for printing ClassOrInterfaceDeclaration and its
-	related uper parts.
+	related upper parts.
 */
-public str prettyPrint(ClassOrInterfaceDeclaration unit) {
-  switch(unit) {
-    case classDecl(_,_,_,_,_,_)       : return "class"; 
-    case interfaceDecl(_,_,_,_,_) : return "interface";
-    default: return "error";
-  }   
-}
-
 public str prettyPrint(list[Modifier] modifiers) =
  "<for(ms<-modifiers){><prettyPrint(ms)> <}>";
 
 public str prettyPrint(list[Type] interfaces) =
  "<for(ins<-interfaces){><prettyPrint(ins)> <}>";
+
+public str prettyPrint(ClassOrInterfaceDeclaration unit) {
+  switch(unit) {
+    case classDecl(n,ms,super,infs,_,_): 
+    	return 
+			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> 
+			<if(size(infs) != 0){> implements <prettyPrint(infs)><}>
+			'{
+			'}
+			";    	 
+    case interfaceDecl(n,ms,infs,_,_):
+    	return
+			"<prettyPrint(ms)> interface <prettyPrint(n)> extends <prettyPrint(infs)>
+			'{
+			'}
+			";    	 
+    default: return "error";
+  }   
+}
+
+/*
+	Class or interface format:
+		modifiers "class" typeName "extends" superClass  | "implements" interfaces | { }
+		modifiers "interface" typeName "extends" superClass { }	
+	Example code:
+		rascal>ClassOrInterfaceDeclaration x = classDecl(TObject("samples.Test"), [Public()], TObject("java.util.List"), [], [], []);
+		rascal>prettyPrint(x);
+*/
