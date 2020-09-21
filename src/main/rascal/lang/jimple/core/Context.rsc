@@ -15,6 +15,8 @@ import io::IOUtil;
 
 import List; 
 import String; 
+import IO;
+
 
 data ClassType = ApplicationClass()
                | LibraryClass()
@@ -32,6 +34,7 @@ data ExecutionContext = ExecutionContext(ClassTable ct, MethodTable mt);
 
 data ClassDecompiler  = Success(ClassOrInterfaceDeclaration) 
                       | Error(str message); 
+
                       
 public ClassDecompiler safeDecompile(loc classFile) {
   try 
@@ -49,29 +52,56 @@ public ClassDecompiler safeDecompile(loc classFile) {
  * value of type T.  
  */ 
 data Analysis[&T] = Analysis(&T (ExecutionContext) run);  
-                  
+       
+/*
+ * Create an ExecutionContext.
+ *
+ * It decompiles all classes in the <code>classPath</code>, 
+ * and builds a class and method tables. We set all methods whose signature 
+ * are in the <code>entryPoints</code> as being an "entry point" of 
+ * the analysis. 
+ *
+ * TODO: we should compute the signature of the method before checking if it is 
+ * in the <code>entryPoints</code>. 
+ */              
+public ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints) {	
+	return createExecutionContext(classPath, entryPoints, true);
+} 
 
+public ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool printErrors) {
+	list[ClassDecompiler] classes = loadClasses(classPath);
+	
+	if (printErrors) {		
+		errors = [err | Error(err) <- classes];
+		for(err <- errors){
+			println(err);
+		}
+	}
+	
+	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
+	
+	MethodTable mt = ();
+		
+	top-down visit(ct) {
+    	case classDecl(TObject(cn), _, _, _, _, mss): {            
+            mt = mt + (methodSignature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), methodSignature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- mss);    
+        }    
+   	}  
+		
+	return ExecutionContext(ct, mt);
+}
 
 /*
  * This is our current execution framework. 
  *
- * It first decompiles all classes in the <code>classPath</code>, 
- * and builds a class and method tables. We set all methods whose signature 
- * are in the <code>entryPoints</code> as being an "entry point" of 
- * the analysis. Finally, it executes the analysis considering the resulting 
- * execution context. 
+ * It first creates an ExecutionContext. Then, it executes the analysis 
+ * considering the resulting execution context. 
  * 
- * TODO: we should compute the signature of the method before checking if it is 
- * in the <code>entryPoints</code>. 
  */ 
 public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis) {
-	list[ClassDecompiler] classes = loadClasses(classPath);
-	
-	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
-	
-	MethodTable mt =  (n : Method(method(ms, r, n, args, es, b), n in entryPoints) | /method(ms, r, n, args, es, b) <- classes);
+	ExecutionContext ctx = createExecutionContext(classPath, entryPoints);
 		
-	return analysis.run(ExecutionContext(ct, mt));
+	return analysis.run(ctx);
 } 
 
 /* Instead of using a list of locations, the execute function 
@@ -91,6 +121,9 @@ public list[loc] findClassFiles(str classPathEntry) = findAllFiles(toLocation(cl
 public list[loc] findClassFiles(loc location) = findAllFiles(location, "class");
 
 public loc toLocation(str c) { 
-  if(endsWith(c, ".jar")) return |jar:///| + c + "!" ; 
-  else return |file:///| + c;
+  	if(endsWith(c, ".jar")) return |jar:///| + c + "!" ; 
+  	else return |file:///| + c;
 }
+
+public str methodSignature(methodSignature(cn, _, mn, args)) = methodSignature(cn, mn, args); 
+public str methodSignature(Name cn, Name mn, args) =  "<replaceAll(cn, "/", ".")>.<mn>(<intercalate(",", args)>)";
