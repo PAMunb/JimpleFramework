@@ -40,6 +40,80 @@ data CGModel = CGModel(CG cg, MethodMap methodMap);
 /* the empty call graph model */ 
 CGModel emptyModel = CGModel({}, ()); 
 
+
+
+CGModel computeCallGraph(ExecutionContext ctx) {
+  	list[MethodSignature] methods = []; 
+   
+   	top-down visit(ctx) {
+     	case classDecl(TObject(cn), _, _, _, _, mss): {
+     		for(method(_,r,mn,args,_,_) <- mss){
+            	methods = methods + methodSignature(cn, r, mn, args);                     
+            }   
+     	} 
+   	}  	
+   
+   return computeCallGraphNovo(ctx, methods);
+}
+
+//TODO review
+CGModel computeCallGraphNovo(ExecutionContext ctx) {   
+   	list[MethodSignature] methods = []; 
+   
+	top-down visit(ctx) {
+     	case classDecl(TObject(cn), _, _, _, _, mss): {
+            //methods = methods + [methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx];
+            //methods = methods + [methodSignature(cn, r, n, f) | /Method(method(m,r,n,f,e,b),true) <- ctx, method(m,r,n,f,e,b) in mss];
+         	for(method(_,r,mn,args,_,_) <- mss){
+            	sig = methodSignature(cn, mn, args);            	
+            	if(ctx.mt[sig].entryPoint){
+            		methods = methods + methodSignature(cn, r, mn, args);
+            	}            	
+            }             
+      	}
+  	}  
+   
+  	return computeCallGraphNovo(ctx, methods);
+}
+
+CGModel computeCallGraphNovo(ExecutionContext ctx, list[MethodSignature] methods) {
+   	cg = emptyModel;        
+  	return computeCallGraph(methods, cg, ctx);
+}
+
+CGModel computeCallGraph([], CGModel model, _) = model;
+CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, ExecutionContext ctx) {
+	MethodSignature method = head(methods);
+	//println("\n\ncomputeCallGrapha .... <method>");	
+  	mm = model.methodMap; 
+  	cg = model.cg; 
+  
+  	str sig1 = methodSignature(method.className, method.methodName, method.formals);  
+  	//print("\tsig1=");println(sig1);
+  	if(! (sig1 in mm)) {
+  		mm[sig1] = "M" + "<size(mm) + 1>"; 
+  	}
+    
+  	top-down visit(ctx.mt[sig1].method.body) {
+    	case virtualInvoke(_, methodSignature(cn, r, mn, args), _): {
+      		sig2 = methodSignature(cn,mn,args); 
+      		//print("\t\tsig2="+sig2);
+      		if(! (sig2 in mm)) {
+        		mm[sig2] = "M" + "<size(mm) + 1>"; 
+      		}
+      		cg = cg + <mm[sig1], mm[sig2]>;   
+      		methods = methods + methodSignature(replaceAll(cn, "/", "."), r, mn, args);
+    	} 
+  	}
+  	
+  	return computeCallGraph(tail(methods), CGModel(cg, mm), ctx);
+}
+
+
+
+
+
+/////////////////////////////////// ORIGINAL
 /* Computes a "full" call graph from an 
  * execution context. A better approach 
  * is to build a call graph starting from 
@@ -47,7 +121,7 @@ CGModel emptyModel = CGModel({}, ());
  *
  * Let's fix this implementation latter. 
  */ 
-CGModel computeCallGraph(ExecutionContext ctx) {
+CGModel computeCallGraphOriginal(ExecutionContext ctx) {
    cg = emptyModel; 
    
    map[Type, list[Method]] methods = (); 
@@ -62,66 +136,6 @@ CGModel computeCallGraph(ExecutionContext ctx) {
    
    return cg;
 }
-
-CGModel computeCallGraphNovo(ExecutionContext ctx) {
-   cg = emptyModel; 
-   
-   list[MethodSignature] methods = []; 
-   
-   top-down visit(ctx) {
-     case classDecl(TObject(cn), _, _, _, _, mss): {
-            //methods[n] = mss; 
-            methods = methods + [methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx];
-            //TODO methods = methods + [methodSignature(cn, r, n, f), method(m,r,n,f,e,b) in mss | /Method(method(m,r,n,f,e,b),true) <- ctx];
-            //println("========= "); println([methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx]);            
-            //println("====");//println({name | method(_,_,name,_,_,_) <- mss });
-            //println({name | method(_,_,name,_,_,_) <- mss });
-            //println("****");println(ctx.mt["A"]);
-            //funciona !!!!!!!!!!!!!!!!
-            //println("&&&&&");println([m | /Method(m,true) <- ctx]);
-            //aaa = [method | \Method(mss, true)];
-            //println(aaa);
-        }
-    //case Method(method(_, _, n, _, _, _),true): {
-    //    print("...............");println(n);
-    //    }
-   }  
-   
-   for(m <- methods) {
-     cg = computeCallGraphNovo(m, cg, ctx);
-   }  	
-   
-   return cg;
-}
-
-CGModel computeCallGraphNovo(_, CGModel model, _) = model;
-CGModel computeCallGraphNovo(methodSignature(cn, r, mn, args), CGModel model, ExecutionContext ctx) {
-	println("\n\ncomputeCallGraphNovo ....");
-	print("\tmethod=");println(mn);
-  mm = model.methodMap; 
-  cg = model.cg; 
-  
-  str sig1 = methodSignature(cn, mn, args);
-  
-  if(! (sig1 in mm)) {
-  	mm[sig1] = "M" + "<size(mm) + 1>"; 
-  }
-  
-  
-  innermost visit(ctx.mt[mn].method.body) {
-    case virtualInvoke(_, sig, _): {
-      sig2 = methodSignature(sig); 
-      if(! (sig2 in mm)) {
-        mm[sig2] = "M" + "<size(mm) + 1>"; 
-      }
-      cg = cg + <mm[sig1], mm[sig2]>;   
-      return computeCallGraphNovo(sig, CGModel(cg, mm), ctx);   
-    } 
-  }
-  
-  return CGModel(cg, mm); 
-}
-
 /* 
  * Computes the call graph for a specific class, 
  * given its list of methods. This is a recursive 
@@ -151,7 +165,3 @@ CGModel computeCallGraph(TObject(cn), [method(_, _, mn, args, _, body), *ms], CG
   
   return computeCallGraph(TObject(cn), ms, CGModel(cg, mm)); 
 }
-
-//TODO: move methods
-str methodSignature(methodSignature(cn, _, mn, args)) = methodSignature(cn, mn, args); 
-str methodSignature(Name cn, Name mn, args) =  "<replaceAll(cn, "/", ".")>.<mn>(<intercalate(",", args)>)";

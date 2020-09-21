@@ -15,26 +15,35 @@ import analysis::graphs::Graph;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 
-/*
+
 public void novo(){
     files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
-    es = ["execute"];//"samples.TestCallGraph.execute()":
+    es = ["samples.TestCallGraph.execute()"];
 
     ExecutionContext ctx =  createExecutionContext(files,es);
-}*/
+    println(ctx.mt);
+    
+    println("\nInformed Entry Points: ");
+    //println([m | /Method(m,true) <- ctx]);
+    //TODO como fazer isso com comprehension???
+    for(m <- ctx.mt){
+    	if(ctx.mt[m].entryPoint){
+    		println(m);
+    	}
+    }
+}
 
 public void main(){
 
     //files = [|project://JimpleFramework/src/test/resources/|];
     files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
-    es = ["A"];//"samples.TestCallGraph.execute()":
+    es = ["samples.TestCallGraph.A()"];
+    //es = ["samples.TestCallGraph.B()","samples.TestCallGraph.C()"];
     
     //CGModel model = execute(files, es, Analysis(computeCallGraph));
     CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
-    println(model.cg);
+    //println(model.cg);        
     
-    
-    /*
     CG cg = model.cg;
     mm = invert(model.methodMap);
     println("\n\n");
@@ -63,13 +72,13 @@ public void main(){
     connections = connectedComponents(cg);
     println("\nConnected Components: "+toString(connections));
     
+    // draw the call graph
     procsList = toList(procs);
     //nodes = toList({box(text(name), id(name), size(50), fillColor("lightgreen")) | name <- procsList});    
     nodes = toList({box(text(name), id(nn), size(50), fillColor("lightgreen")) | nn <- procsList, name <- mm[nn]});
-    //TODO: alterar CallGraph.rsc --> alias CG = rel[str from, str to];
     edges = [edge(c.from,c.to) | c <- cg];    
     render(graph(nodes, edges, hint("layered"), std(size(20)), gap(10)));
-    */
+    
     
     
     
