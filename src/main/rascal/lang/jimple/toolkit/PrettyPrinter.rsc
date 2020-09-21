@@ -40,11 +40,30 @@ str prettyPrint(Type::TVoid()) = "void";
 	Functions for printing ClassOrInterfaceDeclaration and its
 	related upper parts.
 */
-public str prettyPrint(list[Modifier] modifiers) =
- "<for(ms<-modifiers){><prettyPrint(ms)> <}>";
+public str prettyPrint(list[Modifier] modifiers) {
+  str text = "";
+  switch(modifiers) {
+    case [] :  text = ""; 
+    case [v] : text = prettyPrint(v); 
+    case [v, *vs] : text = prettyPrint(v) + " " + prettyPrint(vs);
+  }
+  return text;
+}
 
+public str prettyPrint(list[Type] interfaces) {
+  str text = "";
+  switch(interfaces) {
+    case [] :  text = ""; 
+    case [v] : text = prettyPrint(v); 
+    case [v, *vs] : text = prettyPrint(v) + " " + prettyPrint(vs);
+  }
+  return text;
+}
+
+/*
 public str prettyPrint(list[Type] interfaces) =
  "<for(ins<-interfaces){><prettyPrint(ins)> <}>";
+*/
 
 public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
