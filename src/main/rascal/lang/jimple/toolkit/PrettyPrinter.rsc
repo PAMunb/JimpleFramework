@@ -54,8 +54,8 @@ public str prettyPrint(list[Type] interfaces) {
   str text = "";
   switch(interfaces) {
     case [] :  text = ""; 
-    case [v] : text = prettyPrint(v); 
-    case [v, *vs] : text = prettyPrint(v) + " " + prettyPrint(vs);
+    case [v] : text = "implements " + prettyPrint(v); 
+    case [v, *vs] : text = "implements " + prettyPrint(v) + " " + prettyPrint(vs);
   }
   return text;
 }
@@ -69,8 +69,7 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
     case classDecl(n,ms,super,infs,_,_): 
     	return 
-			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> 
-			<if(size(infs) != 0){> implements <prettyPrint(infs)><}>
+			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> <prettyPrint(infs)>
 			'{
 			'}
 			";    	 
@@ -92,3 +91,13 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
 		rascal>ClassOrInterfaceDeclaration x = classDecl(TObject("samples.Test"), [Public()], TObject("java.util.List"), [], [], []);
 		rascal>prettyPrint(x);
 */
+public void samplerun() {
+	class1 = classDecl(TObject("samples.MyArrayListTest"), [Public(), Static()], TObject("java.util.List"), [], [], []);
+	class2 = classDecl(TObject("samples.MyObjectTest"), [Private(), Static()], object(), [], [], []);
+	inf1 = interfaceDecl(TObject("samples.IObject"), [Private(), Static()], [object(), TObject("java.lang.ArrayList")], [], []);	
+	inf2 = interfaceDecl(TObject("samples.IObject"), [Public(), Final()], [object()], [], []);	
+	writeFile(|file:///tmp/class1.jimple|, prettyPrint(class1));	
+	writeFile(|file:///tmp/class2.jimple|, prettyPrint(class2));	
+	writeFile(|file:///tmp/inf1.jimple|, prettyPrint(inf1));	
+	writeFile(|file:///tmp/inf2.jimple|, prettyPrint(inf2));	
+}
