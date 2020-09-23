@@ -36,7 +36,9 @@ public void novo(){
 public void main(){
 
     //files = [|project://JimpleFramework/src/test/resources/|];
-    files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
+    //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
+    //TODO compile class before using: mvn test -DskipTests
+    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
     es = ["samples.TestCallGraph.A()"];
     //es = ["samples.TestCallGraph.B()","samples.TestCallGraph.C()"];
     
