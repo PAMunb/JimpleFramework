@@ -123,7 +123,7 @@ public class JimpleObjectFactory {
 			return objectConstructor(objectName);
 		}
 		else if(descriptor.startsWith("[")) {  // array types 
-			String baseType = descriptor.substring(0, descriptor.length());				
+			String baseType = descriptor.substring(1, descriptor.length());				
 			return Type.TArray(type(baseType));	
 		}
 		
