@@ -87,6 +87,23 @@ public class TestDecompiler {
 		}
 	}
 	
+	@Test 
+	public void decompileNestedInterface() {
+		try {
+			File classFile = new File("./target/test-classes/samples/NestedInterface.class"); 			
+			assertNotNull(classFile);
+			
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			
+			assertNotNull(c);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
 	
 
 }
