@@ -65,7 +65,7 @@ CGModel computeCallGraphNovo(ExecutionContext ctx) {
             //methods = methods + [methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx];
             //methods = methods + [methodSignature(cn, r, n, f) | /Method(method(m,r,n,f,e,b),true) <- ctx, method(m,r,n,f,e,b) in mss];
          	for(method(_,r,mn,args,_,_) <- mss){
-            	sig = methodSignature(cn, mn, args);            	
+            	sig = signature(cn, mn, args);            	
             	if(ctx.mt[sig].entryPoint){
             		methods = methods + methodSignature(cn, r, mn, args);
             	}            	
@@ -88,7 +88,7 @@ CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, Execution
   	mm = model.methodMap; 
   	cg = model.cg; 
   
-  	str sig1 = methodSignature(method.className, method.methodName, method.formals);  
+  	str sig1 = signature(method.className, method.methodName, method.formals);  
   	//print("\tsig1=");println(sig1);
   	if(! (sig1 in mm)) {
   		mm[sig1] = "M" + "<size(mm) + 1>"; 
@@ -96,7 +96,7 @@ CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, Execution
     
   	top-down visit(ctx.mt[sig1].method.body) {
     	case virtualInvoke(_, methodSignature(cn, r, mn, args), _): {
-      		sig2 = methodSignature(cn,mn,args); 
+      		sig2 = signature(cn,mn,args); 
       		//print("\t\tsig2="+sig2);
       		if(! (sig2 in mm)) {
         		mm[sig2] = "M" + "<size(mm) + 1>"; 
@@ -147,7 +147,7 @@ CGModel computeCallGraph(TObject(cn), [method(_, _, mn, args, _, body), *ms], CG
   mm = model.methodMap; 
   cg = model.cg; 
   
-  str sig1 = methodSignature(cn, mn, args);
+  str sig1 = signature(cn, mn, args);
   
   if(! (sig1 in mm)) {
   	mm[sig1] = "M" + "<size(mm) + 1>"; 
@@ -155,7 +155,7 @@ CGModel computeCallGraph(TObject(cn), [method(_, _, mn, args, _, body), *ms], CG
   
   top-down visit(body) {
     case virtualInvoke(_, sig, _): {
-      sig2 = methodSignature(sig); 
+      sig2 = signature(sig); 
       if(! (sig2 in mm)) {
         mm[sig2] = "M" + "<size(mm) + 1>"; 
       }

@@ -40,8 +40,8 @@ public void main(){
     es = ["samples.TestCallGraph.A()"];
     //es = ["samples.TestCallGraph.B()","samples.TestCallGraph.C()"];
     
-    //CGModel model = execute(files, es, Analysis(computeCallGraph));
-    CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
+    CGModel model = execute(files, es, Analysis(computeCallGraph));
+    //CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
     //println(model.cg);        
     
     CG cg = model.cg;

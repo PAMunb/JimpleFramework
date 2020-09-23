@@ -65,7 +65,7 @@ data Analysis[&T] = Analysis(&T (ExecutionContext) run);
  * in the <code>entryPoints</code>. 
  */              
 public ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints) {	
-	return createExecutionContext(classPath, entryPoints, true);
+	return createExecutionContext(classPath, entryPoints, false);
 } 
 
 public ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool printErrors) {
@@ -84,7 +84,7 @@ public ExecutionContext createExecutionContext(list[loc] classPath, list[str] en
 		
 	top-down visit(ct) {
     	case classDecl(TObject(cn), _, _, _, _, mss): {            
-            mt = mt + (methodSignature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), methodSignature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- mss);    
+            mt = mt + (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- mss);    
         }    
    	}  
 		
@@ -125,5 +125,6 @@ public loc toLocation(str c) {
   	else return |file:///| + c;
 }
 
-public str methodSignature(methodSignature(cn, _, mn, args)) = methodSignature(cn, mn, args); 
-public str methodSignature(Name cn, Name mn, args) =  "<replaceAll(cn, "/", ".")>.<mn>(<intercalate(",", args)>)";
+
+public str signature(methodSignature(cn, _, mn, args)) = signature(cn, mn, args); 
+public str signature(Name cn, Name mn, args) =  "<replaceAll(cn, "/", ".")>.<mn>(<intercalate(",", args)>)";
