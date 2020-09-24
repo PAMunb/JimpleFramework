@@ -15,6 +15,15 @@ public int numberOfClasses(ExecutionContext ctx) {
   return total; 
 }
 
+public int numberOfInterface(ExecutionContext ctx) {
+  int total = 0;
+  top-down visit(ctx) {
+    case interfaceDecl(_, _, _, _, _): total = total + 1;  
+  }	
+  return total; 
+}
+
+
 /**
  * Computes the number of public methods from an 
  * execution context. 
