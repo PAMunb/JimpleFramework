@@ -12,17 +12,32 @@ import vis::ParseTree;
 import vis::Render;
 import analysis::graphs::Graph;
 
+import lang::jimple::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 
 
 public void novo(){
-    files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
-    es = ["samples.TestCallGraph.execute()"];
+    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
+    //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
+    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
 
     ExecutionContext ctx =  createExecutionContext(files,es);
-    println(ctx.mt);
+    //println(ctx.mt);
     
+    //println(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body);
+    
+    println("visitando");
+    visit(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body){
+    	//case virtualInvoke(_, methodSignature(cn, r, mn, args), _): {
+    	case InvokeExp e: {
+    		//sig = signature(cn,mn,args); 
+      		//println("ENTROU!!! "+sig);
+      		println(e);
+    	}     	
+    }
+    
+    /*
     println("\nInformed Entry Points: ");
     //println([m | /Method(m,true) <- ctx]);
     //TODO como fazer isso com comprehension???
@@ -30,7 +45,7 @@ public void novo(){
     	if(ctx.mt[m].entryPoint){
     		println(m);
     	}
-    }
+    }*/
 }
 
 public void main(){
@@ -39,11 +54,11 @@ public void main(){
     //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
     //TODO compile class before using: mvn test -DskipTests
     files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    es = ["samples.TestCallGraph.A()"];
+    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
     //es = ["samples.TestCallGraph.B()","samples.TestCallGraph.C()"];
     
-    CGModel model = execute(files, es, Analysis(computeCallGraph));
-    //CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
+    //CGModel model = execute(files, es, Analysis(computeCallGraph));
+    CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
     //println(model.cg);        
     
     CG cg = model.cg;
