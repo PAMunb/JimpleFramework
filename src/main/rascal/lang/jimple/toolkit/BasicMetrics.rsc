@@ -12,7 +12,7 @@ public int numberOfClasses(ExecutionContext ctx) {
   top-down visit(ctx) {
     case classDecl(_, _, _, _, _, _): total = total + 1;  
   }	
-  return total; 
+  return total;
 }
 
 public int numberOfInterface(ExecutionContext ctx) {
@@ -22,7 +22,6 @@ public int numberOfInterface(ExecutionContext ctx) {
   }	
   return total; 
 }
-
 
 /**
  * Computes the number of public methods from an 
