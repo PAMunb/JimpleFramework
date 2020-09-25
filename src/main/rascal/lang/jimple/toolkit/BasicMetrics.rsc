@@ -11,16 +11,19 @@ public int numberOfClasses(ExecutionContext ctx) {
   int total = 0;
   top-down visit(ctx) {
     case classDecl(_, _, _, _, _, _): total = total + 1;  
+
   }	
   return total;
 }
 
-public int numberOfInterface(ExecutionContext ctx) {
-  int total = 0;
+public list[str] classIdentification(ExecutionContext ctx) {
+  list[str] cl = [];
   top-down visit(ctx) {
-    case interfaceDecl(_, _, _, _, _): total = total + 1;  
-  }	
-  return total; 
+    
+    case classDecl(_, _, _, _, _, list[Method] methods): cl = cl + ["classDecl(_, _, _, _, _, <methods>)"];
+   
+  }
+  return cl; 
 }
 
 /**
@@ -38,3 +41,4 @@ public int numberOfPublicMethods(ExecutionContext ctx) {
   }	
   return total; 
 }
+
