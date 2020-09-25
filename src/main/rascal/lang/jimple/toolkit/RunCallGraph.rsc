@@ -17,46 +17,87 @@ import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 
 
+public void sfl4j(){
+	files = [|project://JimpleFramework/src/test/resources/|];
+    es = [];
+    
+    ExecutionContext ctx =  createExecutionContext(files,es,true);
+    
+    //classes
+    for(name <- ctx.ct){
+    	println(name);
+    }
+    
+    //metodos
+    //println(ctx.mt);
+    //for(name <- ctx.mt){
+    //	println("<name>");// = <ctx.mt[name]>");
+    //}
+    
+    /*CGModel model = execute(files, es, Analysis(computeCallGraph));
+    CG cg = model.cg;
+    
+    //mm = invert(model.methodMap);
+    //for(name <- model.methodMap){
+    //	println("<name>");
+    //}
+    
+    entryPoints = top(cg);    
+    println("\nNumber of Entry Points: "+toString(size(entryPoints)));
+    println("Entry Points: "+toString(entryPoints));
+    procs = carrier(cg); 
+    procsList = toList(procs);
+    mm = invert(model.methodMap);
+    nomes = [name | nn <- procsList, name <- mm[nn]];
+    for(nome <- nomes){
+    	println(nome);
+    }*/
+}
+
 public void novo(){
+	//slf4j
+	//files = [|project://JimpleFramework/src/test/resources/|];
+    //es = [];
+
+	//SimpleCallGraph
     files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
     //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
     es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
 
     ExecutionContext ctx =  createExecutionContext(files,es);
-    //println(ctx.mt);
+    println(ctx.mt);
     
     //println(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body);
     
-    println("visitando");
+    /*println("visitando");
     visit(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body){
-    	//case virtualInvoke(_, methodSignature(cn, r, mn, args), _): {
     	case InvokeExp e: {
     		//sig = signature(cn,mn,args); 
       		//println("ENTROU!!! "+sig);
       		println(e);
-    	}     	
-    }
-    
-    /*
-    println("\nInformed Entry Points: ");
-    //println([m | /Method(m,true) <- ctx]);
-    //TODO como fazer isso com comprehension???
-    for(m <- ctx.mt){
-    	if(ctx.mt[m].entryPoint){
-    		println(m);
-    	}
+    	} 
+
+    	//esse funciona mas fica mostrando erro no eclipse  
+    	//case &T _(_, methodSignature(cn, r, mn, args), _): {
+        //    println("aaa");
+        //} 	
     }*/
+
 }
 
 public void main(){
+	// slf4j
+	files = [|project://JimpleFramework/src/test/resources/|];
+    //es = ["org.slf4j.MDC.get(TObject(\"java.lang.String\"))"];
+    es = ["org.slf4j.MDC.getMDCAdapter()"];
 
-    //files = [|project://JimpleFramework/src/test/resources/|];
+	// SimpleCallGraph
+	//TODO compile class before using: mvn test -DskipTests
+    //files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
     //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
-    //TODO compile class before using: mvn test -DskipTests
-    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
-    //es = ["samples.TestCallGraph.B()","samples.TestCallGraph.C()"];
-    
+    //es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
+   
+    // EXECUTION
     //CGModel model = execute(files, es, Analysis(computeCallGraph));
     CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
     //println(model.cg);        
@@ -78,6 +119,8 @@ public void main(){
     entryPoints = top(cg);    
     println("\nNumber of Entry Points: "+toString(size(entryPoints)));
     println("Entry Points: "+toString(entryPoints));
+    procsList = toList(procs);
+    println([name | nn <- procsList, name <- mm[nn]]);
     
     bottomCalls = bottom(cg);
     println("\nNumber of Bottom Calls (leaves): "+toString(size(bottomCalls)));

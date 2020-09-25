@@ -1,5 +1,8 @@
 package samples.callgraph.simple;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class SimpleCallGraph {
 
 	public void execute() {
@@ -21,8 +24,12 @@ public class SimpleCallGraph {
 		F();
 	}
 
-	private void D() {
-		log("Executing D");
+	private void D() {	
+		List<String> list = Arrays.asList("a","b","c","d");
+		for(int i=0; i < list.size(); i++) {
+			log("Executing D: "+list.get(i));
+			//System.out.println("aa");
+		}
 	}
 
 	private synchronized void E() {

@@ -126,12 +126,12 @@ CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, Execution
   			mm[sig1] = "M" + "<size(mm) + 1>"; 
   		}
     
-	  	top-down visit(ctx.mt[sig1].method.body) {
+	  	top-down visit(ctx.mt[sig1].method.body) {	 	  		
 	  		case virtualInvoke(_, methodSignature(cn, r, mn, args), _): {
 	      		sig2 = signature(cn,mn,args); 
-	      		//println("\ncomputeCallGraph .... <method>");
-	      		//println("\tsig1="+sig1);
-	      		//println("\t\tsig2_virtual="+sig2);
+	      		println("\ncomputeCallGraph .... <method>");
+	      		println("\tsig1="+sig1);
+	      		println("\t\tsig2_virtual="+sig2);
 	      		if(! (sig2 in mm)) {
 	        		mm[sig2] = "M" + "<size(mm) + 1>"; 
 	      		}
@@ -146,9 +146,9 @@ CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, Execution
 	    	} 
 	    	case specialInvoke(_, methodSignature(cn, r, mn, args), _): {
 	      		sig2 = signature(cn,mn,args); 
-	      		//println("\ncomputeCallGraph .... <method>");
-	      		//println("\tsig1="+sig1);
-	      		//println("\t\tsig2_special="+sig2);
+	      		println("\ncomputeCallGraph .... <method>");
+	      		println("\tsig1="+sig1);
+	      		println("\t\tsig2_special="+sig2);
 	      		if(! (sig2 in mm)) {
 	        		mm[sig2] = "M" + "<size(mm) + 1>"; 
 	      		}
@@ -163,9 +163,9 @@ CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, Execution
 	    	} 
 	    	case staticMethodInvoke(methodSignature(cn, r, mn, args), _): {
 	      		sig2 = signature(cn,mn,args); 
-	      		//println("\ncomputeCallGraph .... <method>");
-	      		//println("\tsig1="+sig1);
-	      		//println("\t\tsig2_static="+sig2);
+	      		println("\ncomputeCallGraph .... <method>");
+	      		println("\tsig1="+sig1);
+	      		println("\t\tsig2_static="+sig2);
 	      		if(! (sig2 in mm)) {
 	        		mm[sig2] = "M" + "<size(mm) + 1>"; 
 	      		}
