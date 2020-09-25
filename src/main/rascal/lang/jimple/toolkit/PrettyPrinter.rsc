@@ -2,8 +2,6 @@ module lang::jimple::toolkit::PrettyPrinter
 
 import lang::jimple::Syntax;
 import lang::jimple::core::Context; 
-import List;
-import IO;
 
 /* 
 	Modifiers 
@@ -20,6 +18,8 @@ str prettyPrint(Modifier::Native()) = "native";
 str prettyPrint(Modifier::Synchronized()) = "synchronized";
 str prettyPrint(Modifier::Transient()) = "transient";
 str prettyPrint(Modifier::Volatile()) =  "volatile";
+str prettyPrint(Modifier::Enum()) =  "enum";
+str prettyPrint(Modifier::Annotation()) =  "annotation";
 
 /* 
 	Types 
@@ -34,7 +34,29 @@ str prettyPrint(Type::TFloat()) = "float";
 str prettyPrint(Type::TDouble()) = "double";
 str prettyPrint(Type::TLong()) = "long";
 str prettyPrint(Type::TObject(name)) = name;
+str prettyPrint(TArray(baseType)) = "<prettyPrint(baseType)>[]"; 
 str prettyPrint(Type::TVoid()) = "void";
+
+
+/* 
+ * Statements
+ */
+
+str prettyPrint(Statement::breakpoint()) = "breakpoint";
+str prettyPrint(Statement::gotoStmt(Label target)) = "goto <target>";
+str prettyPrint(Statement::label(Label label)) = "<label>";
+str prettyPrint(Statement::returnEmptyStmt()) = "return";
+str prettyPrint(Statement::nop()) = "nop";
+
+
+/* 
+ * Expression
+ */
+str prettyPrint(Expression::newInstance(Type instanceType)) = "new <prettyPrint(instanceType)>";
+
+/* 
+ * Value
+ */
 
 /* 
 	Functions for printing ClassOrInterfaceDeclaration and its
@@ -55,10 +77,17 @@ public str prettyPrint(list[Type] interfaces) {
   switch(interfaces) {
     case [] :  text = ""; 
     case [v] : text = "implements " + prettyPrint(v); 
-    case [v, *vs] : text = "implements " + prettyPrint(v) + " " + prettyPrint(vs);
+    case [v, *vs] : text = "implements " + prettyPrint(v) + ", " + prettyPrint(vs);
   }
   return text;
 }
+
+public str prettyPrint(Field f: field(modifiers, fieldType, name)) = 
+	"<for(m <- modifiers){><prettyPrint(m)> <}><prettyPrint(fieldType)> <name>;";	
+
+public str prettyPrint(list[Field] fields) =
+	"<for(f <- fields) {>
+	'    <prettyPrint(f)><}>";
 
 /*
 public str prettyPrint(list[Type] interfaces) =
@@ -67,16 +96,18 @@ public str prettyPrint(list[Type] interfaces) =
 
 public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
-    case classDecl(n,ms,super,infs,_,_): 
+    case classDecl(n,ms,super,infs,fields,_): 
     	return 
 			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> <prettyPrint(infs)>
-			'{
-			'}
-			";    	 
-    case interfaceDecl(n,ms,infs,_,_):
+    		'{ 
+    		'<prettyPrint(fields)>
+    		'
+			'}";
+    case interfaceDecl(n,ms,infs,fields,_):
     	return
 			"<prettyPrint(ms)> interface <prettyPrint(n)> extends <prettyPrint(infs)>
 			'{
+        	'<prettyPrint(fields)>    			
 			'}
 			";    	 
     default: return "error";
@@ -91,13 +122,4 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
 		rascal>ClassOrInterfaceDeclaration x = classDecl(TObject("samples.Test"), [Public()], TObject("java.util.List"), [], [], []);
 		rascal>prettyPrint(x);
 */
-public void samplerun() {
-	class1 = classDecl(TObject("samples.MyArrayListTest"), [Public(), Static()], TObject("java.util.List"), [], [], []);
-	class2 = classDecl(TObject("samples.MyObjectTest"), [Private(), Static()], object(), [], [], []);
-	inf1 = interfaceDecl(TObject("samples.IObject"), [Private(), Static()], [object(), TObject("java.lang.ArrayList")], [], []);	
-	inf2 = interfaceDecl(TObject("samples.IObject"), [Public(), Final()], [object()], [], []);	
-	writeFile(|file:///tmp/class1.jimple|, prettyPrint(class1));	
-	writeFile(|file:///tmp/class2.jimple|, prettyPrint(class2));	
-	writeFile(|file:///tmp/inf1.jimple|, prettyPrint(inf1));	
-	writeFile(|file:///tmp/inf2.jimple|, prettyPrint(inf2));	
-}
+
