@@ -13,7 +13,6 @@ str prettyPrint(Modifier::Abstract()) = "abstract";
 str prettyPrint(Modifier::Static()) = "static";
 str prettyPrint(Modifier::Final()) = "final";
 str prettyPrint(Modifier::Strictfp()) = "strictfp";
-
 str prettyPrint(Modifier::Native()) = "native";
 str prettyPrint(Modifier::Synchronized()) = "synchronized";
 str prettyPrint(Modifier::Transient()) = "transient";
@@ -24,7 +23,6 @@ str prettyPrint(Modifier::Annotation()) =  "annotation";
 /* 
 	Types 
 */
-
 str prettyPrint(Type::TByte()) = "byte";
 str prettyPrint(Type::TBoolean()) = "boolean";
 str prettyPrint(Type::TShort()) = "short";
@@ -37,17 +35,14 @@ str prettyPrint(Type::TObject(name)) = name;
 str prettyPrint(TArray(baseType)) = "<prettyPrint(baseType)>[]"; 
 str prettyPrint(Type::TVoid()) = "void";
 
-
 /* 
  * Statements
  */
-
 str prettyPrint(Statement::breakpoint()) = "breakpoint";
 str prettyPrint(Statement::gotoStmt(Label target)) = "goto <target>";
 str prettyPrint(Statement::label(Label label)) = "<label>";
 str prettyPrint(Statement::returnEmptyStmt()) = "return";
 str prettyPrint(Statement::nop()) = "nop";
-
 
 /* 
  * Expression
@@ -72,40 +67,48 @@ public str prettyPrint(list[Modifier] modifiers) {
   return text;
 }
 
-public str prettyPrint(list[Type] interfaces) {
+public str prettyPrint(list[Type] interfaces, str n) {
   str text = "";
   switch(interfaces) {
     case [] :  text = ""; 
-    case [v] : text = "implements " + prettyPrint(v); 
-    case [v, *vs] : text = "implements " + prettyPrint(v) + ", " + prettyPrint(vs);
+    case [v] : text = n + prettyPrint(v); 
+    case [v, *vs] : text = n + prettyPrint(v) + ", " + prettyPrint(vs, n);
   }
   return text;
 }
 
-public str prettyPrint(Field f: field(modifiers, fieldType, name)) = 
-	"<for(m <- modifiers){><prettyPrint(m)> <}><prettyPrint(fieldType)> <name>;";	
+public str prettyPrint(Field f: field(modifiers, fieldType, name)) = 	
+	"<prettyPrint(modifiers)> <prettyPrint(fieldType)> <name>;";
 
 public str prettyPrint(list[Field] fields) =
 	"<for(f <- fields) {>
 	'    <prettyPrint(f)><}>";
 
-/*
-public str prettyPrint(list[Type] interfaces) =
- "<for(ins<-interfaces){><prettyPrint(ins)> <}>";
-*/
+public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
+	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>)
+	'{
+	'}
+	'
+	";
+
+public str prettyPrint(list[Method] methods) =
+	"<for(m <- methods) {>
+	'    <prettyPrint(m)><}>";
+
 
 public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
-    case classDecl(n,ms,super,infs,fields,_): 
+    case classDecl(n,ms,super,infs,fields,methods): 
     	return 
-			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> <prettyPrint(infs)>
+			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> <prettyPrint(infs, "implements")>
     		'{ 
     		'<prettyPrint(fields)>
     		'
+    		'<prettyPrint(methods)>
 			'}";
     case interfaceDecl(n,ms,infs,fields,_):
     	return
-			"<prettyPrint(ms)> interface <prettyPrint(n)> extends <prettyPrint(infs)>
+			"<prettyPrint(ms)> interface <prettyPrint(n)> extends <prettyPrint(infs,"")>
 			'{
         	'<prettyPrint(fields)>    			
 			'}
