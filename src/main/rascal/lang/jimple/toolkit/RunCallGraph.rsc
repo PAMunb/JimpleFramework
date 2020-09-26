@@ -16,86 +16,35 @@ import lang::jimple::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 
+public tuple[list[loc] classPath, list[str] entryPoints] iris() {
+	files = [|project://JimpleFramework/src/test/resources/iris-core/|];
+    es = ["br.unb.cic.iris.core.SystemFacade.send(TObject(\"br.unb.cic.iris.core.model.EmailMessage\"))"];
+	return <files, es>;
+}
 
-public void sfl4j(){
-	files = [|project://JimpleFramework/src/test/resources/|];
+public tuple[list[loc] classPath, list[str] entryPoints] slf4j() {
+	files = [|project://JimpleFramework/src/test/resources/slf4j/|];	
     es = [];
-    
-    ExecutionContext ctx =  createExecutionContext(files,es,true);
-    
-    //classes
-    for(name <- ctx.ct){
-    	println(name);
-    }
-    
-    //metodos
-    //println(ctx.mt);
-    //for(name <- ctx.mt){
-    //	println("<name>");// = <ctx.mt[name]>");
-    //}
-    
-    /*CGModel model = execute(files, es, Analysis(computeCallGraph));
-    CG cg = model.cg;
-    
-    //mm = invert(model.methodMap);
-    //for(name <- model.methodMap){
-    //	println("<name>");
-    //}
-    
-    entryPoints = top(cg);    
-    println("\nNumber of Entry Points: "+toString(size(entryPoints)));
-    println("Entry Points: "+toString(entryPoints));
-    procs = carrier(cg); 
-    procsList = toList(procs);
-    mm = invert(model.methodMap);
-    nomes = [name | nn <- procsList, name <- mm[nn]];
-    for(nome <- nomes){
-    	println(nome);
-    }*/
+    return <files, es>;
 }
 
-public void novo(){
-	//slf4j
-	//files = [|project://JimpleFramework/src/test/resources/|];
-    //es = [];
-
-	//SimpleCallGraph
-    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
+public tuple[list[loc] classPath, list[str] entryPoints] simple() {
+	//TODO compile class before using: mvn test -DskipTests
+	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
     es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
-
-    ExecutionContext ctx =  createExecutionContext(files,es);
-    println(ctx.mt);
-    
-    //println(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body);
-    
-    /*println("visitando");
-    visit(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body){
-    	case InvokeExp e: {
-    		//sig = signature(cn,mn,args); 
-      		//println("ENTROU!!! "+sig);
-      		println(e);
-    	} 
-
-    	//esse funciona mas fica mostrando erro no eclipse  
-    	//case &T _(_, methodSignature(cn, r, mn, args), _): {
-        //    println("aaa");
-        //} 	
-    }*/
-
+    //es = ["samples.TestCallGraph.execute()"];
+    //es = ["samples.callgraph.simple.SimpleCallGraph.B()","samples.TestCallGraph.C()"];
+    return <files, es>;
 }
+
 
 public void main(){
-	// slf4j
-	files = [|project://JimpleFramework/src/test/resources/|];
-    //es = ["org.slf4j.MDC.get(TObject(\"java.lang.String\"))"];
-    es = ["org.slf4j.MDC.getMDCAdapter()"];
+	//tuple[list[loc] cp, list[str] e] t = simple();
+	tuple[list[loc] cp, list[str] e] t = iris();
+	//tuple[list[loc] cp, list[str] e] t = slf4j();	
 
-	// SimpleCallGraph
-	//TODO compile class before using: mvn test -DskipTests
-    //files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    //files = [|project://JimpleFramework/src/test/resources/samples/TestCallGraph.class|];
-    //es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
+    files = t.cp;
+    es = t.e;
    
     // EXECUTION
     //CGModel model = execute(files, es, Analysis(computeCallGraph));
@@ -105,8 +54,7 @@ public void main(){
     CG cg = model.cg;
     mm = invert(model.methodMap);
     println("\n\n");
-    println(typeOf(cg));
-    
+    println(typeOf(cg));    
     
     nCalls = size(model.cg);
     println("Number os calls: "+toString(nCalls));
@@ -137,36 +85,72 @@ public void main(){
     //nodes = toList({box(text(name), id(name), size(50), fillColor("lightgreen")) | name <- procsList});    
     nodes = toList({box(text(name), id(nn), size(50), fillColor("lightgreen")) | nn <- procsList, name <- mm[nn]});
     edges = [edge(c.from,c.to) | c <- cg];    
-    render(graph(nodes, edges, hint("layered"), std(size(20)), gap(10)));
-    
-    
-    
-    
-   
-    
-    //http://tutor.rascal-mpl.org/Recipes/Recipes.html#/Recipes/Common/CallLifting/CallLifting.html
-    // e no artigo EASY, secao 5.2
-    //public rel[str,str] lift(rel[str,str] aCalls, rel[str,str] aPartOf){
-    //    return { <C1, C2> | <str P1, str P2> <- aCalls, <str C1, str C2> <- aPartOf[P1] * aPartOf[P2]};
-    //}
-    
+    render(graph(nodes, edges, hint("layered"), std(size(20)), gap(10)));    
+}
 
-    /*
-    nodes = [ box(text("A"), id("A"), size(50), fillColor("lightgreen")),
-          box(text("B"), id("B"), size(60), fillColor("orange")),
-          ellipse( text("C"), id("C"), size(70), fillColor("lightblue")),
-          ellipse(text("D"), id("D"), size(200, 40), fillColor("violet")),
-          box(text("E"), id("E"), size(50), fillColor("silver")),
-      box(text("F"), id("F"), size(50), fillColor("coral"))
-        ];
-        println("\n\n");
-    println(nodes);
-    println(typeOf(nodes));
+
+public void show(){
+	files = [|project://JimpleFramework/src/test/resources/slf4j/|];	
+	//files = [|project://JimpleFramework/src/test/resources/iris-core/|];
+	es = [];
+
+	ExecutionContext ctx =  createExecutionContext(files,es,true);	
+		
+	top-down visit(ctx.ct) {	 	
+  		case ClassOrInterfaceDeclaration c:{
+  			show(c);
+  		}  			  		
+  	}    
+}
+
+private void show(classDecl(TObject(name), _, _, _, _, list[Method] methods)){
+	println("CLASS: <name>");
+	show(methods);	
+}
+
+private void show(interfaceDecl(TObject(name), _, _, _, list[Method] methods)){
+	println("INTERFACE: <name>");
+	show(methods);	
+}
+
+private void show(list[Method] methods){
+	for(Method m <- methods){
+		show(m);
+	}
+}
+
+private void show(method(_, _, Name name, list[Type] args, _, _)){
+	println("\t - <name>(<intercalate(",", args)>)");
+}
+
+public void novo(){
+    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
+    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
+
+    ExecutionContext ctx =  createExecutionContext(files,es);
+    //println(ctx.mt);
     
-edges = [ edge("A", "B"), edge("B", "C"), edge("B", "D"), edge("A", "C"),
-          edge("C", "E"), edge("C", "F"), edge("D", "E"), edge("D", "F"),
-          edge("A", "F")
-        ]; 
-//render(graph(nodes, edges, hint("layered"), gap(100)));
-*/
+    println(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body);
+    
+    //para testar uma forma de tratar os invokes
+    println("visitando");
+    visit(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body){
+    	//case InvokeExp e: {
+    	case InvokeExp e: {//_(_,methodSignature(cn, r, mn, args),_): {
+    		//sig = signature(cn,mn,args); 
+      		println("ENTROU!!! ");//+sig);
+      		//println(e);
+      		teste(e);
+    	} 
+
+    	//esse funciona mas fica mostrando erro no eclipse  
+    	//case &T _(_, methodSignature(cn, r, mn, args), _): {
+        //    println("aaa");
+        //} 	
+    }
+
+}
+
+public void teste(virtualInvoke(_, sig, _)) {
+	println("teste");
 }

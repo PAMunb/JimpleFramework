@@ -70,6 +70,12 @@ CGModel computeCallGraph(ExecutionContext ctx) {
    return computeCallGraph(ctx, methods);
 }
 
+//TODO como lidar com aplicacao parcial de funcao???
+CGModel computeCallGraph(bool full, ExecutionContext ctx) {   
+	println("full");
+   	return emptyModel;
+}
+
 /* Computes a call graph from an execution 
  * context, starting from the entry points 
  * defined in the execution context.
@@ -112,74 +118,84 @@ CGModel computeCallGraph(ExecutionContext ctx, list[MethodSignature] methods) {
  */
 CGModel computeCallGraph([], CGModel model, _) = model;
 CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, ExecutionContext ctx) {
-	MethodSignature method = head(methods);
+	MethodSignature currentMethod = head(methods);
   	
   	mm = model.methodMap; 
   	cg = model.cg; 
   
-  	str sig1 = signature(method.className, method.methodName, method.formals);  
+  	str sig1 = signature(currentMethod.className, currentMethod.methodName, currentMethod.formals);  
   	
   	//do not follow external methods
+  	//if current method exists in context's methods table
   	if(sig1 in ctx.mt){
   	  	
   		if(! (sig1 in mm)) {
+  			//define a simple name for current method
+  			//if it doesnt already exists
   			mm[sig1] = "M" + "<size(mm) + 1>"; 
   		}
     
-	  	top-down visit(ctx.mt[sig1].method.body) {	 	  		
-	  		case virtualInvoke(_, methodSignature(cn, r, mn, args), _): {
-	      		sig2 = signature(cn,mn,args); 
-	      		println("\ncomputeCallGraph .... <method>");
-	      		println("\tsig1="+sig1);
-	      		println("\t\tsig2_virtual="+sig2);
-	      		if(! (sig2 in mm)) {
-	        		mm[sig2] = "M" + "<size(mm) + 1>"; 
-	      		}
-	      		cg = cg + <mm[sig1], mm[sig2]>;   
-	      		//do not follow external methods
-	  			if(sig2 in ctx.mt){
-	  				sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
-		      		if(! (sig in methods)){
-		      			methods = methods + sig;
-		      		}
-	  			}
-	    	} 
-	    	case specialInvoke(_, methodSignature(cn, r, mn, args), _): {
-	      		sig2 = signature(cn,mn,args); 
-	      		println("\ncomputeCallGraph .... <method>");
-	      		println("\tsig1="+sig1);
-	      		println("\t\tsig2_special="+sig2);
-	      		if(! (sig2 in mm)) {
-	        		mm[sig2] = "M" + "<size(mm) + 1>"; 
-	      		}
-	      		cg = cg + <mm[sig1], mm[sig2]>;   
-	      		//do not follow external methods
-	  			if(sig2 in ctx.mt){
-	  				sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
-		      		if(! (sig in methods)){
-		      			methods = methods + sig;
-		      		}
-	  			}
-	    	} 
-	    	case staticMethodInvoke(methodSignature(cn, r, mn, args), _): {
-	      		sig2 = signature(cn,mn,args); 
-	      		println("\ncomputeCallGraph .... <method>");
-	      		println("\tsig1="+sig1);
-	      		println("\t\tsig2_static="+sig2);
-	      		if(! (sig2 in mm)) {
-	        		mm[sig2] = "M" + "<size(mm) + 1>"; 
-	      		}
-	      		cg = cg + <mm[sig1], mm[sig2]>;   
-	      		//do not follow external methods
-	  			if(sig2 in ctx.mt){
-	  				sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
-		      		if(! (sig in methods)){
-		      			methods = methods + sig;
-		      		}
-	  			}
-	    	} 
-	  	}//END visit
-  	}//END if(sig1 in ctx.mt)
+    	//visit the current method body, searching for invoke expressions
+	  	top-down visit(ctx.mt[sig1].method.body) {	 	
+	  		case InvokeExp e:{
+	  			tuple[CG c, MethodMap m, list[MethodSignature] ms] t = compute(sig1, e, methods, cg, mm, ctx);
+	      		cg = t.c;
+	      		mm = t.m;
+	      		methods = t.ms;	  
+	  		}  			  		
+	  	}
+  	}
   	
+  	//recursive call to deal with the rest (tail) of the methods
   	return computeCallGraph(tail(methods), CGModel(cg, mm), ctx);
 }
+
+//specialInvoke
+public tuple[CG cg, MethodMap mm, list[MethodSignature] methods] compute(str sig1, specialInvoke(_, methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+}
+
+//virtualInvoke
+public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, virtualInvoke(_, methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+}
+
+//interfaceInvoke
+public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, interfaceInvoke(_, methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+}
+
+//staticMethodInvoke
+public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, staticMethodInvoke(methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+	//TODO: infinite loop when testing SLF4J
+	//return <cg,mm,methods>;
+}
+
+//dynamicInvoke
+public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, dynamicInvoke(_,_,_,_), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	//TODO implement dynamicInvoke
+	return <cg,mm,methods>;
+}
+
+public tuple[CG, MethodMap, list[MethodSignature]] compute(str from, methodSignature(cn, r, mn, args), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx) {	
+	to = signature(cn,mn,args); 
+	//println("\ncomputeCallGraph .... <method>");
+	//println("\tsig1="+sig1);
+	//println("\t\tsig2_static="+sig2);
+	if(! (to in mm)) {
+		mm[to] = "M" + "<size(mm) + 1>"; 
+	}
+	//insert a new relation in the call graph
+	cg = cg + <mm[from], mm[to]>;   
+	//do not follow external methods
+	if(to in ctx.mt){
+		sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
+  		if(! (sig in methods)){
+  			//if method exists in the context add it to methods list, to be treated
+  			methods = methods + sig;
+  		}
+	}
+	return <cg,mm,methods>;
+}
+

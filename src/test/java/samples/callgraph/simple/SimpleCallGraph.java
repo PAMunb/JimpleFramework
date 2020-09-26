@@ -25,11 +25,12 @@ public class SimpleCallGraph {
 	}
 
 	private void D() {	
-		List<String> list = Arrays.asList("a","b","c","d");
-		for(int i=0; i < list.size(); i++) {
-			log("Executing D: "+list.get(i));
-			//System.out.println("aa");
-		}
+//		List<String> list = Arrays.asList("a","b","c","d");
+//		for(int i=0; i < list.size(); i++) {
+//			log("Executing D: "+list.get(i));
+//			//System.out.println("aa");
+//		}
+		log("Executing D");
 	}
 
 	private synchronized void E() {
