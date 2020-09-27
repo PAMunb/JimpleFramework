@@ -129,7 +129,7 @@ public class TestDecompiler {
 	@Test 
 	public void decompileAndroidClass() {
 		try {
-			File classFile = new File("/Users/rbonifacio/Downloads/app/oms/wmessage/main.class"); 			
+			File classFile = new File("./target/test-classes/android-app/oms/wmessage/main.class"); 			
 			assertNotNull(classFile);
 			
 			IValueFactory vf = ValueFactory.getInstance();
