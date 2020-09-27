@@ -175,6 +175,7 @@ data Modifier
   | Strictfp() 
   | Enum() 
   | Annotation()
+  | Synthetic()        // handle invoke dynamic call with lambda expressions.
   ;
   
 /**
