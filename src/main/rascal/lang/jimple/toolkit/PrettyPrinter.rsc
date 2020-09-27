@@ -85,7 +85,7 @@ public str prettyPrint(list[Field] fields) =
 	'    <prettyPrint(f)><}>";
 
 public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
-	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>)
+	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>) <prettyPrint(exceptions,"throws")>
 	'{
 	'}
 	'
@@ -98,21 +98,22 @@ public str prettyPrint(list[Method] methods) =
 
 public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
-    case classDecl(n,ms,super,infs,fields,methods): 
+    case classDecl(name,ms,super,infs,fields,methods): 
     	return 
-			"<prettyPrint(ms)> class <prettyPrint(n)> extends <prettyPrint(super)> <prettyPrint(infs, "implements")>
+			"<prettyPrint(ms)> class <prettyPrint(name)> extends <prettyPrint(super)> <prettyPrint(infs, "implements")>
     		'{ 
     		'<prettyPrint(fields)>
     		'
     		'<prettyPrint(methods)>
 			'}";
-    case interfaceDecl(n,ms,infs,fields,_):
+    case interfaceDecl(name,ms,infs,fields,methods):
     	return
-			"<prettyPrint(ms)> interface <prettyPrint(n)> extends <prettyPrint(infs,"")>
+			"<prettyPrint(ms)> interface <prettyPrint(name)> extends <prettyPrint(infs,"")>
 			'{
-        	'<prettyPrint(fields)>    			
-			'}
-			";    	 
+        	'<prettyPrint(fields)>
+       		'
+       		'<prettyPrint(methods)>   			
+			'}";    	 
     default: return "error";
   }   
 }
