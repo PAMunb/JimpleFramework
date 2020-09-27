@@ -690,7 +690,18 @@ public class Decompiler {
 					return localVariables.get(node);
 				}
 			}
-			throw new RuntimeException("local variable not found");
+			// the following code deals with the situations 
+			// where the source code has not been compiler with 
+			// debugging information 
+			//
+			// throw new RuntimeException("local variable not found");
+			String local = "l" + idx; 
+			
+			LocalVariableDeclaration var = new LocalVariableDeclaration(Type.TUnknown(), local);
+			LocalVariableNode node = new LocalVariableNode(local, null, null, null, null, idx); 
+			localVariables.put(node, var); 
+			
+			return var; 
 		}
 		
 		/*

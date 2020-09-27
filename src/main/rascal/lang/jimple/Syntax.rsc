@@ -175,6 +175,7 @@ data Modifier
   | Volatile() 
   | Enum() 
   | Annotation()
+  | Synthetic()        // handle invoke dynamic call with lambda expressions.
   ;
   
 /**

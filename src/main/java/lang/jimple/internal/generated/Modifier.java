@@ -71,6 +71,10 @@ public abstract class Modifier extends JimpleAbstractDataType {
    public static Modifier Annotation()  {
      return new c_Annotation();
    }
+   
+   public static Modifier Synthetic()  {
+     return new c_Synthetic();
+   }
     
 
    
@@ -383,6 +387,30 @@ public abstract class Modifier extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "Annotation";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_Synthetic extends Modifier {
+     
+   
+       public c_Synthetic() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "Synthetic";
      }
    }
     
