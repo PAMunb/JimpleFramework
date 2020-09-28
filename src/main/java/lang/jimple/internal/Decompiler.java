@@ -76,6 +76,14 @@ import lang.jimple.util.Pair;
 public class Decompiler {
 	private static final String INVOKE_DYNAMIC_FAKE_CLASS = "lang.jimple.InvokeDynamic";
 	
+	private static final String LOCAL_VARIABLE_PARAMETER_PREFIX = "i";
+	private static final String LOCAL_VARIABLE_PREFIX = "$i";
+	private static final String THIS_VARIABLE = "this";
+	private static final String LOCAL_PARAMETER_PREFIX = "@parameter";
+	private static final String IMPLICIT_PARAMETER_NAME = "@this";
+	private static final String LOCAL_NAME_FOR_IMPLICIT_PARAMETER = "r0";
+
+	
 	private final IValueFactory vf;
 	private IConstructor _class;
 	
@@ -185,24 +193,30 @@ public class Decompiler {
 				 methodExceptions.add(objectConstructor(str));
 			  }
 			}
+			
+			boolean isStatic = methodModifiers.contains(Modifier.Static());
 						
-			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(mn.localVariables);
+			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic, methodFormalArgs.size(), mn.localVariables);
 			
 			List<LocalVariableDeclaration> decls = new ArrayList<>();
 			List<Statement> stmts = new ArrayList<>();
 			List<CatchClause> catchClauses = visitTryCatchBlocks(mn.tryCatchBlocks);
 			
 			
-			for(LocalVariableDeclaration var: localVariables.values()) {
-				decls.add(var);
-			}
-			
-			//TODO: uncomment the following lines to decompile the instructions. 
 			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables, catchClauses);
-					
+			
+			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
+			
 			mn.instructions.accept(insVisitor);
 			insVisitor.clearUnusedLabelInstructions();
 			stmts = insVisitor.instructions;
+			
+			for(LocalVariableDeclaration var: localVariables.values()) {
+				decls.add(var);
+			}
+			for(LocalVariableDeclaration var: insVisitor.auxiliarlyLocalVariables) {
+				decls.add(var);
+			}
 			
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses); 
 			
@@ -219,15 +233,29 @@ public class Decompiler {
 			return super.visitField(access, name, descriptor, signature, value);
 		}
 
-		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(List<LocalVariableNode> nodes) {
+		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals, List<LocalVariableNode> nodes) {
 			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
+			
+			int idx = 1;  
 			
 			if(nodes != null) {
 				for(int i = 0; i < nodes.size(); i++) {
+					String name = ""; 
 					LocalVariableNode var = nodes.get(i);
 					Type type = type(var.desc);
-				    String name = "l" + i;
-				    localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name));
+					if(!isStatic && i == 0 && var.name.equals(THIS_VARIABLE)) { // being really conservative here. 
+						name = LOCAL_NAME_FOR_IMPLICIT_PARAMETER;
+					} 
+					else if(!isStatic && (i >= 1 && i <= formals)) {
+						name = LOCAL_VARIABLE_PARAMETER_PREFIX + idx++;
+					} 
+					else if(isStatic && (i >= 0 && i < formals)) {
+						name = LOCAL_VARIABLE_PARAMETER_PREFIX + idx++; 
+					}
+					else {
+						name = LOCAL_VARIABLE_PREFIX + idx++; 
+					}
+				    localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name)); 
 				}
 			}
 			return localVariables;
@@ -250,6 +278,7 @@ public class Decompiler {
 	}
 
 	class InstructionSetVisitor extends org.objectweb.asm.MethodVisitor {
+		
 		class Operand {
 			Type type;
 			Immediate immediate;
@@ -695,7 +724,7 @@ public class Decompiler {
 			// debugging information 
 			//
 			// throw new RuntimeException("local variable not found");
-			String local = "l" + idx; 
+			String local = LOCAL_VARIABLE_PARAMETER_PREFIX + idx; 
 			
 			LocalVariableDeclaration var = new LocalVariableDeclaration(Type.TUnknown(), local);
 			LocalVariableNode node = new LocalVariableNode(local, null, null, null, null, idx); 
@@ -1155,7 +1184,7 @@ public class Decompiler {
 		}
 
 		private LocalVariableDeclaration createLocal(Type type) {
-			String name = "l" + locals++;
+			String name = LOCAL_VARIABLE_PREFIX + locals++;
 			LocalVariableDeclaration local = LocalVariableDeclaration.localVariableDeclaration(type, name);
 			auxiliarlyLocalVariables.add(local);
 			return local;
@@ -1198,6 +1227,31 @@ public class Decompiler {
 			aNewArrayIns(type);
 		}
 	
+		public void initFormalArgs(boolean staticMethod, Type classType, boolean emptyLocalVariableTable, List<Type> formals) {
+			if(emptyLocalVariableTable) {
+				assert localVariables.isEmpty();    // we expect an empty list of local variables here. 
+				if(!staticMethod) {
+					LocalVariableNode node = new LocalVariableNode(THIS_VARIABLE, classType.getBaseType(), null, null, null, 0);
+					localVariables.put(node, LocalVariableDeclaration.localVariableDeclaration(classType, LOCAL_NAME_FOR_IMPLICIT_PARAMETER));
+				}
+				int idx = 1; 
+				for(Type t: formals) {
+					String local = LOCAL_VARIABLE_PARAMETER_PREFIX + idx;
+					LocalVariableNode node = new LocalVariableNode(local, t.getBaseType(), null, null, null, idx);
+					localVariables.put(node, LocalVariableDeclaration.localVariableDeclaration(t, local));
+					idx++;
+				}
+			}
+			if(!staticMethod) {                                 
+				instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));     // init the implicit parameter
+			}
+			int idx = 0; 
+			for(Type t: formals) {
+				instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx +1), LOCAL_PARAMETER_PREFIX + idx, t));
+				idx++; 
+			}	
+		}
+		
 		public void clearUnusedLabelInstructions() {
 			List<Statement> toRemove = new ArrayList<>();
 			Map<String, Integer> newLabels = new HashMap<>();
