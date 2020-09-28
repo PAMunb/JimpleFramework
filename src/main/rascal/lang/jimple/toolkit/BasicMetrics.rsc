@@ -2,6 +2,7 @@ module lang::jimple::toolkit::BasicMetrics
 
 import lang::jimple::Syntax;
 import lang::jimple::core::Context; 
+import List;
 
 /**
  * Computes the number of classes from 
@@ -25,6 +26,32 @@ public list[str] classIdentification(ExecutionContext ctx) {
   }
   return cl; 
 }
+
+public list[Method] methodsIdentification(ExecutionContext ctx) {
+  list[Method] lm = [];
+  top-down visit(ctx) {
+    
+    case classDecl(_, _, _, _, _, list[Method] methods): lm = lm + methods;
+   
+  }
+  return lm; 
+}
+public Method firstMethod(ExecutionContext ctx){
+	list[Method] lm = methodsId(ctx);
+	Method m = head(lm);
+	return m;
+}
+
+public list[str] methodsName(ExecutionContext ctx){
+	list[str] name = [];
+	top-down visit(ctx) {
+    	
+    	case method(_, _, nm, _, _, _): name = name+nm;
+     	
+    }
+    return name;
+}
+
 
 /**
  * Computes the number of public methods from an 
