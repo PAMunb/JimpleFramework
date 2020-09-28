@@ -1,0 +1,31 @@
+public class AutoIncrementSample extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        AutoIncrementSample r0;
+
+        r0 := @this;
+
+        specialinvoke r0.<init>();
+
+        return;
+    }
+
+    public void foo()
+    {
+        java.io.PrintStream $r0;
+        AutoIncrementSample r1;
+        int i1;
+
+        r1 := @this;
+
+        i1 = 1 + 1;
+
+        $r0 = java.lang.System.out;
+
+        $r0.println(i1);
+
+        return;
+    }
+}
