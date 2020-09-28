@@ -4,8 +4,15 @@ import lang::jimple::Syntax;
 import lang::jimple::core::Context; 
 
 /*
- * TODO: 
- *	indentation must be made easier, configurable and less error prone. 
+ * TODO PP: 
+ *	Indentation must be made easier, configurable and less error prone.
+ *	Methods in interfaces are printed in a diferent way than in classes; interfaces have a ';' and no {}.
+ *	 
+ * TODO Jimple Decompiler:
+ * 	Missing @this initialization
+ * 	Missing <clinit> method (static initialization blocks for the class, and static field initialization).
+ *  Missing local variable decl (the one with $ symbol.
+ *  label1: is comming with ":'
  */
 
 /* 
@@ -15,7 +22,7 @@ str prettyPrint(Value::intValue(Int iv)) = "<iv>";
 str prettyPrint(Value::longValue(Long lv)) = "<lv>";
 str prettyPrint(Value::floatValue(Float fv)) = "<fv>";
 str prettyPrint(Value::doubleValue(Double fv)) = "<fv>";
-str prettyPrint(Value::stringValue(String sv)) = sv;
+str prettyPrint(Value::stringValue(String sv)) = "\"<sv>\"";
 str prettyPrint(Value::methodValue(Type returnType, list[Type] formals)) = "";
 str prettyPrint(Value::classValue(str name)) = name;
 str prettyPrint(Value::nullValue()) = "null";
@@ -58,10 +65,11 @@ str prettyPrint(Type::TObject(name)) = "<name>";
 str prettyPrint(TArray(baseType)) = "<prettyPrint(baseType)>[]"; 
 str prettyPrint(Type::TVoid()) = "void";
 str prettyPrint(Type::TUnknown()) = "";
+
 /* 
  * Statements
  */
-str prettyPrint(Statement::label(Label label)) = "<label>:";
+str prettyPrint(Statement::label(Label label)) = "\b\b\b<label>:";
 str prettyPrint(Statement::breakpoint()) = "breakpoint;";
 str prettyPrint(Statement::enterMonitor(Immediate immediate)) = "";
 str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "";
@@ -75,7 +83,7 @@ str prettyPrint(Statement::retEmptyStmt()) = "";
 str prettyPrint(Statement::retStmt(Immediate immediate)) = "";
 str prettyPrint(Statement::returnEmptyStmt()) = "return;";
 str prettyPrint(Statement::returnStmt(Immediate immediate)) = "";
-str prettyPrint(Statement::throwStmt(Immediate immediate)) = "";
+str prettyPrint(Statement::throwStmt(Immediate immediate)) = "throw <prettyPrint(immediate)>;";
 str prettyPrint(Statement::invokeStmt(InvokeExp invokeExpression)) = "<prettyPrint(invokeExpression)>;";
 str prettyPrint(Statement::gotoStmt(Label target)) = "goto <target>;";
 str prettyPrint(Statement::nop()) = "nop;";
@@ -85,9 +93,14 @@ str prettyPrint(Statement::nop()) = "nop;";
  */
 str prettyPrint(Variable::localVariable(Name local)) = "<local>";
 str prettyPrint(Variable::arrayRef(Name reference, Immediate idx)) = "";
-str prettyPrint(Variable::fieldRef(Name reference, FieldSignature field)) = "";
+str prettyPrint(Variable::fieldRef(Name reference, FieldSignature field)) = "<reference>.<prettyPrint(field)>";
 str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "";
 
+/* 
+ * FieldSignature
+ */
+str prettyPrint(FieldSignature::fieldSignature(Name className, Type fieldType, Name fieldName)) =
+	"\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
 /* 
  * Expression
  */
@@ -105,8 +118,8 @@ str prettyPrint(Expression::and(Immediate lhs, Immediate rhs)) = "<prettyPrint(l
 str prettyPrint(Expression::or(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> | <prettyPrint(rhs)>";
 str prettyPrint(Expression::xor(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> ^ <prettyPrint(rhs)>";
 str prettyPrint(Expression::reminder(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> % <prettyPrint(rhs)>";
-str prettyPrint(Expression::isNull(Immediate immediate)) = "";
-str prettyPrint(Expression::isNotNull(Immediate immediate)) = "";
+str prettyPrint(Expression::isNull(Immediate immediate)) = "<prettyPrint(immediate)> == null";
+str prettyPrint(Expression::isNotNull(Immediate immediate)) = "<prettyPrint(immediate)> != null";
 str prettyPrint(Expression::cmp(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> cmp <prettyPrint(rhs)>";
 str prettyPrint(Expression::cmpg(Immediate lhs, Immediate rhs) ) = "<prettyPrint(lhs)> cmpg <prettyPrint(rhs)>";
 str prettyPrint(Expression::cmpl(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> cmpl <prettyPrint(rhs)>";
@@ -127,15 +140,24 @@ str prettyPrint(Expression::lengthOf(Immediate immediate)) = "lengthof <prettyPr
 str prettyPrint(Expression::neg(Immediate immediate)) = "neg <prettyPrint(immediate)>";
 str prettyPrint(Expression::immediate(Immediate immediate)) = "<prettyPrint(immediate)>";
 
+public str prettyPrint(list[Immediate] args) {
+	  str text = "";
+	  switch(args) {
+	    case [] :  text = ""; 
+	    case [v] : text = prettyPrint(v); 
+	    case [v, *vs] : text = prettyPrint(v) + ", " + prettyPrint(vs);
+	  }
+	  return text;
+}
 
 str prettyPrint(InvokeExp invoke) {
 	  switch(invoke) {
 	    case specialInvoke(local, sig, args):  
-	    	return "specialinvoke <local>.\<<prettyPrint(sig)>\>()";
+	    	return "specialinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
 	    case virtualInvoke(local, sig, args): 
-	    	return "virtualinvoke <local>.\<<prettyPrint(sig)>\>()";
+	    	return "virtualinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
 	    case interfaceInvoke(local, sig, args): 
-	    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>()";
+	    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
 	    case staticMethodInvoke(sig,  args): 
 	    	return "staticinvoke";
 	    case dynamicInvoke(bsmSig, bsmArgs, sig, args): 
@@ -177,7 +199,8 @@ public str prettyPrint(Field f: field(modifiers, fieldType, name)) =
 
 public str prettyPrint(list[Field] fields) =
 	"<for(f <- fields) {>
-	'   <prettyPrint(f)><}>";
+	'    <prettyPrint(f)><}>
+	";
 
 public str prettyPrint(LocalVariableDeclaration::localVariableDeclaration(Type varType, Identifier local)) = 
 	"<prettyPrint(varType)> <local>;";
@@ -213,15 +236,15 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
     case classDecl(name,ms,super,infs,fields,methods): 
     	return 
 			"<prettyPrint(ms)> class <prettyPrint(name)> extends <prettyPrint(super)> <prettyPrint(infs, "implements ")>
-    		'{ 
+    		'{
     		'<prettyPrint(fields)> <prettyPrint(methods)>
 			'}";
     case interfaceDecl(name,ms,infs,fields,methods):
     	return
 			"<prettyPrint(ms)> interface <prettyPrint(name)> extends <prettyPrint(infs,"")>
-			'{
-        	'<prettyPrint(fields)> <prettyPrint(methods)>   			
-			'}";    	 
+			'{ 
+        	'<prettyPrint(fields)> <prettyPrint(methods)>
+			'}";
     default: return "error";
   }   
 }
