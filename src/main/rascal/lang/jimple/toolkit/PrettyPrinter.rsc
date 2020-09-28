@@ -3,6 +3,28 @@ module lang::jimple::toolkit::PrettyPrinter
 import lang::jimple::Syntax;
 import lang::jimple::core::Context; 
 
+/*
+ * TODO: 
+ *	indentation must be made easier, configurable and less error prone. 
+ */
+
+/* 
+	Value 
+*/
+str prettyPrint(Value::intValue(Int iv)) = "<iv>";
+str prettyPrint(Value::longValue(Long lv)) = "<lv>";
+str prettyPrint(Value::floatValue(Float fv)) = "<fv>";
+str prettyPrint(Value::doubleValue(Double fv)) = "<fv>";
+str prettyPrint(Value::stringValue(String sv)) = sv;
+str prettyPrint(Value::methodValue(Type returnType, list[Type] formals)) = "";
+str prettyPrint(Value::classValue(str name)) = name;
+str prettyPrint(Value::nullValue()) = "null";
+
+/* 
+	Immediate
+*/
+str prettyPrint(Immediate::local(String localName)) = "<localName>";
+str prettyPrint(Immediate::iValue(Value v)) = "<prettyPrint(v)>";
 
 /* 
 	Modifiers 
@@ -32,10 +54,10 @@ str prettyPrint(Type::TInteger()) = "int";
 str prettyPrint(Type::TFloat()) = "float";
 str prettyPrint(Type::TDouble()) = "double";
 str prettyPrint(Type::TLong()) = "long";
-str prettyPrint(Type::TObject(name)) = name;
+str prettyPrint(Type::TObject(name)) = "<name>";
 str prettyPrint(TArray(baseType)) = "<prettyPrint(baseType)>[]"; 
 str prettyPrint(Type::TVoid()) = "void";
-
+str prettyPrint(Type::TUnknown()) = "";
 /* 
  * Statements
  */
@@ -46,7 +68,7 @@ str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "";
 str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = "";
 str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = "";
 str prettyPrint(Statement::identity(Name local, Name identifier, Type idType)) = "";
-str prettyPrint(Statement::assign(Variable var, Expression expression)) = "<prettyPrint(var)> = ;";
+str prettyPrint(Statement::assign(Variable var, Expression expression)) = "<prettyPrint(var)> = <prettyPrint(expression)>;";
 str prettyPrint(Statement::ifStmt(Expression exp, Label target)) = "if <prettyPrint(exp)> goto <target>;";
 str prettyPrint(Statement::identity(Name local, Name identifier, Type idType)) = "";
 str prettyPrint(Statement::retEmptyStmt()) = "";
@@ -61,7 +83,7 @@ str prettyPrint(Statement::nop()) = "nop;";
 /* 
  * Variable
  */
-str prettyPrint(Variable::localVariable(Name local)) = local;
+str prettyPrint(Variable::localVariable(Name local)) = "<local>";
 str prettyPrint(Variable::arrayRef(Name reference, Immediate idx)) = "";
 str prettyPrint(Variable::fieldRef(Name reference, FieldSignature field)) = "";
 str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "";
@@ -70,35 +92,65 @@ str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "";
  * Expression
  */
 str prettyPrint(Expression::newInstance(Type instanceType)) = "new <prettyPrint(instanceType)>";
+str prettyPrint(Expression::newArray(Type baseType, list[ArrayDescriptor] dims)) = "";
+str prettyPrint(Expression::cast(Type toType, Immediate immeadiate)) = "(<prettyPrint(toType)>) <prettyPrint(immeadiate)>";
+str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<prettyPrint(immediate)> instanceof <prettyPrint(baseType)>";
+str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<prettyPrint(immediate)> instanceof <prettyPrint(baseType)>";
+str prettyPrint(Expression::invokeExp(InvokeExp expression)) = "<prettyPrint(expression)>";
+str prettyPrint(Expression::arraySubscript(Name name, Immediate immediate)) = "";
+str prettyPrint(Expression::stringSubscript(String string, Immediate immediate)) = "";
+str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "";
+str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = "\<<className> <prettyPrint(fieldType)> <fieldName>\>";
+str prettyPrint(Expression::and(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> & <prettyPrint(rhs)>";
+str prettyPrint(Expression::or(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> | <prettyPrint(rhs)>";
+str prettyPrint(Expression::xor(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> ^ <prettyPrint(rhs)>";
+str prettyPrint(Expression::reminder(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> % <prettyPrint(rhs)>";
+str prettyPrint(Expression::isNull(Immediate immediate)) = "";
+str prettyPrint(Expression::isNotNull(Immediate immediate)) = "";
+str prettyPrint(Expression::cmp(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> cmp <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmpg(Immediate lhs, Immediate rhs) ) = "<prettyPrint(lhs)> cmpg <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmpl(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> cmpl <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmpeq(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> == <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmpne(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> != <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmpgt(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> \> <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmpge(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> \>= <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmplt(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> != <prettyPrint(rhs)>";
+str prettyPrint(Expression::cmple(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> \< <prettyPrint(rhs)>";
+str prettyPrint(Expression::shl(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> \<\< <prettyPrint(rhs)>";
+str prettyPrint(Expression::shr(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> \>\> <prettyPrint(rhs)>";
+str prettyPrint(Expression::ushr(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> \>\>\> <prettyPrint(rhs)>";
+str prettyPrint(Expression::plus(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> + <prettyPrint(rhs)>";
+str prettyPrint(Expression::minus(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> - <prettyPrint(rhs)>";
+str prettyPrint(Expression::mult(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> * <prettyPrint(rhs)>";
+str prettyPrint(Expression::div(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> / <prettyPrint(rhs)>";
+str prettyPrint(Expression::lengthOf(Immediate immediate)) = "lengthof <prettyPrint(immediate)>";
+str prettyPrint(Expression::neg(Immediate immediate)) = "neg <prettyPrint(immediate)>";
+str prettyPrint(Expression::immediate(Immediate immediate)) = "<prettyPrint(immediate)>";
 
-/* 
- * Invokes
- */
-
-str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)) =
-	"<className>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals, "")>)";
 
 str prettyPrint(InvokeExp invoke) {
-  switch(invoke) {
-    case specialInvoke(local, sig, args):  
-    	return "specialinvoke <local>.\<<prettyPrint(sig)>\>()";
-    case virtualInvoke(local, sig, args): 
-    	return "virtualinvoke <local>.\<<prettyPrint(sig)>\>()";
-    case interfaceInvoke(local, sig, args): 
-    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>()";
-    case staticMethodInvoke(sig,  args): 
-    	return "staticinvoke";
-    case dynamicInvoke(bsmSig, bsmArgs, sig, args): 
-    	return "dynamicinvoke";
-    default: return "error";    
-  }
-}
+	  switch(invoke) {
+	    case specialInvoke(local, sig, args):  
+	    	return "specialinvoke <local>.\<<prettyPrint(sig)>\>()";
+	    case virtualInvoke(local, sig, args): 
+	    	return "virtualinvoke <local>.\<<prettyPrint(sig)>\>()";
+	    case interfaceInvoke(local, sig, args): 
+	    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>()";
+	    case staticMethodInvoke(sig,  args): 
+	    	return "staticinvoke";
+	    case dynamicInvoke(bsmSig, bsmArgs, sig, args): 
+	    	return "dynamicinvoke";
+	    default: return "error";    
+	  }
+	}
 
 /* 
 	Functions for printing ClassOrInterfaceDeclaration and its
 	related upper parts.
 */
 
+str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)) =
+	"<className>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)";
 
 public str prettyPrint(list[Modifier] modifiers) {
   str text = "";
@@ -124,28 +176,27 @@ public str prettyPrint(Field f: field(modifiers, fieldType, name)) =
 	"<prettyPrint(modifiers)> <prettyPrint(fieldType)> <name>;";
 
 public str prettyPrint(list[Field] fields) =
-	"<for(f <- fields){>
-	'    <prettyPrint(f)><}>";
+	"<for(f <- fields) {>
+	'   <prettyPrint(f)><}>";
 
 public str prettyPrint(LocalVariableDeclaration::localVariableDeclaration(Type varType, Identifier local)) = 
 	"<prettyPrint(varType)> <local>;";
 
 public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClauses)) =
-	"<for(l <- localVars) {>
-	'    <prettyPrint(l)><}>
-	'<for(s <- stmts) {>
-	'    <prettyPrint(s)><}>
-	";
+	"<for(l <- localVars){>
+	'   <prettyPrint(l)><}>
+	'<for(s <- stmts){>
+	'
+	'   <prettyPrint(s)><}>";
 
 public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
 	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>) <prettyPrint(exceptions,"throws ")>
-	'{
-	'<prettyPrint(body)>
+	'{<prettyPrint(body)>
 	'}
 	";
 
 public str prettyPrint(list[Method] methods) =
-	"<for(m <- methods) {>
+	"<for(m <- methods){>
 	'    <prettyPrint(m)><}>";
 
 /*
