@@ -12,7 +12,8 @@ import lang::jimple::core::Context;
  * 	Missing @this initialization
  * 	Missing <clinit> method (static initialization blocks for the class, and static field initialization).
  *  Missing local variable decl (the one with $ symbol.
- *  label1: is comming with ":'
+ *  label1: is comming with ":".
+ *  Sort LocalVariableDeclaration by variable name.
  */
 
 /* 
@@ -71,18 +72,18 @@ str prettyPrint(Type::TUnknown()) = "";
  */
 str prettyPrint(Statement::label(Label label)) = "\b\b\b<label>:";
 str prettyPrint(Statement::breakpoint()) = "breakpoint;";
-str prettyPrint(Statement::enterMonitor(Immediate immediate)) = "";
-str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "";
-str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = "";
-str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = "";
+str prettyPrint(Statement::enterMonitor(Immediate immediate)) = "entermonitor <prettyPrint(immediate)>;";
+str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "exitmonitor <prettyPrint(immediate)>;";
+str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = "tableswitch";
+str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = "lookupswitch";
 str prettyPrint(Statement::identity(Name local, Name identifier, Type idType)) = "";
 str prettyPrint(Statement::assign(Variable var, Expression expression)) = "<prettyPrint(var)> = <prettyPrint(expression)>;";
 str prettyPrint(Statement::ifStmt(Expression exp, Label target)) = "if <prettyPrint(exp)> goto <target>;";
 str prettyPrint(Statement::identity(Name local, Name identifier, Type idType)) = "";
-str prettyPrint(Statement::retEmptyStmt()) = "";
-str prettyPrint(Statement::retStmt(Immediate immediate)) = "";
+str prettyPrint(Statement::retEmptyStmt()) = "ret;";
+str prettyPrint(Statement::retStmt(Immediate immediate)) = "ret <prettyPrint(immediate)>;";
 str prettyPrint(Statement::returnEmptyStmt()) = "return;";
-str prettyPrint(Statement::returnStmt(Immediate immediate)) = "";
+str prettyPrint(Statement::returnStmt(Immediate immediate)) = "return <prettyPrint(immediate)>;";
 str prettyPrint(Statement::throwStmt(Immediate immediate)) = "throw <prettyPrint(immediate)>;";
 str prettyPrint(Statement::invokeStmt(InvokeExp invokeExpression)) = "<prettyPrint(invokeExpression)>;";
 str prettyPrint(Statement::gotoStmt(Label target)) = "goto <target>;";
@@ -94,18 +95,26 @@ str prettyPrint(Statement::nop()) = "nop;";
 str prettyPrint(Variable::localVariable(Name local)) = "<local>";
 str prettyPrint(Variable::arrayRef(Name reference, Immediate idx)) = "";
 str prettyPrint(Variable::fieldRef(Name reference, FieldSignature field)) = "<reference>.<prettyPrint(field)>";
-str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "";
+str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "<prettyPrint(field)>";
 
 /* 
  * FieldSignature
  */
 str prettyPrint(FieldSignature::fieldSignature(Name className, Type fieldType, Name fieldName)) =
 	"\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
+
+/* 
+ * Case
+ */
+
+str prettyPrint(CaseStmt::caseOption(Int option, Label targetStmt)) = "case";
+str prettyPrint(CaseStmt::defaultOption(Label targetStmt)) = "default";
+
 /* 
  * Expression
  */
 str prettyPrint(Expression::newInstance(Type instanceType)) = "new <prettyPrint(instanceType)>";
-str prettyPrint(Expression::newArray(Type baseType, list[ArrayDescriptor] dims)) = "";
+str prettyPrint(Expression::newArray(Type baseType, list[ArrayDescriptor] dims)) = "newArray(<prettyPrint(baseType)>)";
 str prettyPrint(Expression::cast(Type toType, Immediate immeadiate)) = "(<prettyPrint(toType)>) <prettyPrint(immeadiate)>";
 str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<prettyPrint(immediate)> instanceof <prettyPrint(baseType)>";
 str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<prettyPrint(immediate)> instanceof <prettyPrint(baseType)>";

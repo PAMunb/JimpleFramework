@@ -1267,7 +1267,7 @@ public class Decompiler {
 					}
 					else {
 						newLabels.put(labelIns.label, count);
-						labelIns.label = String.format("label%d:", count++);  // update the label to a more user friendly string
+						labelIns.label = String.format("label%d", count++);  // update the label to a more user friendly string
 					}
 				}
 			}
@@ -1281,11 +1281,11 @@ public class Decompiler {
 			for(Statement s: instructions) {
 				if(s instanceof Statement.c_gotoStmt) {
 					Statement.c_gotoStmt g = (Statement.c_gotoStmt)s; 
-					g.target = newLabels.containsKey(g.target) ? String.format("label%d:", newLabels.get(g.target)) : g.target;
+					g.target = newLabels.containsKey(g.target) ? String.format("label%d", newLabels.get(g.target)) : g.target;
 				}
 				else if(s instanceof Statement.c_ifStmt) {
 					Statement.c_ifStmt i = (Statement.c_ifStmt)s;
-					i.target = newLabels.containsKey(i.target) ? String.format("label%d:", newLabels.get(i.target)) : i.target;
+					i.target = newLabels.containsKey(i.target) ? String.format("label%d", newLabels.get(i.target)) : i.target;
 				}
 			}
 		}
