@@ -41,9 +41,10 @@ data CGModel = CGModel(CG cg, MethodMap methodMap);
 /* the empty call graph model */ 
 CGModel emptyModel = CGModel({}, ()); 
 
-//TODO: diferenciar os metodos:
-// - que gera o grafo todo SEM levar em conta os entry points
-// - que gera o grafo todo LEVANDO em conta os entry points
+// Computes a call graph by looking for all
+// methods in the program or by starting by
+// the program's entrypoints. This execution depends
+// on the entrypoints inside the ExecutionContext data.
 CGModel computeCallGraphConditional(ExecutionContext ctx) {
 	MethodTable entryPoints = (s: ctx.mt[s] | s <- ctx.mt, ctx.mt[s].entryPoint == true);
 	if (size(entryPoints) == 0) {
