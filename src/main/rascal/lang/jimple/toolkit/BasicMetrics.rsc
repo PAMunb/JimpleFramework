@@ -37,7 +37,7 @@ public list[Method] methodsIdentification(ExecutionContext ctx) {
   return lm; 
 }
 public Method firstMethod(ExecutionContext ctx){
-	list[Method] lm = methodsId(ctx);
+	list[Method] lm = methodsIdentification(ctx);
 	Method m = head(lm);
 	return m;
 }
@@ -51,6 +51,20 @@ public list[str] methodsName(ExecutionContext ctx){
     }
     return name;
 }
+public list[MethodSignature] methodSignatureList(ExecutionContext ctx){
+	list[MethodSignature] mS = [];
+	top-down visit(ctx) {
+    	
+    	case invokeStmt(specialInvoke(_,methodS,_)): mS = mS+methodS;
+    	case invokeStmt(virtualInvoke(_,methodS,_)): mS = mS+methodS;
+    	case invokeStmt(interfaceInvoke(_,methodS,_)): mS = mS+methodS;
+    	case invokeStmt(staticMethodInvoke(methodS,_)): mS = mS+methodS;
+    	case invokeStmt(dynamicInvoke(methodS,_,_,_)): mS = mS+methodS;
+     	
+    }
+    return mS;
+}
+
 
 
 /**
