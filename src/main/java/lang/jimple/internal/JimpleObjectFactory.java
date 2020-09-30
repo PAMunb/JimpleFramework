@@ -176,6 +176,9 @@ public class JimpleObjectFactory {
 		if((access & Opcodes.ACC_ANNOTATION) != 0) {
 			list.add(Modifier.Annotation());
 		}
+		if((access & Opcodes.ACC_SYNTHETIC) != 0) {
+			list.add(Modifier.Synthetic());
+		}
 		return list;
 	}
 	

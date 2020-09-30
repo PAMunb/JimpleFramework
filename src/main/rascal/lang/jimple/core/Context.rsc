@@ -3,6 +3,10 @@
  * the analysis. Note: this is trully experimental, 
  * and only works as a first attempt to implement a 
  * general framework for running the static analysis. 
+ *
+ * This code is trully experimental. We expect a lot of 
+ * changes in its design. For instance, the name Context 
+ * does not see the most suitable anymore. 
  * 
  * @author: rbonifacio
  */ 
@@ -16,7 +20,6 @@ import io::IOUtil;
 import List; 
 import String; 
 import IO;
-
 
 data ClassType = ApplicationClass()
                | LibraryClass()
@@ -51,8 +54,8 @@ public ClassDecompiler safeDecompile(loc classFile) {
  * argument the execution context and returns a 
  * value of type T.  
  */ 
-data Analysis[&T] = Analysis(&T (ExecutionContext) run);  
-       
+data Analysis[&T] = Analysis(&T (ExecutionContext) run);
+
 /*
  * Create an ExecutionContext.
  *
@@ -63,19 +66,15 @@ data Analysis[&T] = Analysis(&T (ExecutionContext) run);
  *
  * TODO: we should compute the signature of the method before checking if it is 
  * in the <code>entryPoints</code>. 
- */              
-public ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints) {	
-	return createExecutionContext(classPath, entryPoints, false);
-} 
-
-public ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool printErrors) {
+ */
+ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints) = createExecutionContext(classPath, entryPoints, false);
+ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool verbose) {
 	list[ClassDecompiler] classes = loadClasses(classPath);
 	
-	if (printErrors) {		
-		errors = [err | Error(err) <- classes];
-		for(err <- errors){
-			println(err);
-		}
+	errors = [f | Error(f) <- classes]; 
+	
+	if(verbose) {
+		println(errors); 
 	}
 	
 	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
@@ -97,9 +96,10 @@ public ExecutionContext createExecutionContext(list[loc] classPath, list[str] en
  * It first creates an ExecutionContext. Then, it executes the analysis 
  * considering the resulting execution context. 
  * 
- */ 
-public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis) {
-	ExecutionContext ctx = createExecutionContext(classPath, entryPoints);
+ */
+public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis) = execute(classPath, entryPoints, analysis, false); 
+public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis, bool verbose) {
+	ExecutionContext ctx = createExecutionContext(classPath, entryPoints, verbose);
 		
 	return analysis.run(ctx);
 } 
@@ -108,9 +108,11 @@ public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analy
  * also works when we define the <code>classPath</code>
  * as a list of strings.  
  */
-public &T execute(list[str] classPath, list[str] entryPoints, Analysis[&T] analysis) {
+public &T execute(list[str] classPath, list[str] entryPoints, Analysis[&T] analysis) = execute(classPath, entryPoints, analysis, false);
+public &T execute(list[str] classPath, list[str] entryPoints, Analysis[&T] analysis, bool verbose) {
 	locations = mapper(classPath, toLocation); 
-	return execute(locations, entryPoints, analysis); 
+	bool r1 = verbose;
+	return execute(locations, entryPoints, analysis, r1); 
 }
 
 /* some auxiliarly functions to load all classes on a given class path */ 
