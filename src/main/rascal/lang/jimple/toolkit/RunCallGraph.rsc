@@ -39,16 +39,16 @@ public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 
 
 public void main(){
-	//tuple[list[loc] cp, list[str] e] t = simple();
-	tuple[list[loc] cp, list[str] e] t = iris();
-	//tuple[list[loc] cp, list[str] e] t = slf4j();	
+	tuple[list[loc] cp, list[str] e] t = simple();
+	//tuple[list[loc] cp, list[str] e] t = iris();
+	//tuple[list[loc] cp, list[str] e] t = slf4j();
 
     files = t.cp;
     es = t.e;
    
     // EXECUTION
     //CGModel model = execute(files, es, Analysis(computeCallGraph));
-    CGModel model = execute(files, es, Analysis(computeCallGraphNovo));
+    CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
     //println(model.cg);        
     
     CG cg = model.cg;

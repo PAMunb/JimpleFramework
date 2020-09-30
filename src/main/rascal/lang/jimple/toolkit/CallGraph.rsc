@@ -41,13 +41,16 @@ data CGModel = CGModel(CG cg, MethodMap methodMap);
 /* the empty call graph model */ 
 CGModel emptyModel = CGModel({}, ()); 
 
-
-
 //TODO: diferenciar os metodos:
 // - que gera o grafo todo SEM levar em conta os entry points
 // - que gera o grafo todo LEVANDO em conta os entry points
-
-
+CGModel computeCallGraphConditional(ExecutionContext ctx) {
+	MethodTable entryPoints = (s: ctx.mt[s] | s <- ctx.mt, ctx.mt[s].entryPoint == true);
+	if (size(entryPoints) == 0) {
+		return computeCallGraphFull(ctx);
+	}
+	return computeCallGraphFromEntryPoints(ctx);
+}
 
 /* Computes a "full" call graph from an 
  * execution context. A better approach 
@@ -56,7 +59,7 @@ CGModel emptyModel = CGModel({}, ());
  *
  * Let's fix this implementation latter. 
  */ 
-CGModel computeCallGraph(ExecutionContext ctx) {
+CGModel computeCallGraphFull(ExecutionContext ctx) {
   	list[MethodSignature] methods = []; 
    
    	top-down visit(ctx) {
@@ -70,19 +73,13 @@ CGModel computeCallGraph(ExecutionContext ctx) {
    return computeCallGraph(ctx, methods);
 }
 
-//TODO como lidar com aplicacao parcial de funcao???
-CGModel computeCallGraph(bool full, ExecutionContext ctx) {   
-	println("full");
-   	return emptyModel;
-}
-
 /* Computes a call graph from an execution 
  * context, starting from the entry points 
  * defined in the execution context.
  *
  * TODO review/refactoring 
  */ 
-CGModel computeCallGraphNovo(ExecutionContext ctx) {   
+CGModel computeCallGraphFromEntryPoints(ExecutionContext ctx) {   
    	list[MethodSignature] methods = []; 
    
 	top-down visit(ctx) {
