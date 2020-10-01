@@ -3,6 +3,7 @@ module lang::jimple::toolkit::BasicMetrics
 import lang::jimple::Syntax;
 import lang::jimple::core::Context; 
 import List;
+import lang::jimple::toolkit::CallGraph;
 
 /**
  * Computes the number of classes from 
@@ -51,15 +52,15 @@ public list[str] methodsName(ExecutionContext ctx){
     }
     return name;
 }
-public list[MethodSignature] methodSignatureList(ExecutionContext ctx){
-	list[MethodSignature] mS = [];
+public list[str] methodSignatureList(ExecutionContext ctx){
+	list[str] mS = [];
 	top-down visit(ctx) {
     	
-    	case invokeStmt(specialInvoke(_,methodS,_)): mS = mS+methodS;
-    	case invokeStmt(virtualInvoke(_,methodS,_)): mS = mS+methodS;
-    	case invokeStmt(interfaceInvoke(_,methodS,_)): mS = mS+methodS;
-    	case invokeStmt(staticMethodInvoke(methodS,_)): mS = mS+methodS;
-    	case invokeStmt(dynamicInvoke(methodS,_,_,_)): mS = mS+methodS;
+    	case invokeStmt(specialInvoke(_,methodS,_)): mS = mS+methodSignature(methodS);
+    	case invokeStmt(virtualInvoke(_,methodS,_)): mS = mS+methodSignature(methodS);
+    	case invokeStmt(interfaceInvoke(_,methodS,_)): mS = mS+methodSignature(methodS);
+    	case invokeStmt(staticMethodInvoke(methodS,_)): mS = mS+methodSignature(methodS);
+    	case invokeStmt(dynamicInvoke(methodS,_,_,_)): mS = mS+methodSignature(methodS);
      	
     }
     return mS;
