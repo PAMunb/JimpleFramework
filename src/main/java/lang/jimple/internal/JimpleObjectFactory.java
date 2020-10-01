@@ -123,7 +123,7 @@ public class JimpleObjectFactory {
 			return objectConstructor(objectName);
 		}
 		else if(descriptor.startsWith("[")) {  // array types 
-			String baseType = descriptor.substring(0, descriptor.length());				
+			String baseType = descriptor.substring(1, descriptor.length());				
 			return Type.TArray(type(baseType));	
 		}
 		
@@ -175,6 +175,9 @@ public class JimpleObjectFactory {
 		}
 		if((access & Opcodes.ACC_ANNOTATION) != 0) {
 			list.add(Modifier.Annotation());
+		}
+		if((access & Opcodes.ACC_SYNTHETIC) != 0) {
+			list.add(Modifier.Synthetic());
 		}
 		return list;
 	}

@@ -15,6 +15,7 @@ data Value
  | floatValue(Float fv)
  | doubleValue(Double fv)
  | stringValue(String sv)
+ | booleanValue(bool bl)
  | methodValue(Type returnType, list[Type] formals)
  | classValue(str name)
  | methodHandle(MethodSignature methodSig)
@@ -175,6 +176,7 @@ data Modifier
   | Strictfp() 
   | Enum() 
   | Annotation()
+  | Synthetic()        // handle invoke dynamic call with lambda expressions.
   ;
   
 /**

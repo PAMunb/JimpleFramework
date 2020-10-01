@@ -3,6 +3,10 @@
  * the analysis. Note: this is trully experimental, 
  * and only works as a first attempt to implement a 
  * general framework for running the static analysis. 
+ *
+ * This code is trully experimental. We expect a lot of 
+ * changes in its design. For instance, the name Context 
+ * does not see the most suitable anymore. 
  * 
  * @author: rbonifacio
  */ 
@@ -15,6 +19,8 @@ import io::IOUtil;
 
 import List; 
 import String; 
+
+import IO;
 
 data ClassType = ApplicationClass()
                | LibraryClass()
@@ -51,7 +57,6 @@ public ClassDecompiler safeDecompile(loc classFile) {
 data Analysis[&T] = Analysis(&T (ExecutionContext) run);  
                   
 
-
 /*
  * This is our current execution framework. 
  *
@@ -64,8 +69,14 @@ data Analysis[&T] = Analysis(&T (ExecutionContext) run);
  * TODO: we should compute the signature of the method before checking if it is 
  * in the <code>entryPoints</code>. 
  */ 
-public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis) {
+public &T execute(list[loc] classPath, list[str] entryPoints, Analysis[&T] analysis, bool verbose = false) {
 	list[ClassDecompiler] classes = loadClasses(classPath);
+	
+	errors = [f | Error(f) <- classes]; 
+	
+	if(verbose) {
+		println(errors); 
+	}
 	
 	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
 	
