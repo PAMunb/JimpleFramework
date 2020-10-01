@@ -1267,7 +1267,7 @@ public class Decompiler {
 					}
 					else {
 						newLabels.put(labelIns.label, count);
-						labelIns.label = String.format("label%d", count++);  // update the label to a more user friendly string
+						labelIns.label = String.format("label%d", count++);
 					}
 				}
 			}

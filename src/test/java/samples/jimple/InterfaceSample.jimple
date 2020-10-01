@@ -8,11 +8,11 @@ public interface  InterfaceSample extends java.lang.Object
         java.io.PrintStream $r0;
         InterfaceSample r1;
 
-        r1 := @this;
+        r1 := @this: InterfaceSample;
 
-        $r0 = java.lang.System.out;
+        $r0 = <java.lang.System: java.io.PrintStream out>;
 
-        $r0.println("abc");
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("abc");
 
         return;
     }

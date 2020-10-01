@@ -5,9 +5,9 @@ public class WhileStmtSample extends java.lang.Object
     {
         WhileStmtSample r0;
 
-        r0 := @this;
+        r0 := @this: WhileStmtSample;
 
-        specialinvoke r0.<init>();
+        specialinvoke r0.<java.lang.Object: void <init>()>();
 
         return;
     }
@@ -16,7 +16,7 @@ public class WhileStmtSample extends java.lang.Object
     {
         int i0, i1;
 
-        i0 := @parameter0;
+        i0 := @parameter0: int;
 
         i1 = i0;
 

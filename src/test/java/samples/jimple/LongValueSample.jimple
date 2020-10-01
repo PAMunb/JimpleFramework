@@ -5,9 +5,9 @@ public class LongValueSample extends java.lang.Object
     {
         LongValueSample r0;
 
-        r0 := @this;
+        r0 := @this: LongValueSample;
 
-        specialinvoke r0.<init>();
+        specialinvoke r0.<java.lang.Object: void <init>()>();
 
         return;
     }
@@ -17,11 +17,11 @@ public class LongValueSample extends java.lang.Object
         long $l2;
         java.io.PrintStream $r0;
 
-        $r0 = java.lang.System.out;
+        $r0 = <java.lang.System: java.io.PrintStream out>;
 
         $l2 = 10L + 20L;
 
-        $r0.println($l2);
+        virtualinvoke $r0.<java.io.PrintStream: void println(long)>($l2);
 
         return;
     }

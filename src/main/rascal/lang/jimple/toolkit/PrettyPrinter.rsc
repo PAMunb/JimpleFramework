@@ -14,6 +14,7 @@ import lang::jimple::core::Context;
  *  Missing local variable decl (the one with $ symbol.
  *  label1: is comming with ":".
  *  Sort LocalVariableDeclaration by variable name.
+ *  Changes in .classpath file  made the test-classes dir, on target, disappear. This broke the Test*.rsc files. 
  */
 
 /* 
@@ -106,7 +107,6 @@ str prettyPrint(FieldSignature::fieldSignature(Name className, Type fieldType, N
 /* 
  * Case
  */
-
 str prettyPrint(CaseStmt::caseOption(Int option, Label targetStmt)) = "case";
 str prettyPrint(CaseStmt::defaultOption(Label targetStmt)) = "default";
 
@@ -122,7 +122,8 @@ str prettyPrint(Expression::invokeExp(InvokeExp expression)) = "<prettyPrint(exp
 str prettyPrint(Expression::arraySubscript(Name name, Immediate immediate)) = "";
 str prettyPrint(Expression::stringSubscript(String string, Immediate immediate)) = "";
 str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "";
-str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = "\<<className> <prettyPrint(fieldType)> <fieldName>\>";
+str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = 
+	"\<<className> <prettyPrint(fieldType)> <fieldName>\>";
 str prettyPrint(Expression::and(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> & <prettyPrint(rhs)>";
 str prettyPrint(Expression::or(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> | <prettyPrint(rhs)>";
 str prettyPrint(Expression::xor(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> ^ <prettyPrint(rhs)>";
@@ -179,7 +180,6 @@ str prettyPrint(InvokeExp invoke) {
 	Functions for printing ClassOrInterfaceDeclaration and its
 	related upper parts.
 */
-
 str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)) =
 	"<className>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)";
 

@@ -5,9 +5,9 @@ public abstract class AbstractClassSample extends java.lang.Object
     {
         AbstractClassSample r0;
 
-        r0 := @this;
+        r0 := @this: AbstractClassSample;
 
-        specialinvoke r0.<init>();
+        specialinvoke r0.<java.lang.Object: void <init>()>();
 
         return;
     }
