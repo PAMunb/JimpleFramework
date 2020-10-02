@@ -9,10 +9,7 @@ import Map;
 import String;
 import IO;
 
-/* ISSUES:
- * - #3: A new call graph analysis that starts from the entry points.
- *
- */
+import Type;
 
 /* 
  * a map from method signatures 
@@ -85,8 +82,6 @@ CGModel computeCallGraphFromEntryPoints(ExecutionContext ctx) {
    
 	top-down visit(ctx) {
      	case classDecl(TObject(cn), _, _, _, _, mss): {
-            //methods = methods + [methodSignature(cn, r,n,f) | /Method(method(m,r,n,f,e,b),true) <- ctx];
-            //methods = methods + [methodSignature(cn, r, n, f) | /Method(method(m,r,n,f,e,b),true) <- ctx, method(m,r,n,f,e,b) in mss];
          	for(method(_,r,mn,args,_,_) <- mss){
             	sig = signature(cn, mn, args);            	
             	if(ctx.mt[sig].entryPoint){
@@ -104,7 +99,7 @@ CGModel computeCallGraphFromEntryPoints(ExecutionContext ctx) {
  * passed as parameter.
  *
  */ 
-CGModel computeCallGraph(ExecutionContext ctx, list[MethodSignature] methods) {
+private CGModel computeCallGraph(ExecutionContext ctx, list[MethodSignature] methods) {
    	cg = emptyModel;        
   	return computeCallGraph(methods, cg, ctx);
 }
@@ -114,8 +109,8 @@ CGModel computeCallGraph(ExecutionContext ctx, list[MethodSignature] methods) {
  * This is a recursive implementation, using the 
  * second argument as an acummulator.  
  */
-CGModel computeCallGraph([], CGModel model, _) = model;
-CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, ExecutionContext ctx) {
+private CGModel computeCallGraph([], CGModel model, _) = model;
+private CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, ExecutionContext ctx) {
 	MethodSignature currentMethod = head(methods);
   	
   	mm = model.methodMap; 
@@ -149,48 +144,55 @@ CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, Execution
 }
 
 //specialInvoke
-public tuple[CG cg, MethodMap mm, list[MethodSignature] methods] compute(str sig1, specialInvoke(_, methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
-	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, specialInvoke(_, ms, _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(from, ms, methods, cg, mm, ctx);
 }
 
 //virtualInvoke
-public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, virtualInvoke(_, methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
-	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, virtualInvoke(_, ms, _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(from, ms, methods, cg, mm, ctx);
 }
 
 //interfaceInvoke
-public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, interfaceInvoke(_, methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
-	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, interfaceInvoke(_, ms, _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(from, ms, methods, cg, mm, ctx);
 }
 
 //staticMethodInvoke
-public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, staticMethodInvoke(methodSignature(cn, r, mn, args), _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
-	return compute(sig1,methodSignature(cn, r, mn, args), methods, cg, mm, ctx);
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, staticMethodInvoke(ms, _), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+	return compute(from, ms, methods, cg, mm, ctx);
 	//TODO: infinite loop when testing SLF4J
 	//return <cg,mm,methods>;
 }
 
 //dynamicInvoke
-public tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, dynamicInvoke(_,_,_,_), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, dynamicInvoke(_,_,_,_), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
 	//TODO implement dynamicInvoke
 	return <cg,mm,methods>;
 }
 
-public tuple[CG, MethodMap, list[MethodSignature]] compute(str from, methodSignature(cn, r, mn, args), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx) {	
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, methodSignature(cn, r, mn, args), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx) {	
 	to = signature(cn,mn,args); 
 	//println("\ncomputeCallGraph .... <method>");
-	//println("\tsig1="+sig1);
-	//println("\t\tsig2_static="+sig2);
+	//println("\tsig1="+from);
+	//println("\t\tsig2_static="+to);	
 	if(! (to in mm)) {
 		mm[to] = "M" + "<size(mm) + 1>"; 
 	}
-	//insert a new relation in the call graph
-	cg = cg + <mm[from], mm[to]>;   
-	//do not follow external methods
+	//define the new relation <from, to>
+	newRelation = <mm[from], mm[to]>;
+	//the relation already exists in the call graph?
+	//this will be used later to avoid cycles
+	alreadyExists = newRelation in cg;
+	//insert the new relation in the call graph
+	cg = cg + newRelation;   
+	//do not follow external methods (not declared in the context)
 	if(to in ctx.mt){
+		//TODO update when decompiler replaces '/' for '.'
 		sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
-  		if(! (sig in methods)){
+  		if( (!(sig in methods)) && !alreadyExists){
   			//if method exists in the context add it to methods list, to be treated
+  			//don't add the method if the relation already exists, to avoid cycles
   			methods = methods + sig;
   		}
 	}

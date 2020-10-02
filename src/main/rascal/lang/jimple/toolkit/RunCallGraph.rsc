@@ -46,6 +46,9 @@ public void main(){
     files = t.cp;
     es = t.e;
    
+   	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/CallGraphWithCycle.class|];
+    es = [];//["samples.TestCallGraph.execute()"];
+   
     // EXECUTION
     //CGModel model = execute(files, es, Analysis(computeCallGraph));
     CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
