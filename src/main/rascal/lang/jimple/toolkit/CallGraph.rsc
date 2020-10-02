@@ -116,22 +116,22 @@ private CGModel computeCallGraph(list[MethodSignature] methods, CGModel model, E
   	mm = model.methodMap; 
   	cg = model.cg; 
   
-  	str sig1 = signature(currentMethod.className, currentMethod.methodName, currentMethod.formals);  
+  	str from = signature(currentMethod.className, currentMethod.methodName, currentMethod.formals);  
   	
   	//do not follow external methods
   	//if current method exists in context's methods table
-  	if(sig1 in ctx.mt){
+  	if(from in ctx.mt){
   	  	
-  		if(! (sig1 in mm)) {
+  		if(! (from in mm)) {
   			//define a simple name for current method
   			//if it doesnt already exists
-  			mm[sig1] = "M" + "<size(mm) + 1>"; 
+  			mm[from] = "M" + "<size(mm) + 1>"; 
   		}
     
     	//visit the current method body, searching for invoke expressions
-	  	top-down visit(ctx.mt[sig1].method.body) {	 	
+	  	top-down visit(ctx.mt[from].method.body) {	 	
 	  		case InvokeExp e:{
-	  			tuple[CG c, MethodMap m, list[MethodSignature] ms] t = compute(sig1, e, methods, cg, mm, ctx);
+	  			tuple[CG c, MethodMap m, list[MethodSignature] ms] t = compute(from, e, methods, cg, mm, ctx);
 	      		cg = t.c;
 	      		mm = t.m;
 	      		methods = t.ms;	  
@@ -166,7 +166,7 @@ private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, staticMeth
 }
 
 //dynamicInvoke
-private tuple[CG, MethodMap, list[MethodSignature]] compute(str sig1, dynamicInvoke(_,_,_,_), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
+private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, dynamicInvoke(_,_,_,_), list[MethodSignature] methods, CG cg, MethodMap mm, ExecutionContext ctx){
 	//TODO implement dynamicInvoke
 	return <cg,mm,methods>;
 }
