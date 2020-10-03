@@ -60,6 +60,7 @@ CGModel computeCallGraphConditional(ExecutionContext ctx) {
 CGModel computeCallGraphFull(ExecutionContext ctx) {
   	list[MethodSignature] methods = []; 
    
+   	//get all methods
    	top-down visit(ctx) {
      	case classDecl(TObject(cn), _, _, _, _, mss): {
      		for(method(_,r,mn,args,_,_) <- mss){
@@ -80,6 +81,7 @@ CGModel computeCallGraphFull(ExecutionContext ctx) {
 CGModel computeCallGraphFromEntryPoints(ExecutionContext ctx) {   
    	list[MethodSignature] methods = []; 
    
+   	//get all methods marked as entry points in the execution context
 	top-down visit(ctx) {
      	case classDecl(TObject(cn), _, _, _, _, mss): {
          	for(method(_,r,mn,args,_,_) <- mss){
@@ -190,7 +192,7 @@ private tuple[CG, MethodMap, list[MethodSignature]] compute(str from, methodSign
 	if(to in ctx.mt){
 		//TODO update when decompiler replaces '/' for '.'
 		sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
-  		if( (!(sig in methods)) && !alreadyExists){
+  		if( !(sig in methods) && !alreadyExists){
   			//if method exists in the context add it to methods list, to be treated
   			//don't add the method if the relation already exists, to avoid cycles
   			methods = methods + sig;

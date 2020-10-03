@@ -1,16 +1,7 @@
 module lang::jimple::toolkit::GraphUtil
 
-
-import IO;
-import Map;
-import Relation;
-import Type;
 import Set;
 import List;
-import util::Math;
-import vis::Figure;
-import vis::ParseTree;
-import vis::Render;
 import analysis::graphs::Graph;
 
 @doc{

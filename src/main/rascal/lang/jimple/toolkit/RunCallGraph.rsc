@@ -16,6 +16,14 @@ import lang::jimple::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 
+public tuple[list[loc] classPath, list[str] entryPoints] polymorphism() {
+	//TODO compile class before using: mvn test -DskipTests
+	files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
+    es = ["samples.callgraph.polymorphism.Main.execute()"];
+    //es = ["samples.callgraph.polymorphism.Main.main(TArray(TObject(\"java.lang.String\")))"];
+	return <files, es>;
+}
+
 public tuple[list[loc] classPath, list[str] entryPoints] iris() {
 	files = [|project://JimpleFramework/src/test/resources/iris-core/|];
     es = ["br.unb.cic.iris.core.SystemFacade.send(TObject(\"br.unb.cic.iris.core.model.EmailMessage\"))"];
@@ -31,7 +39,7 @@ public tuple[list[loc] classPath, list[str] entryPoints] slf4j() {
 public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
+    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
     //es = ["samples.TestCallGraph.execute()"];
     //es = ["samples.callgraph.simple.SimpleCallGraph.B()","samples.TestCallGraph.C()"];
     return <files, es>;
@@ -39,15 +47,13 @@ public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 
 
 public void main(){
-	tuple[list[loc] cp, list[str] e] t = simple();
+	//tuple[list[loc] cp, list[str] e] t = polymorphism();
+	//tuple[list[loc] cp, list[str] e] t = simple();
 	//tuple[list[loc] cp, list[str] e] t = iris();
-	//tuple[list[loc] cp, list[str] e] t = slf4j();
+	tuple[list[loc] cp, list[str] e] t = slf4j();
 
     files = t.cp;
     es = t.e;
-   
-   	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/CallGraphWithCycle.class|];
-    es = [];//["samples.TestCallGraph.execute()"];
    
     // EXECUTION
     //CGModel model = execute(files, es, Analysis(computeCallGraph));
@@ -93,7 +99,8 @@ public void main(){
 
 
 public void show(){
-	files = [|project://JimpleFramework/src/test/resources/slf4j/|];	
+	files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
+	//files = [|project://JimpleFramework/src/test/resources/slf4j/|];	
 	//files = [|project://JimpleFramework/src/test/resources/iris-core/|];
 	es = [];
 

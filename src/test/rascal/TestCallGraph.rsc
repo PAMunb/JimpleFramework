@@ -5,11 +5,12 @@ import lang::jimple::toolkit::CallGraph;
 import lang::jimple::toolkit::GraphUtil;
 
 import Map;
+import IO;
  
 //compile test classes before running this test:
 //mvn test -DskipTest
 
-test bool testSimpleGraph(){
+test bool testSimpleCallGraph(){
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
 	es = [];
 	CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
@@ -29,7 +30,7 @@ test bool testSimpleGraph(){
 	return validPath && validPath2 && validPath3 && !invalidPath;
 }
 
-test bool testSimpleGraphWithEntryPointA(){
+test bool testSimpleCallGraphWithEntryPointA(){
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
 	es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
 	CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
@@ -50,7 +51,7 @@ test bool testSimpleGraphWithEntryPointA(){
 	return validPath && validPath2 && validPath3 && !invalidPath && !invalidPath2;
 }
 
-test bool testSimpleGraphWithEntryPointsBandC(){
+test bool testSimpleCallGraphWithEntryPointsBandC(){
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
 	es = ["samples.callgraph.simple.SimpleCallGraph.B()","samples.callgraph.simple.SimpleCallGraph.C()"];
 	CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
