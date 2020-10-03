@@ -7,14 +7,13 @@ import Type;
 import Set;
 import List;
 import util::Math;
-import vis::Figure;
-import vis::ParseTree;
 import vis::Render;
 import analysis::graphs::Graph;
 
 import lang::jimple::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
+import lang::jimple::toolkit::GraphUtil;
 
 public tuple[list[loc] classPath, list[str] entryPoints] polymorphism() {
 	//TODO compile class before using: mvn test -DskipTests
@@ -48,9 +47,9 @@ public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 
 public void main(){
 	//tuple[list[loc] cp, list[str] e] t = polymorphism();
-	//tuple[list[loc] cp, list[str] e] t = simple();
+	tuple[list[loc] cp, list[str] e] t = simple();
 	//tuple[list[loc] cp, list[str] e] t = iris();
-	tuple[list[loc] cp, list[str] e] t = slf4j();
+	//tuple[list[loc] cp, list[str] e] t = slf4j();
 
     files = t.cp;
     es = t.e;
@@ -61,9 +60,10 @@ public void main(){
     //println(model.cg);        
     
     CG cg = model.cg;
-    mm = invert(model.methodMap);
+    mm = invertUnique(model.methodMap);
+    //mm = invert(model.methodMap);
     println("\n\n");
-    println(typeOf(cg));    
+    println(typeOf(mm));    
     
     nCalls = size(model.cg);
     println("Number os calls: "+toString(nCalls));
@@ -77,7 +77,7 @@ public void main(){
     println("\nNumber of Entry Points: "+toString(size(entryPoints)));
     println("Entry Points: "+toString(entryPoints));
     procsList = toList(procs);
-    println([name | nn <- procsList, name <- mm[nn]]);
+    println([mm[name] | name <- procsList]);
     
     bottomCalls = bottom(cg);
     println("\nNumber of Bottom Calls (leaves): "+toString(size(bottomCalls)));
@@ -90,11 +90,12 @@ public void main(){
     println("\nConnected Components: "+toString(connections));
     
     // draw the call graph
-    procsList = toList(procs);
-    //nodes = toList({box(text(name), id(name), size(50), fillColor("lightgreen")) | name <- procsList});    
-    nodes = toList({box(text(name), id(nn), size(50), fillColor("lightgreen")) | nn <- procsList, name <- mm[nn]});
-    edges = [edge(c.from,c.to) | c <- cg];    
-    render(graph(nodes, edges, hint("layered"), std(size(20)), gap(10)));    
+    render(toFigure(cg));   
+    //render(toFigure(cg,mm));
+    
+    //to dot (use xdot or graphviz to view)
+    println("DOT:");
+    println(toDot(cg, "CallGraph", mm));
 }
 
 
@@ -133,34 +134,3 @@ private void show(method(_, _, Name name, list[Type] args, _, _)){
 	println("\t - <name>(<intercalate(",", args)>)");
 }
 
-public void novo(){
-    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
-
-    ExecutionContext ctx =  createExecutionContext(files,es);
-    //println(ctx.mt);
-    
-    println(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body);
-    
-    //para testar uma forma de tratar os invokes
-    println("visitando");
-    visit(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body){
-    	//case InvokeExp e: {
-    	case InvokeExp e: {//_(_,methodSignature(cn, r, mn, args),_): {
-    		//sig = signature(cn,mn,args); 
-      		println("ENTROU!!! ");//+sig);
-      		//println(e);
-      		teste(e);
-    	} 
-
-    	//esse funciona mas fica mostrando erro no eclipse  
-    	//case &T _(_, methodSignature(cn, r, mn, args), _): {
-        //    println("aaa");
-        //} 	
-    }
-
-}
-
-public void teste(virtualInvoke(_, sig, _)) {
-	println("teste");
-}
