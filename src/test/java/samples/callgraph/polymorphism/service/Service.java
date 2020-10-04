@@ -6,8 +6,9 @@ import java.util.Optional;
 
 import samples.callgraph.polymorphism.domain.Entity;
 import samples.callgraph.polymorphism.repository.Repository;
+import samples.callgraph.polymorphism.util.Log;
 
-public interface Service<E extends Entity<ID>, ID extends Serializable> {
+public interface Service<E extends Entity<ID>, ID extends Serializable> extends Log {
 
 	Repository<E, ID> getRepository();
 
