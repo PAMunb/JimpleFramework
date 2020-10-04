@@ -78,6 +78,7 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 	}
 	
 	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
+	ct = ct + (n : Class(interfaceDecl(n, ms, is, fs, mss), ApplicationClass()) | Success(interfaceDecl(n, ms, is, fs, mss)) <- classes);
 	
 	MethodTable mt = ();
 		
