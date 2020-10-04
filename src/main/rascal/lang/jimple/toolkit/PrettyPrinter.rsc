@@ -123,11 +123,10 @@ str prettyPrint(Expression::newArray(Type baseType, list[ArrayDescriptor] dims))
 str prettyPrint(Expression::cast(Type toType, Immediate immeadiate)) = "(<prettyPrint(toType)>) <prettyPrint(immeadiate)>";
 str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<prettyPrint(immediate)> instanceof <prettyPrint(baseType)>";
 str prettyPrint(Expression::invokeExp(InvokeExp expression)) = "<prettyPrint(expression)>";
-str prettyPrint(Expression::arraySubscript(Name name, Immediate immediate)) = "";
-str prettyPrint(Expression::stringSubscript(String string, Immediate immediate)) = "";
+str prettyPrint(Expression::arraySubscript(Name name, Immediate immediate)) = "<name>[<prettyPrint(immediate)>]";
+str prettyPrint(Expression::stringSubscript(String string, Immediate immediate)) = "\"<string>\"[<prettyPrint(immediate)>]";
 str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "";
-str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = 
-	"\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
+str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = "\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
 str prettyPrint(Expression::and(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> & <prettyPrint(rhs)>";
 str prettyPrint(Expression::or(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> | <prettyPrint(rhs)>";
 str prettyPrint(Expression::xor(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> ^ <prettyPrint(rhs)>";
@@ -191,7 +190,7 @@ str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType
 	"<className>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)";
 
 str prettyPrint(UnnamedMethodSignature::unnamedMethodSignature(Type returnType, list[Type] formals)) =
-	"<prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)";
+	"<prettyPrint(returnType)> (<prettyPrint(formals,"")>)";
 
 public str prettyPrint(list[Modifier] modifiers) {
   str text = "";
@@ -265,6 +264,11 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
         	'<prettyPrint(fields)> <prettyPrint(methods)>
 			'}";
     default: return "error";
-  }   
+  }
 }
+
+
+str prettyPrint(ExecutionContext ctx) {
+	   return "TODO";
+	}
 
