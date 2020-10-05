@@ -9,8 +9,8 @@ import lang::jimple::core::Context;
  *	Methods in interfaces are printed in a diferent way than in classes; interfaces have a ';' and no {}.
  *	 
  * TODO Jimple Decompiler:
- * 	Missing <clinit> method (static initialization blocks for the class, and static field initialization).
  *  Missing local variable decl (the one with $ symbol.
+ *  execute from Context does not process interfaces.
  *  Sort LocalVariableDeclaration by variable name.
  *  Changes in .classpath file  made the test-classes dir, on target, disappear. This broke the Test*.rsc files. 
  */
@@ -34,6 +34,7 @@ str prettyPrint(Value::nullValue()) = "null";
 */
 str prettyPrint(Immediate::local(String localName)) = "<localName>";
 str prettyPrint(Immediate::iValue(Value v)) = "<prettyPrint(v)>";
+str prettyPrint(Immediate::caughtException()) = "TODO";
 
 /* 
 	Modifiers 
@@ -51,6 +52,7 @@ str prettyPrint(Modifier::Transient()) = "transient";
 str prettyPrint(Modifier::Volatile()) =  "volatile";
 str prettyPrint(Modifier::Enum()) =  "enum";
 str prettyPrint(Modifier::Annotation()) =  "annotation";
+str prettyPrint(Modifier::Synthetic()) =  "TODO";
 
 /* 
 	Types 
@@ -240,7 +242,7 @@ public str prettyPrint(list[Field] fields) =
 public str prettyPrint(LocalVariableDeclaration::localVariableDeclaration(Type varType, Identifier local)) = 
 	"<prettyPrint(varType)> <local>;";
 
-public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClauses)) =
+public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClauses)) = //TODO catchClauses
 	"<for(l <- localVars){>
 	'   <prettyPrint(l)><}>
 	'<for(s <- stmts){>
@@ -257,15 +259,6 @@ public str prettyPrint(Method m: method(modifiers, returnType, name, formals, ex
 public str prettyPrint(list[Method] methods) =
 	"<for(m <- methods){>
 	'    <prettyPrint(m)><}>";
-
-/*
-Class or interface format:
-	modifiers "class" typeName "extends" superClass  | "implements" interfaces | { }
-	modifiers "interface" typeName "extends" superClass { }	
-Example code:
-	rascal>ClassOrInterfaceDeclaration x = classDecl(TObject("samples.Test"), [Public()], TObject("java.util.List"), [], [], []);
-	rascal>prettyPrint(x);
-*/
 
 public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
@@ -288,14 +281,14 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
 
 alias PrettyPrintMap = map[str, str]; 
 
-data PrettyPrintModel = PrettyPrintModel(PrettyPrintMap ppMap);
+public data PrettyPrintModel = PrettyPrintModel(PrettyPrintMap ppMap);
 
-PrettyPrintModel prettyPrint(ExecutionContext ctx) {
-	PrettyPrintMap ppMap = ();
+public map[str, str] PrettyPrint(ExecutionContext ctx) {
+	map[str, str] ppMap = ();
 	
 	top-down visit(ctx) {
 		case classDecl(n, ms, s, is, fs, mss): ppMap[prettyPrint(n)] = prettyPrint(classDecl(n, ms, s, is, fs, mss)); 
 	}	
-	return PrettyPrintModel(ppMap);
+	return ppMap;
 }
 
