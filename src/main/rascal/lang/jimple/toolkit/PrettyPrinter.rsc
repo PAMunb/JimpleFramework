@@ -9,10 +9,8 @@ import lang::jimple::core::Context;
  *	Methods in interfaces are printed in a diferent way than in classes; interfaces have a ';' and no {}.
  *	 
  * TODO Jimple Decompiler:
- * 	Missing @this initialization
  * 	Missing <clinit> method (static initialization blocks for the class, and static field initialization).
  *  Missing local variable decl (the one with $ symbol.
- *  label1: is comming with ":".
  *  Sort LocalVariableDeclaration by variable name.
  *  Changes in .classpath file  made the test-classes dir, on target, disappear. This broke the Test*.rsc files. 
  */
@@ -27,8 +25,8 @@ str prettyPrint(Value::doubleValue(Double fv)) = "<fv>";
 str prettyPrint(Value::stringValue(String sv)) = "\"<sv>\"";
 str prettyPrint(Value::booleanValue(bool bl)) = "<bl>";
 str prettyPrint(Value::classValue(str name)) = name;
-str prettyPrint(Value::methodValue(Type returnType, list[Type] formals)) = "";
-str prettyPrint(Value::fieldHandle(FieldSignature fieldSig)) = "";
+str prettyPrint(Value::methodValue(Type returnType, list[Type] formals)) = "TODO";
+str prettyPrint(Value::fieldHandle(FieldSignature fieldSig)) = "TODO";
 str prettyPrint(Value::nullValue()) = "null";
 
 /* 
@@ -77,8 +75,8 @@ str prettyPrint(Statement::label(Label label)) = "\b\b\b<label>:";
 str prettyPrint(Statement::breakpoint()) = "breakpoint;";
 str prettyPrint(Statement::enterMonitor(Immediate immediate)) = "entermonitor <prettyPrint(immediate)>;";
 str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "exitmonitor <prettyPrint(immediate)>;";
-str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = "tableswitch"; //TODO
-str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = "lookupswitch"; //TODO
+str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = "TODO";
+str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = "TODO";
 str prettyPrint(Statement::identity(Name local, Name identifier, Type idType)) = "<local> := <identifier>: <prettyPrint(idType)>;";
 str prettyPrint(Statement::identityNoType(Name local, Name identifier)) = "<local> := <identifier>;";
 str prettyPrint(Statement::assign(Variable var, Expression expression)) = "<prettyPrint(var)> = <prettyPrint(expression)>;";
@@ -112,8 +110,8 @@ str prettyPrint(FieldSignature::fieldSignature(Name className, Type fieldType, N
 str prettyPrint(CaseStmt::caseOption(Int option, Label targetStmt)) = "case";
 str prettyPrint(CaseStmt::defaultOption(Label targetStmt)) = "default";
 
-str prettyPrint(ArrayDescriptor::fixedSize(Int size)) = "";
-str prettyPrint(ArrayDescriptor::variableSize()) = "";
+str prettyPrint(ArrayDescriptor::fixedSize(Int size)) = "TODO";
+str prettyPrint(ArrayDescriptor::variableSize()) = "TDO";
 
 /* 
  * Expression
@@ -125,7 +123,7 @@ str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<
 str prettyPrint(Expression::invokeExp(InvokeExp expression)) = "<prettyPrint(expression)>";
 str prettyPrint(Expression::arraySubscript(Name name, Immediate immediate)) = "<name>[<prettyPrint(immediate)>]";
 str prettyPrint(Expression::stringSubscript(String string, Immediate immediate)) = "\"<string>\"[<prettyPrint(immediate)>]";
-str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "";
+str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "<local>.\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
 str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = "\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
 str prettyPrint(Expression::and(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> & <prettyPrint(rhs)>";
 str prettyPrint(Expression::or(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> | <prettyPrint(rhs)>";
@@ -172,9 +170,9 @@ str prettyPrint(InvokeExp invoke) {
 	    case interfaceInvoke(local, sig, args): 
 	    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
 	    case staticMethodInvoke(sig,  args): 
-	    	return "staticinvoke";
-	    case dynamicInvoke(bsmSig, bsmArgs, sig, args): 
-	    	return "dynamicinvoke";
+	    	return "staticinvoke \<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
+	    case dynamicInvoke(bsmSig, bsmArgs, sig, args): //TODO 
+	    	return "dynamicinvoke TODO";
 	    default: return "error";    
 	  }
 	}
@@ -268,7 +266,16 @@ public str prettyPrint(ClassOrInterfaceDeclaration unit) {
 }
 
 
-str prettyPrint(ExecutionContext ctx) {
-	   return "TODO";
-	}
+alias PrettyPrintMap = map[str, str]; 
+
+data PrettyPrintModel = PrettyPrintModel(PrettyPrintMap ppMap);
+
+PrettyPrintModel prettyPrint(ExecutionContext ctx) {
+	PrettyPrintMap ppMap = ();
+	
+	top-down visit(ctx) {
+		case classDecl(n, ms, s, is, fs, mss): ppMap[prettyPrint(n)] = prettyPrint(classDecl(n, ms, s, is, fs, mss)); 
+	}	
+	return PrettyPrintModel(ppMap);
+}
 
