@@ -71,7 +71,7 @@ str prettyPrint(Type::TUnknown()) = "unknown";
 /* 
  * Statements
  */
-str prettyPrint(Statement::label(Label label)) = "\b\b\b<label>:";
+str prettyPrint(Statement::label(Label label)) = "<label>:";
 str prettyPrint(Statement::breakpoint()) = "breakpoint;";
 str prettyPrint(Statement::enterMonitor(Immediate immediate)) = "entermonitor <prettyPrint(immediate)>;";
 str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "exitmonitor <prettyPrint(immediate)>;";
@@ -244,8 +244,9 @@ public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClause
 	"<for(l <- localVars){>
 	'   <prettyPrint(l)><}>
 	'<for(s <- stmts){>
-	'
-	'   <prettyPrint(s)><}>";
+	'<if (s is label) {>
+	'<prettyPrint(s)><} else {>
+	'   <prettyPrint(s)><}><}>";
 
 public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
 	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>) <prettyPrint(exceptions,"throws ")>
