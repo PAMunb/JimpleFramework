@@ -75,8 +75,16 @@ str prettyPrint(Statement::label(Label label)) = "\b\b\b<label>:";
 str prettyPrint(Statement::breakpoint()) = "breakpoint;";
 str prettyPrint(Statement::enterMonitor(Immediate immediate)) = "entermonitor <prettyPrint(immediate)>;";
 str prettyPrint(Statement::exitMonitor(Immediate immediate)) = "exitmonitor <prettyPrint(immediate)>;";
-str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = "TODO";
-str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = "TODO";
+str prettyPrint(Statement::tableSwitch(Immediate immediate, int min, int max, list[CaseStmt] stmts)) = 
+	"tableswitch(<prettyPrint(immediate)>)
+	'{<for(s <- stmts) {>
+	'    <prettyPrint(s)><}>
+	'}";
+str prettyPrint(Statement::lookupSwitch(Immediate immediate, list[CaseStmt] stmts)) = 
+	"lookupswitch(<prettyPrint(immediate)>)
+	'{<for(s <- stmts) {>
+	'    <prettyPrint(s)><}>
+	'}";
 str prettyPrint(Statement::identity(Name local, Name identifier, Type idType)) = "<local> := <identifier>: <prettyPrint(idType)>;";
 str prettyPrint(Statement::identityNoType(Name local, Name identifier)) = "<local> := <identifier>;";
 str prettyPrint(Statement::assign(Variable var, Expression expression)) = "<prettyPrint(var)> = <prettyPrint(expression)>;";
@@ -107,17 +115,17 @@ str prettyPrint(FieldSignature::fieldSignature(Name className, Type fieldType, N
 /* 
  * Case
  */
-str prettyPrint(CaseStmt::caseOption(Int option, Label targetStmt)) = "case";
-str prettyPrint(CaseStmt::defaultOption(Label targetStmt)) = "default";
+str prettyPrint(CaseStmt::caseOption(Int option, Label targetStmt)) = "case <option>: goto <targetStmt>;";
+str prettyPrint(CaseStmt::defaultOption(Label targetStmt)) = "default: goto <targetStmt>;";
 
-str prettyPrint(ArrayDescriptor::fixedSize(Int size)) = "TODO";
-str prettyPrint(ArrayDescriptor::variableSize()) = "TDO";
+str prettyPrint(ArrayDescriptor::fixedSize(Int size)) = "[<size>]";
+str prettyPrint(ArrayDescriptor::variableSize()) = "[]";
 
 /* 
  * Expression
  */
 str prettyPrint(Expression::newInstance(Type instanceType)) = "new <prettyPrint(instanceType)>";
-str prettyPrint(Expression::newArray(Type baseType, list[ArrayDescriptor] dims)) = "newArray(<prettyPrint(baseType)>[])";
+str prettyPrint(Expression::newArray(Type baseType, list[ArrayDescriptor] dims)) = "newarray (<prettyPrint(baseType)>)<prettyPrint(dims)>";
 str prettyPrint(Expression::cast(Type toType, Immediate immeadiate)) = "(<prettyPrint(toType)>) <prettyPrint(immeadiate)>";
 str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<prettyPrint(immediate)> instanceof <prettyPrint(baseType)>";
 str prettyPrint(Expression::invokeExp(InvokeExp expression)) = "<prettyPrint(expression)>";
@@ -150,6 +158,17 @@ str prettyPrint(Expression::div(Immediate lhs, Immediate rhs)) = "<prettyPrint(l
 str prettyPrint(Expression::lengthOf(Immediate immediate)) = "lengthof <prettyPrint(immediate)>";
 str prettyPrint(Expression::neg(Immediate immediate)) = "neg <prettyPrint(immediate)>";
 str prettyPrint(Expression::immediate(Immediate immediate)) = "<prettyPrint(immediate)>";
+
+
+public str prettyPrint(list[ArrayDescriptor] dims) {
+	  str text = "";
+	  switch(dims) {
+	    case [] :  text = "";
+	    case [v] : text = prettyPrint(v);
+	    case [v, *vs] : text = prettyPrint(v) + prettyPrint(vs);
+	  }
+	  return text;
+}
 
 public str prettyPrint(list[Immediate] args) {
 	  str text = "";
