@@ -31,7 +31,7 @@ data Immediate
  
 public data ClassOrInterfaceDeclaration 
  = classDecl(Type typeName,
- 	 list[Modifier] modifiers,
+     list[Modifier] modifiers,
      Type superClass,
      list[Type] interfaces,
      list[Field] fields,
