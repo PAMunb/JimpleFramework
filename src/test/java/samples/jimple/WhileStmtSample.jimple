@@ -1,0 +1,35 @@
+public class WhileStmtSample extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        WhileStmtSample r0;
+
+        r0 := @this: WhileStmtSample;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static int factorial(int)
+    {
+        int i0, i1;
+
+        i0 := @parameter0: int;
+
+        i1 = i0;
+
+     label1:
+        if i0 <= 1 goto label2;
+
+        i0 = i0 + -1;
+
+        i1 = i1 * i0;
+
+        goto label1;
+
+     label2:
+        return i1;
+    }
+}
