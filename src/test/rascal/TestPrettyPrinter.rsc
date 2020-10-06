@@ -90,7 +90,7 @@ test bool testProcessAllFiles() {
 	x = execute([|project://JimpleFramework/target/test-classes/samples/|], es, Analysis(PrettyPrint));		
 	for(k <- x) {
 		println(k);
-		writeFile(|file:///tmp/<k>.jimple|, x[k]);		
+		writeFile(|file:///tmp/jimpleframework/<k>.jimple|, x[k]);		
 	}
 	return true;
 }
