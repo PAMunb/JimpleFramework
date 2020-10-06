@@ -163,17 +163,17 @@ data UnnamedMethodSignature
   ;   
     
 data Modifier 
-  = Abstract()
+  = Public()
+  | Protected()
+  | Private()  
+  | Abstract()
+  | Static()  
   | Final()
-  | Native()
-  | Public() 
-  | Protected() 
-  | Private() 
-  | Static() 
-  | Synchronized() 
+  | Synchronized()  
+  | Native() 
+  | Strictfp() 
   | Transient() 
   | Volatile() 
-  | Strictfp() 
   | Enum() 
   | Annotation()
   | Synthetic()        // handle invoke dynamic call with lambda expressions.
