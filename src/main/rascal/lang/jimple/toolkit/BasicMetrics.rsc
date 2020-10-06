@@ -1,48 +1,40 @@
 module lang::jimple::toolkit::BasicMetrics
 import IO;
 import lang::jimple::Syntax;
-import lang::jimple::core::Context; 
+import lang::jimple::core::Context;
 import List;
 import lang::jimple::toolkit::CallGraph;
-
+import String;
 /**
- * Computes the number of classes from 
- * an ExecutionContext. 
- */ 
+ * Computes the number of classes from
+ * an ExecutionContext.
+ */
 public int numberOfClasses(ExecutionContext ctx) {
   int total = 0;
   top-down visit(ctx) {
-    case classDecl(_, _, _, _, _, _): total = total + 1;  
-
+    case classDecl(_, _, _, _, _, _): total = total + 1;
   }	
   return total;
 }
-
 public list[str] classIdentification(ExecutionContext ctx) {
   list[str] cl = [];
   top-down visit(ctx) {
-    
     case classDecl(_, _, _, _, _, list[Method] methods): cl = cl + ["classDecl(_, _, _, _, _, <methods>)"];
-   
   }
-  return cl; 
+  return cl;
 }
-
 public list[Method] methodsIdentification(ExecutionContext ctx) {
   list[Method] lm = [];
   top-down visit(ctx) {
-    
     case classDecl(_, _, _, _, _, list[Method] methods): lm = lm + methods;
-   
   }
-  return lm; 
+  return lm;
 }
 public Method firstMethod(ExecutionContext ctx){
 	list[Method] lm = methodsIdentification(ctx);
 	Method m = head(lm);
 	return m;
 }
-
 public list[str] methodsName(ExecutionContext ctx){
 	list[str] name = [];
 	top-down visit(ctx) {
@@ -65,19 +57,14 @@ public list[str] methodSignatureList(ExecutionContext ctx){
     }
     return mS;
 }
-
-    
-     
 list[str] readFiles(loc location){
    res = [];
    list[str] lines = readFileLines(location);
-     
    for (str l <- lines){
       res = res + changeLine(l);
-   };    
+   };
    return res;
 }
-
 str changeLine(str s){
 	str stringFinal = replaceAll(s, "\<", "");
 	stringFinal = replaceAll(stringFinal, "\>", "");
@@ -93,13 +80,21 @@ str changeLine(str s){
 		
 		str metodo = partes[2];
 		list[str] args = split(",", metodo);
-				
-		list[tuple[str s1, str s2]] types = getTypes();
-		for (str arg <- args){ //pega os argumentos
-			for (tuple[str s1, str s2] t <- types){ //verifica os tipos
-				if (t.s2 == arg){
-					arg = t.s1;
-					metodo = replaceAll(metodo, t.s2, t.s1); //Substitui os tipos dos args
+		if (size(args) == 0){
+			list[str] args2 = split(",", metodo);
+			str arg = replaceAll(args2[1] , ")", "");
+			if (contains(arg, ".")){
+				metodo = replaceAll(metodo, arg,"TObject(\""+arg+"\")");
+			};
+		};
+		if (size(args) > 1) {	
+			list[tuple[str s1, str s2]] types = getTypes();
+			for (str arg <- args){ //pega os argumentos
+				for (tuple[str s1, str s2] t <- types){ //verifica os tipos
+					if (t.s2 == arg){
+						arg = t.s1;
+						metodo = replaceAll(metodo, t.s2, t.s1); //Substitui os tipos dos args
+					};
 				};
 			};
 		};
@@ -108,9 +103,7 @@ str changeLine(str s){
 	};
 	
 	return "";
-}
-
-list[tuple[str s1, str s2]] getTypes(){
+}list[tuple[str s1, str s2]] getTypes(){
 	list[tuple[str s1, str s2]] types = [<"TInteger()", "int">];
 	types = types + [<"TString()", "string">];
 	types = types + [<"TVoid()", "void">];
@@ -123,7 +116,7 @@ list[tuple[str s1, str s2]] getTypes(){
   | TFloat()
   | TDouble()
   | TLong()
-  | TObject(Name name)  
+  | TObject(Name name)
   | TArray(Type baseType)
   | TVoid()
   | TString()
@@ -132,30 +125,25 @@ list[tuple[str s1, str s2]] getTypes(){
   | TMethodHandle()
   | TFieldHandle()
   | TNull()
-  | TUnknown() 
+  | TUnknown()
 	*/
 	
 	
 	//Adicionar mais tipos aqui
 	return types;
 }
-
-
-
-
 /**
- * Computes the number of public methods from an 
- * execution context. 
- */ 
+ * Computes the number of public methods from an
+ * execution context.
+ */
 public int numberOfPublicMethods(ExecutionContext ctx) {
   int total = 0;
   top-down visit(ctx) {
-    case method(ms, _, _, _, _, _): { 
+    case method(ms, _, _, _, _, _): {
      if(Public() in ms) {
        total = total + 1;
      }
     }
   }	
-  return total; 
+  return total;
 }
-
