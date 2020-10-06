@@ -1,5 +1,6 @@
 module lang::jimple::toolkit::Teste
 
+import Type;
 import IO;
 import analysis::graphs::Graph;
 import vis::Render;
@@ -9,7 +10,7 @@ import lang::jimple::Syntax;
 import lang::jimple::toolkit::GraphUtil;
 
 //hierarchy type's graph
-alias HT = rel[str from, str to];
+alias HT = rel[str parent, str child];
 
 public HT createHT(ExecutionContext ctx){
 	HT ht = {};
@@ -33,7 +34,7 @@ public HT createHT(ExecutionContext ctx){
 	return ht;
 }
 
-
+/*
 public set[Type] hierarchy_types(Type typeName, ExecutionContext ctx){
 	println("typeName=<typeName>");
 	
@@ -71,7 +72,7 @@ private bool implements(classDecl(_, _, _, interfaces, _, _ ), TObject(tn)) {
 	names = [name | TObject(name) <- interfaces];
 	return tn in names;
 }
-
+*/
 public list[str] hierarchy_types(HT ht, str name) {
 	hierarquia = [name];
 	
@@ -89,16 +90,44 @@ public void teste(){
     
     ExecutionContext ctx =  createExecutionContext(files,es,true);
     
-    typeName = TObject("samples.callgraph.polymorphism.util.Log");
+    //typeName = TObject("samples.callgraph.polymorphism.util.Log");
     //typeName = TObject("samples.callgraph.polymorphism.service.Service");	
     //typeName = TObject("samples.callgraph.polymorphism.service.AbstractService");
     
-    hierarquia = hierarchy_types(typeName, ctx);
-    println(hierarquia);
+    //hierarquia = hierarchy_types(typeName, ctx);
+    //println(hierarquia);
     
-    HT ht = createHT(ctx);
-    //println("bbb=<ht["java.lang.Object"]>");
-    println("HT=<hierarchy_types(ht, "samples.callgraph.polymorphism.util.Log")>");
+    println("\n\nMETODOS .....");
+    for(m <- ctx.mt){
+    	println("<m>");
+    }
+    
+    println("\n\nCLASSES .....");
+    for(TObject(m) <- ctx.ct){
+    	println("<m>");
+    }
+    
+    HT ht = createHT(ctx);      
+    //println("HT=<ht>");     
+    //for(k <- ht){
+    //	println("- <k>");
+    //}
+    
+    //for(k <- ht){
+    //	println("- <k.parent> = <hierarchy_types(ht,k.parent)>");
+    //}
+    
+    println("\n\nMAPA");
+    mapa = (k.parent : hierarchy_types(ht,k.parent) | k <- ht);
+    println(typeOf(mapa));//map(str(),list(str()))
+    for(k <- mapa){
+    	println(" - <k>===<mapa[k]>");
+    }
+    
     //render(toFigure(ht));     
+    //println(toDot(ht));
+    
+    
+    
     
 }

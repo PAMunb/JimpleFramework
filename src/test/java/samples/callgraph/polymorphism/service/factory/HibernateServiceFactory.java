@@ -13,7 +13,7 @@ public class HibernateServiceFactory extends ServiceFactory {
 	}
 
 	@Override
-	public User createContact(String id, String name, String email, String phone) {
+	public User createUser(String id, String name, String email, String phone) {
 		return new HibernateUser(id, name, email, phone);
 	}
 

@@ -86,6 +86,10 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
     	case classDecl(TObject(cn), _, _, _, _, mss): {            
             mt = mt + (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- mss);    
         }    
+        case interfaceDecl(TObject(cn), _, _, _, mss): {            
+        	//TODO interface can be entry point???
+            mt = mt + (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), false) | /method(ms, r, mn, args, es, b) <- mss);    
+        }    
    	}  
 		
 	return ExecutionContext(ct, mt);

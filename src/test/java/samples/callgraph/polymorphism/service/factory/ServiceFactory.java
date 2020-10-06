@@ -9,18 +9,18 @@ import samples.callgraph.polymorphism.service.UserService;
 
 public abstract class ServiceFactory {
 
-	private UserService contactService;
+	private UserService userService;
 
 	public ServiceFactory() {
-		contactService = new UserService(getRepository());
+		userService = new UserService(getRepository());
 	}
 
-	public UserService getContactService() {
-		return contactService;
+	public UserService getUserService() {
+		return userService;
 	}
 
 	protected abstract <E extends Entity<ID>, ID extends Serializable> Repository<E, ID> getRepository();
 
-	public abstract User createContact(String id, String name, String email, String phone);
+	public abstract User createUser(String id, String name, String email, String phone);
 
 }

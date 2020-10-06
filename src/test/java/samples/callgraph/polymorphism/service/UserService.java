@@ -10,7 +10,7 @@ public class UserService extends AbstractService<User, String> {
 	}
 
 	protected boolean valid(User entity) {
-		System.out.println("[ContactService] valid: " + entity);
+		log("[ContactService] valid: " + entity);
 		return true;
 	}
 

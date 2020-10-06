@@ -11,31 +11,31 @@ public class HibernateUserRepository implements Repository<User, String> {
 
 	@Override
 	public User save(User entity) {
-		System.out.println("[HibernateRepository] save: " + entity);
+		log("[HibernateRepository] save: " + entity);
 		return entity;
 	}
 
 	@Override
 	public User update(User entity) {
-		System.out.println("[HibernateRepository] update: " + entity);
+		log("[HibernateRepository] update: " + entity);
 		return entity;
 	}
 
 	@Override
 	public List<User> findAll() {
-		System.out.println("[HibernateRepository] findAll");
+		log("[HibernateRepository] findAll");
 		return new ArrayList<>();
 	}
 
 	@Override
 	public Optional<User> findById(String id) {
-		System.out.println("[HibernateRepository] findById: " + id);
+		log("[HibernateRepository] findById: " + id);
 		return Optional.empty();
 	}
 
 	@Override
 	public void delete(String id) {
-		System.out.println("[HibernateRepository] delete: " + id);
+		log("[HibernateRepository] delete: " + id);
 	}
 
 }

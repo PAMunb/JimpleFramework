@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Optional;
 
 import samples.callgraph.polymorphism.domain.Entity;
+import samples.callgraph.polymorphism.util.Log;
 
-public interface Repository<E extends Entity<ID>, ID extends Serializable>  {
+public interface Repository<E extends Entity<ID>, ID extends Serializable> extends Log {
 
 	E save(E entity);
 

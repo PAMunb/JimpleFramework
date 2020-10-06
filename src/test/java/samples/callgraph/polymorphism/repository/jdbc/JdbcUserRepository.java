@@ -11,31 +11,31 @@ public class JdbcUserRepository implements Repository<User, String> {
 
 	@Override
 	public User save(User entity) {
-		System.out.println("[JdbcRepository] save: " + entity);
+		log("[JdbcRepository] save: " + entity);
 		return entity;
 	}
 
 	@Override
 	public User update(User entity) {
-		System.out.println("[JdbcRepository] update: " + entity);
+		log("[JdbcRepository] update: " + entity);
 		return entity;
 	}
 
 	@Override
 	public List<User> findAll() {
-		System.out.println("[JdbcRepository] findAll");
+		log("[JdbcRepository] findAll");
 		return new ArrayList<>();
 	}
 
 	@Override
 	public Optional<User> findById(String id) {
-		System.out.println("[JdbcRepository] findById: " + id);
+		log("[JdbcRepository] findById: " + id);
 		return Optional.empty();
 	}
 
 	@Override
 	public void delete(String id) {
-		System.out.println("[JdbcRepository] delete: " + id);
+		log("[JdbcRepository] delete: " + id);
 	}
 
 }

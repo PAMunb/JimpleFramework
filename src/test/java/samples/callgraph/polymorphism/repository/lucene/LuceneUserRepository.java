@@ -11,31 +11,31 @@ public class LuceneUserRepository implements Repository<User, String> {
 
 	@Override
 	public User save(User entity) {
-		System.out.println("[LuceneRepository] save: " + entity);
+		log("[LuceneRepository] save: " + entity);
 		return entity;
 	}
 
 	@Override
 	public User update(User entity) {
-		System.out.println("[LuceneRepository] update: " + entity);
+		log("[LuceneRepository] update: " + entity);
 		return entity;
 	}
 
 	@Override
 	public List<User> findAll() {
-		System.out.println("[LuceneRepository] findAll");
+		log("[LuceneRepository] findAll");
 		return new ArrayList<>();
 	}
 
 	@Override
 	public Optional<User> findById(String id) {
-		System.out.println("[LuceneRepository] findById: " + id);
+		log("[LuceneRepository] findById: " + id);
 		return Optional.empty();
 	}
 
 	@Override
 	public void delete(String id) {
-		System.out.println("[LuceneRepository] delete: " + id);
+		log("[LuceneRepository] delete: " + id);
 	}
 
 }

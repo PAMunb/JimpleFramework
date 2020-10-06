@@ -16,7 +16,7 @@ public abstract class AbstractService<E extends Entity<ID>, ID extends Serializa
 	protected abstract boolean valid(E entity);
 
 	public E save(E entity) {
-		System.out.println("[AbstractService] save: " + entity);
+		log("[AbstractService] save: " + entity);
 		if (valid(entity)) {
 			return getRepository().save(entity);
 		}

@@ -46,8 +46,8 @@ public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 
 
 public void main(){
-	//tuple[list[loc] cp, list[str] e] t = polymorphism();
-	tuple[list[loc] cp, list[str] e] t = simple();
+	tuple[list[loc] cp, list[str] e] t = polymorphism();
+	//tuple[list[loc] cp, list[str] e] t = simple();
 	//tuple[list[loc] cp, list[str] e] t = iris();
 	//tuple[list[loc] cp, list[str] e] t = slf4j();
 

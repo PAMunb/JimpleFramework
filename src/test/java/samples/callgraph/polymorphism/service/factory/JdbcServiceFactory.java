@@ -13,7 +13,7 @@ public class JdbcServiceFactory extends ServiceFactory {
 	}
 
 	@Override
-	public User createContact(String id, String name, String email, String phone) {
+	public User createUser(String id, String name, String email, String phone) {
 		return new UserImpl(id, name, email, phone);
 	}
 
