@@ -18,9 +18,15 @@ import String;
 public list[str] sensitiveFind(loc fileSensitive){
 	es = [];
 	list[str] listSignature = execute([|project://JimpleFramework/src/test/resources|], es, Analysis(methodSignatureList));
+	
 	list[str] listFileSensitive = readFiles(fileSensitive);
+	
+	//listFileSensitive = listFileSensitive + ["android/app/Activity.\<init\>()"];
+	//listFileSensitive = listFileSensitive + ["android/content/Intent.\<init\>()"];
+	//listFileSensitive = listFileSensitive + ["oms/wmessage/main.startActivity(android.content.Intent)"];
+	//listFileSensitive = listFileSensitive + ["android/widget/Button.setOnClickListener(android.view.View$OnClickListener)"];
 
-	list[str] listResult = listSignature & listFileSensitive;
+	list[str] listResult = listFileSensitive & listSignature;
 	return listResult;
 }
 

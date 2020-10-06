@@ -1,3 +1,4 @@
+<android.app.Activity: void <init>()>
 <com.android.mms.util.Recycler$MmsRecycler: android.database.Cursor getAllThreads(android.content.Context)> android.permission.READ_SMS (NO_CATEGORY)
 <com.android.mms.model.MediaModel: int getBegin()> (NO_CATEGORY)
 <com.android.mms.MmsConfig: int getAliasMinChars()> (NO_CATEGORY)
