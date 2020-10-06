@@ -195,7 +195,7 @@ str prettyPrint(InvokeExp invoke) {
 	    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
 	    case staticMethodInvoke(sig,  args): 
 	    	return "staticinvoke \<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
-	    case dynamicInvoke(bsmSig, bsmArgs, sig, args): //TODO 
+	    case dynamicInvoke(bsmSig, bsmArgs, sig, args):
 	    	return "dynamicinvoke TODO";
 	    default: return "error";    
 	  }
@@ -209,7 +209,7 @@ str prettyPrint(CatchClause::catchClause(Type exception, Label from, Label to, L
 	"catch <prettyPrint(exception)> from <from> to <to> with <with>;";
 
 str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)) =
-	"<cleanClassName(className)>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)"; //TODO: remove this
+	"<cleanClassName(className)>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)";
 
 str prettyPrint(UnnamedMethodSignature::unnamedMethodSignature(Type returnType, list[Type] formals)) =
 	"<prettyPrint(returnType)> (<prettyPrint(formals,"")>)";
