@@ -87,7 +87,7 @@ test bool testClassWithMethod() {
 
 test bool testProcessAllFiles() {
 	list[str] es = [];
-	x = execute([|project://JimpleFramework/src/test/resources/slf4j|], es, Analysis(PrettyPrint));		
+	x = execute([|project://JimpleFramework/src/test/resources/iris-core|], es, Analysis(PrettyPrint));		
 	for(k <- x) {
 		println(k);
 		writeFile(|file:///tmp/<k>.jimple|, x[k]);		

@@ -1,7 +1,8 @@
 module lang::jimple::toolkit::PrettyPrinter
 
 import lang::jimple::Syntax;
-import lang::jimple::core::Context; 
+import lang::jimple::core::Context;
+import String;
 
 /*
  * TODO PP: 
@@ -34,7 +35,7 @@ str prettyPrint(Value::nullValue()) = "null";
 */
 str prettyPrint(Immediate::local(String localName)) = "<localName>";
 str prettyPrint(Immediate::iValue(Value v)) = "<prettyPrint(v)>";
-str prettyPrint(Immediate::caughtException()) = "TODO";
+str prettyPrint(Immediate::caughtException()) = "@caughtexception";
 
 /* 
 	Modifiers 
@@ -203,10 +204,10 @@ str prettyPrint(InvokeExp invoke) {
 	related upper parts.
 */
 str prettyPrint(CatchClause::catchClause(Type exception, Label from, Label to, Label with)) = 
-	"catch <prettyPrint(exception)> from <from> to <from> with <with>";
+	"catch <prettyPrint(exception)> from <from> to <to> with <with>;";
 
 str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)) =
-	"<className>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)";
+	"<replaceAll(className, "/",".")>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)"; //TODO: remove this
 
 str prettyPrint(UnnamedMethodSignature::unnamedMethodSignature(Type returnType, list[Type] formals)) =
 	"<prettyPrint(returnType)> (<prettyPrint(formals,"")>)";
@@ -242,13 +243,14 @@ public str prettyPrint(list[Field] fields) =
 public str prettyPrint(LocalVariableDeclaration::localVariableDeclaration(Type varType, Identifier local)) = 
 	"<prettyPrint(varType)> <local>;";
 
-public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClauses)) = //TODO catchClauses
+public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClauses)) =
 	"<for(l <- localVars){>
 	'   <prettyPrint(l)><}>
 	'<for(s <- stmts){>
 	'<if (s is label) {>
 	'<prettyPrint(s)><} else {>
-	'   <prettyPrint(s)><}><}>";
+	'   <prettyPrint(s)><}><}> <for(c <- catchClauses){>\n   <prettyPrint(c)><}>
+	";
 
 public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
 	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>) <prettyPrint(exceptions,"throws ")>
