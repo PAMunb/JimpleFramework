@@ -16,6 +16,8 @@ import String;
  *  Changes in .classpath file  made the test-classes dir, on target, disappear. This broke the Test*.rsc files. 
  */
 
+str cleanClassName(str className) = replaceAll(className, "/","."); //TODO: do this in the decompiler
+
 /* 
 	Value 
 */
@@ -113,7 +115,7 @@ str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "<prettyPrint(
  * FieldSignature
  */
 str prettyPrint(FieldSignature::fieldSignature(Name className, Type fieldType, Name fieldName)) =
-	"\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
+	"\<<cleanClassName(className)>: <prettyPrint(fieldType)> <fieldName>\>";
 
 /* 
  * Case
@@ -134,8 +136,8 @@ str prettyPrint(Expression::instanceOf(Type baseType, Immediate immediate)) = "<
 str prettyPrint(Expression::invokeExp(InvokeExp expression)) = "<prettyPrint(expression)>";
 str prettyPrint(Expression::arraySubscript(Name name, Immediate immediate)) = "<name>[<prettyPrint(immediate)>]";
 str prettyPrint(Expression::stringSubscript(String string, Immediate immediate)) = "\"<string>\"[<prettyPrint(immediate)>]";
-str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "<local>.\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
-str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = "\<<className>: <prettyPrint(fieldType)> <fieldName>\>";
+str prettyPrint(Expression::localFieldRef(Name local, Name className, Type fieldType, Name fieldName)) = "<local>.\<<cleanClassName(className)>: <prettyPrint(fieldType)> <fieldName>\>";
+str prettyPrint(Expression::fieldRef(Name className, Type fieldType, Name fieldName)) = "\<<cleanClassName(className)>: <prettyPrint(fieldType)> <fieldName>\>";
 str prettyPrint(Expression::and(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> & <prettyPrint(rhs)>";
 str prettyPrint(Expression::or(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> | <prettyPrint(rhs)>";
 str prettyPrint(Expression::xor(Immediate lhs, Immediate rhs)) = "<prettyPrint(lhs)> ^ <prettyPrint(rhs)>";
@@ -207,7 +209,7 @@ str prettyPrint(CatchClause::catchClause(Type exception, Label from, Label to, L
 	"catch <prettyPrint(exception)> from <from> to <to> with <with>;";
 
 str prettyPrint(MethodSignature::methodSignature(Name className, Type returnType, Name methodName, list[Type] formals)) =
-	"<replaceAll(className, "/",".")>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)"; //TODO: remove this
+	"<cleanClassName(className)>: <prettyPrint(returnType)> <methodName>(<prettyPrint(formals,"")>)"; //TODO: remove this
 
 str prettyPrint(UnnamedMethodSignature::unnamedMethodSignature(Type returnType, list[Type] formals)) =
 	"<prettyPrint(returnType)> (<prettyPrint(formals,"")>)";
@@ -249,8 +251,7 @@ public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClause
 	'<for(s <- stmts){>
 	'<if (s is label) {>
 	'<prettyPrint(s)><} else {>
-	'   <prettyPrint(s)><}><}> <for(c <- catchClauses){>\n   <prettyPrint(c)><}>
-	";
+	'   <prettyPrint(s)><}><}> <for(c <- catchClauses){>\n   <prettyPrint(c)><}>";
 
 public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
 	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>) <prettyPrint(exceptions,"throws ")>
@@ -285,8 +286,8 @@ alias PrettyPrintMap = map[str, str];
 
 public data PrettyPrintModel = PrettyPrintModel(PrettyPrintMap ppMap);
 
-public map[str, str] PrettyPrint(ExecutionContext ctx) {
-	map[str, str] ppMap = ();
+public PrettyPrintMap PrettyPrint(ExecutionContext ctx) {
+	PrettyPrintMap ppMap = ();
 	
 	top-down visit(ctx) {
 		case classDecl(n, ms, s, is, fs, mss): ppMap[prettyPrint(n)] = prettyPrint(classDecl(n, ms, s, is, fs, mss)); 
