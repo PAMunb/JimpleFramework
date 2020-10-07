@@ -2,7 +2,6 @@ module TestDecompiler
 
 import lang::jimple::Syntax;
 import lang::jimple::Decompiler; 
-import List;
 import Set;
 import IO;
 import String;
