@@ -1,12 +1,14 @@
 module lang::jimple::toolkit::TesteCallGraph
 
-import IO;
 import Map;
-import Type;
 import Set;
 import List;
 import String;
 import analysis::graphs::Graph;
+
+//TODO remover qdo remover o metodo usado para teste (testePolimorfismo)
+import Type;
+import IO;
 import vis::Render;
 
 import lang::jimple::core::Context; 
@@ -19,7 +21,8 @@ data EntryPointsStrategy = full()
 						| given(list[str] methods) 
 						| publicMethods() 
 						| j2se();
-						
+
+// the algorithm used to build the call graph						
 data CallGraphType = RA()
 					| CHA()
 					| RTA();						
@@ -42,6 +45,7 @@ alias MethodMap = map[str, str];
  */ 
 alias CG = rel[str from, str to];
 
+//TODO criar modulo especifico para hierarquia de classes? sera usado em algum outro lugar?
 //hierarchy class/type's graph
 alias HT = rel[str parent, str child];
 
@@ -55,7 +59,12 @@ data CallGraphRuntime = callGraphRuntime(ExecutionContext ctx, CallGraphType cgT
 data CGModel = CGModel(CG cg, MethodMap methodMap);
 
 
-						
+
+/*
+ * Method used to create the call graph. Receives:
+ * - the entry points selection strategy
+ * - the algorithm to be used to generate the call graph 
+ */						
 public &T(ExecutionContext) executar(EntryPointsStrategy strategy, CallGraphType cgType){
 	return CGModel(ExecutionContext ctx) { 
         return computeCallGraph(ctx, strategy, cgType);
@@ -64,26 +73,33 @@ public &T(ExecutionContext) executar(EntryPointsStrategy strategy, CallGraphType
 
 
 
-/* Computes a call graph from an execution 
+/* 
+ * Computes a call graph from an execution 
  * context, starting from the entry points 
  * passed as parameter.
- *
  */ 
 CGModel computeCallGraph(ExecutionContext ctx, EntryPointsStrategy strategy, CallGraphType cgType) {
-	println("strategy=<strategy>");
+	// select the entry points
 	methods = selectEntryPoints(ctx, strategy);
-	println("entrypoints=<methods>");
+	// init the parameters to be used at runtime (generation time)
 	rt = callGraphRuntime(ctx, cgType, strategy, createHT(ctx));
-	return computeCallGraphNovo(methods, rt);
+	// generate and return the call graph
+	return computeCallGraph(methods, rt);
 }			
 
+/*
+ * Returns the entry points list based on the defined strategy
+ */
 private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPointsStrategy strategy) {
 	list[MethodSignature] methods = []; 
 	
+	//visit all methods of all classes
 	top-down visit(ctx) {
      	case classDecl(TObject(cn), _, _, _, _, mss): {
-         	for(m: method(_,r,mn,args,_,_) <- mss){
-         		if(isEntryPoint(cn, m, ctx, strategy)){
+         	for(m: method(_,r,mn,args,_,_) <- mss) {
+         		// if the method is an entry point (depending on the strategy specified)         		
+         		if(isEntryPoint(cn, m, ctx, strategy)) {
+         			// add method to the entry points list
          			methods = methods + methodSignature(cn, r, mn, args);
          		}
             }             
@@ -117,30 +133,36 @@ private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, j2se()){
 }
 
 
-
-private CGModel computeCallGraphNovo(list[MethodSignature] methodsList, CallGraphRuntime rt) {
+/* 
+ * Computes a call graph from runtime parameters, 
+ * starting from the entry points list.
+ */ 
+private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRuntime rt) {
 	mm = (); 
   	cg = {}; 
-	
-	while(!isEmpty(methodsList)){		
+		
+	// as long as there are methods to be visited
+	while(!isEmpty(methodsList)){			 	
 		MethodSignature currentMethod = head(methodsList);
 		methodsList = drop(1,methodsList);	
-		//MethodSignature currentMethod = head(1,methodsList);
-		//delete(1,methodsList,currentMethod);
 		
 		str from = signature(currentMethod.className, currentMethod.methodName, currentMethod.formals);  
 
 	  	if(from in rt.ctx.mt){	  	  		  	
 	  		if(! (from in mm)) {
+	  			//define a simple name for current method
+  				//if it doesnt already exists
 	  			mm[from] = "M" + "<size(mm) + 1>"; 
 	  		}
 	    
 	    	invokedMethods = getInvokedMethods(from, rt);
+	    	
 	    	for(methodSignature(cn, r, mn, args) <- invokedMethods){
-	    		to = signature(cn,mn,args); 
+	    		str to = signature(cn,mn,args); 
 	    		if(! (to in mm)) {
 					mm[to] = "M" + "<size(mm) + 1>"; 
 				}
+				
 				newRelation = <mm[from], mm[to]>;
 				alreadyExists = newRelation in cg;
 				cg = cg + newRelation;  
@@ -148,16 +170,14 @@ private CGModel computeCallGraphNovo(list[MethodSignature] methodsList, CallGrap
 				if(to in rt.ctx.mt){
 					//TODO update when decompiler replaces '/' for '.'
 					sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
+					
 					//TODO rever .....							
 			  		if( !(sig in methodsList) && !alreadyExists){// && (!(to in mm))){  			
 			  			methodsList = methodsList + sig;
 			  		}
-	
-					//TODO nao eh a assinatura do 'to' ... eh do 'from'
+					
 					hierarchyMethods = computeClasses(sig, rt);
-					println("\t\t\thierarchyMethods=<hierarchyMethods>");
 					for(hm <- hierarchyMethods){
-						println("\t\t\t\thm=<hm>");
 						if(! (hm in mm)) {
 							mm[hm] = "M" + "<size(mm) + 1>"; 
 						}
@@ -174,6 +194,9 @@ private CGModel computeCallGraphNovo(list[MethodSignature] methodsList, CallGrap
 
 private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
 	methods = [];
+	//visit the method body, searching for invoke expressions
+	//and add each method signature to the list of methods called 
+	//from the method received as parameter (from) 
 	top-down visit(rt.ctx.mt[from].method.body) {	 	
   		case InvokeExp e:{
   			methods = methods + getMethodSignature(e);
@@ -185,12 +208,12 @@ private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) { return ms;
 private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) { return ms; }
 private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) { return ms; }
 private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) { return ms; }
+//TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
 private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) { return ms; }
 
 
 
 private list[str] computeClasses(MethodSignature ms, callGraphRuntime(_,RA(),_,_)){
-	println("RA()");
 	return [];
 }
 private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,CHA(),_,ht)){
@@ -202,7 +225,6 @@ private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraph
 		//TODO verificar se o metodo existe no contexto???
 		//if(method in ctx.mt){
 			methodsList = methodsList + signature(c,mn,args);
-			//println("CHA().6=<methodsList>");
 		//}
 	}
 	return methodsList;
