@@ -36,18 +36,20 @@ test bool testWrongTypeDecompilerNames(){
 	int count= 0;
 	for(loc entry <- entries) {
 		ClassOrInterfaceDeclaration c = decompile(entry);
-		count = count +1;
+		count = count + 1;
 		bottom-up visit(c) {
-		     case TObject(str N): if(contains(N, "/")) results += {"Object(<N>)"};
-		     case fieldRef(str N,_,_): if(contains(N, "/")) results += {"fieldRef(<N>)"};
-		     case methodSignature(str N,_,_,_): if(contains(N, "/")) results += {"methodSignature(<N>)"};
+		     case TObject(name): if(contains(name, "/")) results += "Object(<name>)" ;
+		     case fieldRef(name,_,_): if(contains(name, "/")) results +=  "fieldRef(<name>)" ;
+		     case methodSignature(name,_,_,_): results +=  "methodSignature(<name>)" ;
 		};
    	}
-   	println("number of classes: <count>");
-   	if(size(results)>0){
+   	println("Total number of classes: <count>");
+   	
+   	if(size(results) > 0){
    		println(results);
    		return false;
    	}
+   	
    	return true;
 }
  
