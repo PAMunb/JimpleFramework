@@ -60,6 +60,7 @@ data CGModel = CGModel(CG cg, MethodMap methodMap);
 
 
 
+
 /*
  * Method used to create the call graph. Receives:
  * - the entry points selection strategy
@@ -92,6 +93,11 @@ CGModel computeCallGraph(ExecutionContext ctx, EntryPointsStrategy strategy, Cal
  */
 private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPointsStrategy strategy) {
 	list[MethodSignature] methods = []; 
+	
+	//TODO tratar separado o caso de given(), para nao precisar percorrer todos os metodos de todas as classes
+	//if(strategy := given(mss)){
+	//	println("");
+	//}	
 	
 	//visit all methods of all classes
 	top-down visit(ctx) {
@@ -204,21 +210,20 @@ private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
   	}
   	return methods;
 }
-private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) { return ms; }
-private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) { return ms; }
-private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) { return ms; }
-private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) { return ms; }
+private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) = ms; 
+private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) = ms; 
+private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) = ms;
+private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) = ms; 
 //TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
-private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) { return ms; }
+private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) = ms; 
 
 
 
-private list[str] computeClasses(MethodSignature ms, callGraphRuntime(_,RA(),_,_)){
-	return [];
-}
+private list[str] computeClasses(MethodSignature ms, callGraphRuntime(_,RA(),_,_)) = [];
 private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,CHA(),_,ht)){
-	methodsList = [];
+	methodsList = [];	
 	classList = hierarchy_types(ht, cn);
+	//removes the class (cn) because it has already been handled
 	classList = classList - cn;
 	for(c <- classList){
 		m = signature(c,mn,args);
@@ -257,6 +262,11 @@ private HT createHT(ExecutionContext ctx){
 	return ht;
 }
 
+//TODO rever a questao de performance:
+// - do jeito atual em toda chamada vai gastar O(log n) +-
+// - criar um mapa global no modulo: mapa = (k.parent : hierarchy_types(ht,k.parent) | k <- ht); ... mas assim chamaria o hierarchy_types zilhoes de vezes
+// - criar o mapa dinamicamente ... o mapa seria global mas seria criada uma entrada sob demanda ... tipo memoizacao
+// - ver o uso de @memo ... como funciona isso?
 private list[str] hierarchy_types(HT ht, str name) {
 	hierarquia = [name];
 	
@@ -276,8 +286,8 @@ public void testePolimorfismo(){
     //es = ["samples.callgraph.polymorphism.Main.execute3(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
     
     //CGModel model = execute(files, es, Analysis(executar(full())));
-    //CGModel model = execute(files, es, Analysis(executar(context(), RA())));
-    CGModel model = execute(files, es, Analysis(executar(context(), CHA())));
+    CGModel model = execute(files, es, Analysis(executar(context(), RA())));
+    //CGModel model = execute(files, es, Analysis(executar(context(), CHA())));
     //CGModel model = execute(files, es, Analysis(executar(context(), RTA())));
     //CGModel model = execute(files, es, Analysis(executar(given(["samples.callgraph.simple.SimpleCallGraph.B()","samples.callgraph.simple.SimpleCallGraph.C()"]))));
     //TODO nao esta funcionando::::CGModel model = execute(files, es, Analysis(executar(publicMethods())));
