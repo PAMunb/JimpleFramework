@@ -9,6 +9,9 @@ import lang::jimple::core::Context;
 import lang::jimple::Syntax; 
 import lang::jimple::toolkit::GraphUtil;
 
+
+//TODO remover antes de fazer merge
+
 //hierarchy type's graph
 alias HT = rel[str parent, str child];
 

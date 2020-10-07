@@ -13,7 +13,7 @@ import IO;
 test bool testSimpleCallGraph(){
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
 	es = [];
-	CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
+	CGModel model = execute(files, es, Analysis(generateCallGraph(full(), RA())));
 		
 	cg = transformToFullNames(model);	
 	
@@ -33,7 +33,7 @@ test bool testSimpleCallGraph(){
 test bool testSimpleCallGraphWithEntryPointA(){
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
 	es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
-	CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
+	CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
 		
 	cg = transformToFullNames(model);	
 	
@@ -54,7 +54,7 @@ test bool testSimpleCallGraphWithEntryPointA(){
 test bool testSimpleCallGraphWithEntryPointsBandC(){
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
 	es = ["samples.callgraph.simple.SimpleCallGraph.B()","samples.callgraph.simple.SimpleCallGraph.C()"];
-	CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
+	CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
 		
 	cg = transformToFullNames(model);	
 	
@@ -85,7 +85,7 @@ private CG transformToFullNames(CGModel model){
 
 /* TODO atualizar esse metodo depois de decidir como (e se) tratar construtores
 test bool testSimpleCallGraphStatistics(){	 
-    CGModel model = executeSimpleCallGraph([], Analysis(computeCallGraphConditional));
+    CGModel model = executeSimpleCallGraph([], Analysis(generateCallGraph(context(), RA())));
     
     CG cg = model.cg;
     mm = invert(model.methodMap);
