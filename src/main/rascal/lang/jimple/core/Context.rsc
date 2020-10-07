@@ -71,28 +71,26 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool verbose) {
 	list[ClassDecompiler] classes = loadClasses(classPath);
 	
-	errors = [f | Error(f) <- classes]; 
-	
+	errors = [f | Error(f) <- classes]; 	
 	if(verbose) {
 		println(errors); 
 	}
 	
-	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
-	ct = ct + (n : Class(interfaceDecl(n, ms, is, fs, mss), ApplicationClass()) | Success(interfaceDecl(n, ms, is, fs, mss)) <- classes);
-	
-	MethodTable mt = ();
+	ClassTable ct  = (getTypeName(c) : Class(c, ApplicationClass()) | Success(c) <- classes);
 		
+	MethodTable mt = ();	
 	top-down visit(ct) {
-    	case classDecl(TObject(cn), _, _, _, _, mss): {            
-            mt = mt + (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- mss);    
-        }    
-        case interfaceDecl(TObject(cn), _, _, _, mss): {            
-        	//TODO interface can be entry point???
-            mt = mt + (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), false) | /method(ms, r, mn, args, es, b) <- mss);    
-        }    
+    	case classDecl(TObject(cn), _, _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints);   
+        case interfaceDecl(TObject(cn), _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints); 
    	}  
 		
 	return ExecutionContext(ct, mt);
+}
+
+private Type getTypeName(classDecl(cn, _, _, _, _, _)) = cn;
+private Type getTypeName(interfaceDecl(cn, _, _, _, _)) = cn;
+private map[Name, DeclaredMethod] toMethodsTable(Name cn, list[Method] methods, list[str] entryPoints) {
+	return (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- methods);
 }
 
 /*
