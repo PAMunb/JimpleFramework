@@ -685,7 +685,7 @@ public class Decompiler {
 		// auxiliarly methods. 
 
 		private void invokeMethodIns(String owner, String name, String descriptor, boolean isStatic, InvokeExpressionFactory factory) {
-			MethodSignature signature = methodSignature(owner, name, descriptor);
+			MethodSignature signature = methodSignature(owner.replace("/", "."), name, descriptor);
 			List<Immediate> args = new ArrayList<>();
 			
 			for(int i = 0; i < signature.formals.size(); i++) {
@@ -1131,7 +1131,7 @@ public class Decompiler {
 		private void getStaticIns(String owner, String field, String descriptor) {
 			LocalVariableDeclaration newLocal = createLocal(descriptor);
 			Type fieldType = type(descriptor);
-			Expression fieldRef = Expression.fieldRef(owner, fieldType, field);
+			Expression fieldRef = Expression.fieldRef(owner.replace("/", "."), fieldType, field);
 		
 			instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
 
