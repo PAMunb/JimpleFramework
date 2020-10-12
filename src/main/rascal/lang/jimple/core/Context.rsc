@@ -14,6 +14,7 @@ module lang::jimple::core::Context
 
 import lang::jimple::Syntax; 
 import lang::jimple::Decompiler; 
+import lang::jimple::util::Converters; 
 
 import io::IOUtil;
 
@@ -129,7 +130,3 @@ public loc toLocation(str c) {
   	if(endsWith(c, ".jar")) return |jar:///| + c + "!" ; 
   	else return |file:///| + c;
 }
-
-
-public str signature(methodSignature(cn, _, mn, args)) = signature(cn, mn, args); 
-public str signature(Name cn, Name mn, args) =  "<replaceAll(cn, "/", ".")>.<mn>(<intercalate(",", args)>)";

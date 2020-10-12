@@ -123,7 +123,8 @@ public class JimpleObjectFactory {
 			return objectConstructor(objectName);
 		}
 		else if(descriptor.startsWith("[")) {  // array types 
-			String baseType = descriptor.substring(1, descriptor.length());				
+			String baseType = descriptor.substring(1, descriptor.length());
+			Type base = objectConstructor(baseType);
 			return Type.TArray(type(baseType));	
 		}
 		
@@ -139,36 +140,36 @@ public class JimpleObjectFactory {
 	
 	public static List<Modifier> modifiers(int access) {
 		List<Modifier> list = new ArrayList<Modifier>();
-		
-		if((access & Opcodes.ACC_ABSTRACT) != 0) {
-			list.add(Modifier.Abstract());
-		}
-		if((access & Opcodes.ACC_FINAL) != 0) {
-			list.add(Modifier.Final());
-		}
+
 		if((access & Opcodes.ACC_PUBLIC) != 0) {
 			list.add(Modifier.Public());
-		}
-		if((access & Opcodes.ACC_PRIVATE) != 0) {
-			list.add(Modifier.Private());
 		}
 		if((access & Opcodes.ACC_PROTECTED) != 0) {
 			list.add(Modifier.Protected());
 		}
+		if((access & Opcodes.ACC_PRIVATE) != 0) {
+			list.add(Modifier.Private());
+		}		
+		if((access & Opcodes.ACC_ABSTRACT) != 0) {
+			list.add(Modifier.Abstract());
+		}
 		if((access & Opcodes.ACC_STATIC) != 0) {
 			list.add(Modifier.Static());
+		}		
+		if((access & Opcodes.ACC_FINAL) != 0) {
+			list.add(Modifier.Final());
 		}
 		if((access & Opcodes.ACC_SYNCHRONIZED) != 0) {
 			list.add(Modifier.Synchronized());
-		}
+		}		
+		if((access & Opcodes.ACC_STRICT) != 0) {
+			list.add(Modifier.Strictfp());
+		}		
 		if((access & Opcodes.ACC_TRANSIENT) != 0) {
 			list.add(Modifier.Transient());
 		}
 		if((access & Opcodes.ACC_VOLATILE) != 0) {
 			list.add(Modifier.Volatile());
-		}
-		if((access & Opcodes.ACC_STRICT) != 0) {
-			list.add(Modifier.Strictfp());
 		}
 		if((access & Opcodes.ACC_ENUM) != 0) {
 			list.add(Modifier.Enum());

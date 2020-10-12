@@ -14,6 +14,8 @@ import lang::jimple::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 import lang::jimple::toolkit::GraphUtil;
+import lang::jimple::util::Converters;
+import lang::jimple::toolkit::PrettyPrinter;
 
 public tuple[list[loc] classPath, list[str] entryPoints] android() {
 	files = [|project://JimpleFramework/src/test/resources/android-app/|];
@@ -23,7 +25,7 @@ public tuple[list[loc] classPath, list[str] entryPoints] android() {
 
 public tuple[list[loc] classPath, list[str] entryPoints] iris() {
 	files = [|project://JimpleFramework/src/test/resources/iris-core/|];
-    es = ["br.unb.cic.iris.core.SystemFacade.send(TObject(\"br.unb.cic.iris.core.model.EmailMessage\"))"];
+    es = ["br.unb.cic.iris.core.SystemFacade.send(br.unb.cic.iris.core.model.EmailMessage)"];
 	return <files, es>;
 }
 
@@ -37,7 +39,7 @@ public tuple[list[loc] classPath, list[str] entryPoints] polymorphism() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
     //es = ["samples.callgraph.polymorphism.Main.execute2()"];
-    es = ["samples.callgraph.polymorphism.Main.execute(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
+    es = ["samples.callgraph.polymorphism.Main.execute(samples.callgraph.polymorphism.service.factory.ServiceFactory)"];
     //es = ["samples.callgraph.polymorphism.Main.execute3(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
 	return <files, es>;
 }
@@ -54,7 +56,7 @@ public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 public tuple[list[loc] classPath, list[str] entryPoints] simpleWithRecursion() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/CallGraphWithRecursion.class|];
-    es = ["samples.callgraph.simple.CallGraphWithRecursion.execute(TArray(TInteger()))"];
+    es = ["samples.callgraph.simple.CallGraphWithRecursion.execute(int[])"];
     return <files, es>;
 }
 
@@ -70,9 +72,9 @@ public void main() {
 	// possible tests
 	//tuple[list[loc] cp, list[str] e] t = polymorphism();
 	//tuple[list[loc] cp, list[str] e] t = simple();
-	//tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
+	tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
 	//tuple[list[loc] cp, list[str] e] t = simpleWithCycle();
-	tuple[list[loc] cp, list[str] e] t = iris();
+	//tuple[list[loc] cp, list[str] e] t = iris();
 	//tuple[list[loc] cp, list[str] e] t = slf4j();
 	//tuple[list[loc] cp, list[str] e] t = android();
 
@@ -89,6 +91,7 @@ public void main() {
     CG cg = model.cg;
     mm = invertUnique(model.methodMap);
     //mm = invert(model.methodMap);
+    println("MM=<mm>");
     println("\n\n");
     println(typeOf(mm));    
     
@@ -117,8 +120,8 @@ public void main() {
     println("\nConnected Components: "+toString(connections));
     
     // draw the call graph
-    render(toFigure(cg));   
-    //render(toFigure(cg,mm));
+    //render(toFigure(cg));   
+    render(toFigure(cg,mm));
     
     //to dot (use xdot or graphviz to view)
     //EX: save text to ra.dot, then: xdot ra.dot
@@ -129,8 +132,8 @@ public void main() {
 
 public void show(){
 	//tuple[list[loc] cp, list[str] e] t = polymorphism();
-	tuple[list[loc] cp, list[str] e] t = simple();
-	//tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
+	//tuple[list[loc] cp, list[str] e] t = simple();
+	tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
 	//tuple[list[loc] cp, list[str] e] t = simpleWithCycle();
 	//tuple[list[loc] cp, list[str] e] t = iris();
 	//tuple[list[loc] cp, list[str] e] t = slf4j();

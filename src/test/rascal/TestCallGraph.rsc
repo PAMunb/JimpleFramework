@@ -18,13 +18,15 @@ test bool testSimpleCallGraph(){
 		
 	cg = transformToFullNames(model);	
 	
+	println("CG=<cg>");
+	
 	prefix = "samples.callgraph.simple.SimpleCallGraph.";
 	
-	calls = [prefix+"execute()",prefix+"A()",prefix+"B()",prefix+"D()",prefix+"log(TObject(\"java.lang.String\"))","java.io.PrintStream.println(TObject(\"java.lang.String\"))"];	
+	calls = [prefix+"execute()",prefix+"A()",prefix+"B()",prefix+"D()",prefix+"log(java.lang.String)","java.io.PrintStream.println(java.lang.String)"];	
 	validPath = existPath(cg, calls);
 	
 	validPath2 = existPath(cg, [prefix+"B()",prefix+"E()",prefix+"G()"]);
-	validPath3 = existPath(cg, [prefix+"A()",prefix+"C()",prefix+"F()",prefix+"G()",prefix+"log(TObject(\"java.lang.String\"))","java.io.PrintStream.println(TObject(\"java.lang.String\"))"]);
+	validPath3 = existPath(cg, [prefix+"A()",prefix+"C()",prefix+"F()",prefix+"G()",prefix+"log(java.lang.String)","java.io.PrintStream.println(java.lang.String)"]);
 	
 	invalidPath = existPath(cg, [prefix+"A()",prefix+"B()",prefix+"G()"]);
 	

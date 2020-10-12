@@ -15,6 +15,7 @@ import vis::Render;
 import lang::jimple::core::Context; 
 import lang::jimple::Syntax; 
 import lang::jimple::toolkit::GraphUtil;
+import lang::jimple::util::Converters;
 
 //TODO redefinir nomes ...
 data EntryPointsStrategy = full() 
