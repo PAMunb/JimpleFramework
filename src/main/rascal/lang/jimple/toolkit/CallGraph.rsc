@@ -5,6 +5,7 @@ import Set;
 import List;
 import String;
 import analysis::graphs::Graph;
+import Exception;
 
 //TODO remover qdo remover o metodo usado para teste (testePolimorfismo)
 import Type;
@@ -89,16 +90,25 @@ CGModel computeCallGraph(ExecutionContext ctx, EntryPointsStrategy strategy, Cal
 }			
 
 /*
+ * Returns the entry points list based on the "given methods" strategy
+ */
+private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, given(list[str] givenMethods)) {
+	list[MethodSignature] methods = []; 
+		
+	for(m <- givenMethods){
+		if(m in ctx.mt){
+			methods = methods + toMethodSignature(m,ctx);
+		}
+	}
+	
+  	return methods;
+}
+/*
  * Returns the entry points list based on the defined strategy
  */
 private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPointsStrategy strategy) {
 	list[MethodSignature] methods = []; 
-	
-	//TODO tratar separado o caso de given(), para nao precisar percorrer todos os metodos de todas as classes
-	//if(strategy := given(mss)){
-	//	println("");
-	//}	
-	
+		
 	//visit all methods of all classes
 	top-down visit(ctx) {
      	case classDecl(TObject(cn), _, _, _, _, mss): {
@@ -114,6 +124,7 @@ private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPoint
   	
   	return methods;
 }
+
 
 private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, full()){
 	return true;
@@ -144,8 +155,8 @@ private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, j2se()){
  * starting from the entry points list.
  */ 
 private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRuntime rt) {
-	mm = (); 
-  	cg = {}; 
+	map[str, str] mm = (); 
+  	rel[str from, str to] cg = {}; 
 		
 	// as long as there are methods to be visited
 	while(!isEmpty(methodsList)){		
@@ -280,6 +291,30 @@ private list[str] hierarchy_types(HT ht, str name) {
 	return hierarquia;
 }
 
+
+
+//TODO mover para algum local???
+public str getClassName(str methodSignature) {
+	if(contains(methodSignature,"(") && contains(methodSignature,".")){
+		untilMethodName = substring(methodSignature,0,findFirst(methodSignature,"("));	
+		return substring(untilMethodName,0,findLast(untilMethodName,"."));
+	}
+	return "";
+}
+public MethodSignature toMethodSignature(str ms, ExecutionContext ctx) {
+	Name className = getClassName(ms);
+	if(className != ""){
+		m = ctx.mt[ms].method;		
+		return methodSignature(className, m.returnType, m.name, m.formals);
+	}
+	throw IllegalArgument(methodSignature, "The method does not exist in the execution context.");
+}
+
+
+
+
+
+//TODO remover metodos abaixo
 public void testePolimorfismo(){
 	//polymorphism
     files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
@@ -305,4 +340,14 @@ public void testePolimorfismo(){
     
     //println("DOT:");
     //println(toDot(cg,mm));
+}
+
+public void testeNomeClasse(){
+	//nome = "samples.callgraph.simple.SimpleCallGraph.A()";
+	nome = "samples.callgraph.simple.SimpleCallGraph.log(TObject(\"java.lang.String\"))";
+	
+	
+	untilMethodName = substring(nome,0,findFirst(nome,"("));
+	
+	println(substring(untilMethodName,0,findLast(untilMethodName,".")));
 }
