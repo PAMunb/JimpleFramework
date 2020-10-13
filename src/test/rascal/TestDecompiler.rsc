@@ -2,6 +2,11 @@ module TestDecompiler
 
 import lang::jimple::Syntax;
 import lang::jimple::Decompiler; 
+import lang::jimple::core::Context;
+import lang::jimple::toolkit::PrettyPrinter; 
+import lang::jimple::toolkit::jimplify::ProcessLabels; 
+
+import List; 
 import Set;
 import IO;
 import String;
@@ -10,6 +15,7 @@ import io::IOUtil;
 
 loc classLocation = |project://JimpleFramework/target/test-classes/samples/AbstractClassSample.class|;  
 loc interfaceLocation = |project://JimpleFramework/target/test-classes/samples/InterfaceSample.class|;
+loc whileLocation = |project://JimpleFramework/target/test-classes/samples/WhileStmtSample.class|;
 
 loc path = |project://JimpleFramework/target/test-classes/samples/operators|;
 
@@ -21,13 +27,20 @@ loc path = |project://JimpleFramework/target/test-classes/samples/operators|;
     }
  }
  
- test bool testInterface() {
-    ClassOrInterfaceDeclaration c = decompile(interfaceLocation);
-    switch(c) {
-      case interfaceDecl(TObject("samples.InterfaceSample"), _, _, _, _): return true;  
-      default: return false; 
-    }
- }
+test bool testInterface() {
+  ClassOrInterfaceDeclaration c = decompile(interfaceLocation);
+  switch(c) {
+    case interfaceDecl(TObject("samples.InterfaceSample"), _, _, _, _): return true;  
+    default: return false; 
+  }
+}
+
+test bool testSolveLabels() {
+  ClassOrInterfaceDeclaration c = decompile(whileLocation);
+  c = processJimpleLabels(c);
+  return size([aLabel | /label(aLabel) <- c]) == 2;  
+}
+ 
  
 test bool testWrongTypeDecompilerNames(){
 	list[loc] entries = findAllFiles(path,"class");

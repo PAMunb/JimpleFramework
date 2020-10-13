@@ -15,12 +15,15 @@ module lang::jimple::core::Context
 import lang::jimple::Syntax; 
 import lang::jimple::Decompiler; 
 import lang::jimple::util::Converters; 
+import lang::jimple::toolkit::jimplify::ProcessLabels; 
 
 import io::IOUtil;
 
 import List; 
 import String; 
 import IO;
+
+alias CID = ClassOrInterfaceDeclaration; 
 
 data ClassType = ApplicationClass()
                | LibraryClass()
@@ -36,7 +39,7 @@ alias MethodTable = map[Name, DeclaredMethod];
 
 data ExecutionContext = ExecutionContext(ClassTable ct, MethodTable mt);  
 
-data ClassDecompiler  = Success(ClassOrInterfaceDeclaration) 
+data ClassDecompiler  = Success(CID) 
                       | Error(str message); 
 
                       
@@ -56,6 +59,8 @@ public ClassDecompiler safeDecompile(loc classFile) {
  * value of type T.  
  */ 
 data Analysis[&T] = Analysis(&T (ExecutionContext) run);
+
+alias Transformation = Analysis[ExecutionContext];
 
 /*
  * Create an ExecutionContext.
@@ -90,6 +95,15 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 		
 	return ExecutionContext(ct, mt);
 }
+
+CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
+
+CID jimplify(list[CID (CID)] fs, CID c) { 
+  switch(fs) {
+    case [h, *t]: return jimplify(t, h(c));
+    default: return c; 
+  }
+} 
 
 /*
  * This is our current execution framework. 
