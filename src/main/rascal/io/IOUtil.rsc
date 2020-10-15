@@ -7,7 +7,7 @@ import IO;
  */
 list[loc] findAllFiles(loc location, str ext) {
   res = [];
-  list[loc] allFiles; 
+  list[loc] allFiles = []; 
   
   if(isDirectory(location) || (location.extension == "jar") || (location.extension == "zip")) {
      allFiles = location.ls;
