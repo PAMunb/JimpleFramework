@@ -1,12 +1,13 @@
 module TestPrettyPrinter
 
-
-import lang::jimple::toolkit::PrettyPrinter;
 import lang::jimple::Syntax;
-import lang::jimple::core::Context;
 import lang::jimple::Decompiler;
-import IO;
+import lang::jimple::core::Context;
+import lang::jimple::util::JPrettyPrinter; 
 import lang::jimple::toolkit::BasicMetrics;
+import lang::jimple::toolkit::PrettyPrinter;
+
+import IO;
 
 test bool testField() {
 	f1 = field([Public()], TBoolean(), "flag");
