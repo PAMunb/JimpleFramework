@@ -14,8 +14,8 @@ module lang::jimple::core::Context
 
 import lang::jimple::Syntax; 
 import lang::jimple::Decompiler; 
-import lang::jimple::util::Converters; 
 import lang::jimple::toolkit::jimplify::ProcessLabels; 
+import lang::jimple::util::Converters; 
 
 import io::IOUtil;
 
@@ -83,7 +83,7 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 		println(errors); 
 	}
 	
-	ClassTable ct  = (n : Class(classDecl(n, ms, s, is, fs, mss), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
+	ClassTable ct  = (n : Class(jimplify(classDecl(n, ms, s, is, fs, mss)), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
 	
 	MethodTable mt = ();
 		
@@ -96,9 +96,9 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 	return ExecutionContext(ct, mt);
 }
 
-CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
+private CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
 
-CID jimplify(list[CID (CID)] fs, CID c) { 
+private CID jimplify(list[CID (CID)] fs, CID c) { 
   switch(fs) {
     case [h, *t]: return jimplify(t, h(c));
     default: return c; 

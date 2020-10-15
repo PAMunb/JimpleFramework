@@ -2,7 +2,6 @@ module lang::jimple::toolkit::jimplify::ProcessLabels
 
 import lang::jimple::Syntax;
  
-
 /**
  * An auxiliarly function to process all Jimple labels and 
  * goto statements, translating them to a more user friendly 
