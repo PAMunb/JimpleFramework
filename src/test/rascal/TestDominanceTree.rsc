@@ -23,33 +23,80 @@ test bool testDominanceTree() {
   
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
-  	result = createDominanceTree(flowGraph);
   
-  	map[Node, Node] expectation = (
-	  stmtNode(assign(
+  	rel[&T, set[&T]] expectation = {
+	  <stmtNode(assign(
 	      localVariable("v2"),
-	      immediate(iValue(intValue(2))))):stmtNode(returnStmt(local("v2"))),
-	  entryNode():stmtNode(assign(
-	      localVariable("v0"),
-	      immediate(iValue(booleanValue(false))))),
-	  stmtNode(ifStmt(
+	      immediate(iValue(intValue(2))))),{
+	    stmtNode(returnStmt(local("v2"))),
+	    exitNode()
+	  }>,
+	  <entryNode(),{
+	    stmtNode(assign(
+	        localVariable("v2"),
+	        immediate(iValue(intValue(2))))),
+	    stmtNode(ifStmt(
+	        cmp(
+	          local("v0"),
+	          iValue(booleanValue(false))),
+	        "label1:")),
+	    stmtNode(returnStmt(local("v2"))),
+	    stmtNode(gotoStmt("label2:")),
+	    stmtNode(assign(
+	        localVariable("v0"),
+	        immediate(iValue(booleanValue(false))))),
+	    stmtNode(assign(
+	        localVariable("v1"),
+	        immediate(iValue(intValue(1))))),
+	    exitNode(),
+	    stmtNode(label("print"))
+	  }>,
+	  <stmtNode(ifStmt(
 	      cmp(
 	        local("v0"),
 	        iValue(booleanValue(false))),
-	      "label1:")):stmtNode(assign(
-	      localVariable("v1"),
-	      immediate(iValue(intValue(1))))),
-	  stmtNode(assign(
+	      "label1:")),{
+	    stmtNode(assign(
+	        localVariable("v2"),
+	        immediate(iValue(intValue(2))))),
+	    stmtNode(returnStmt(local("v2"))),
+	    stmtNode(gotoStmt("label2:")),
+	    stmtNode(assign(
+	        localVariable("v1"),
+	        immediate(iValue(intValue(1))))),
+	    exitNode(),
+	    stmtNode(label("print"))
+	  }>,
+	  <stmtNode(returnStmt(local("v2"))),{exitNode()}>,
+	  <stmtNode(gotoStmt("label2:")),{stmtNode(label("print"))}>,
+	  <stmtNode(assign(
 	      localVariable("v0"),
-	      immediate(iValue(booleanValue(false))))):stmtNode(ifStmt(
-	      cmp(
-	        local("v0"),
-	        iValue(booleanValue(false))),
-	      "label1:")),
-	  stmtNode(assign(
+	      immediate(iValue(booleanValue(false))))),{
+	    stmtNode(assign(
+	        localVariable("v2"),
+	        immediate(iValue(intValue(2))))),
+	    stmtNode(ifStmt(
+	        cmp(
+	          local("v0"),
+	          iValue(booleanValue(false))),
+	        "label1:")),
+	    stmtNode(returnStmt(local("v2"))),
+	    stmtNode(gotoStmt("label2:")),
+	    stmtNode(assign(
+	        localVariable("v1"),
+	        immediate(iValue(intValue(1))))),
+	    exitNode(),
+	    stmtNode(label("print"))
+	  }>,
+	  <stmtNode(assign(
 	      localVariable("v1"),
-      immediate(iValue(intValue(1))))):stmtNode(gotoStmt("label2:"))
-	);
+	      immediate(iValue(intValue(1))))),{
+	    stmtNode(gotoStmt("label2:")),
+	    stmtNode(label("print"))
+	  }>,
+	  <exitNode(),{}>,
+	  <stmtNode(label("print")),{}>
+	};
   
 	return createDominanceTree(flowGraph) == expectation; 
 }
