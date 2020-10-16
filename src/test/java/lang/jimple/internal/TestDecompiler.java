@@ -165,7 +165,7 @@ public class TestDecompiler {
 	@Test 
 	public void decompileSwitchCaseSample() {
 		try {
-			File classFile = new File("./target/test-classes/samples/SwitchCaseSample"); 			
+			File classFile = new File("./target/test-classes/samples/SwitchCaseSample.class"); 			
 			assertNotNull(classFile);
 			
 			IValueFactory vf = ValueFactory.getInstance();
@@ -183,7 +183,7 @@ public class TestDecompiler {
 	@Test 
 	public void decompileControlStatements() {
 		try {
-			File classFile = new File("./target/test-classes/samples/ControlStatements"); 			
+			File classFile = new File("./target/test-classes/samples/ControlStatements.class"); 			
 			assertNotNull(classFile);
 			
 			IValueFactory vf = ValueFactory.getInstance();
