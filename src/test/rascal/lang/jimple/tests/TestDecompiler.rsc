@@ -1,4 +1,4 @@
-module TestDecompiler
+module lang::jimple::tests::TestDecompiler
 
 import lang::jimple::Syntax;
 import lang::jimple::Decompiler; 

@@ -1,4 +1,4 @@
-module TestReachDefinition
+module lang::jimple::tests::TestReachDefinition
 
 import lang::jimple::Syntax;
 import lang::jimple::analysis::FlowGraph;
