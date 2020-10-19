@@ -19,4 +19,4 @@ before_install:
  - echo $JAVA_HOME
 
 script:
- - mvn -U clean package
+ - mvn -U clean package install
