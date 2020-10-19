@@ -8,6 +8,7 @@ import String;
  * TODO PP: 
  *	Indentation must be made easier, configurable and less error prone.
  *	Methods in interfaces are printed in a diferent way than in classes; interfaces have a ';' and no {}.
+ *  Local variables must be grouped during printting (example: java.io.PrintStream $r0, $r1, $r2, $r3) 
  *	 
  * TODO Jimple Decompiler:
  *  Missing local variable decl (the one with $ symbol.
