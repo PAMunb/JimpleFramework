@@ -208,7 +208,14 @@ public class Decompiler {
 			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
 			
 			mn.instructions.accept(insVisitor);
-			insVisitor.clearUnusedLabelInstructions();
+			
+			// TODO: we commented this line because we want to 
+			//   solve this issue using a Jimple transformation.
+			//   we will keep the commented implementation here just while 
+			//   we review the new strategy. 
+			// 
+			// insVisitor.clearUnusedLabelInstructions();
+			
 			stmts = insVisitor.instructions;
 			
 			for(LocalVariableDeclaration var: localVariables.values()) {
@@ -1252,6 +1259,7 @@ public class Decompiler {
 			}	
 		}
 		
+		@Deprecated
 		public void clearUnusedLabelInstructions() {
 			List<Statement> toRemove = new ArrayList<>();
 			Map<String, Integer> newLabels = new HashMap<>();
