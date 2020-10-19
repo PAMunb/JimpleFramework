@@ -11,9 +11,7 @@ import String;
  *	 
  * TODO Jimple Decompiler:
  *  Missing local variable decl (the one with $ symbol.
- *  execute from Context does not process interfaces.
  *  Sort LocalVariableDeclaration by variable name.
- *  Changes in .classpath file  made the test-classes dir, on target, disappear. This broke the Test*.rsc files. 
  */
 
 str cleanClassName(str className) = replaceAll(className, "/","."); //TODO: do this in the decompiler
@@ -107,7 +105,7 @@ public str prettyPrint(Statement::nop()) = "nop;";
  * Variable
  */
 public str prettyPrint(Variable::localVariable(Name local)) = "<local>";
-public str prettyPrint(Variable::arrayRef(Name reference, Immediate idx)) = "<reference> [<prettyPrint(idx)>]";
+public str prettyPrint(Variable::arrayRef(Name reference, Immediate idx)) = "<reference>[<prettyPrint(idx)>]";
 public str prettyPrint(Variable::fieldRef(Name reference, FieldSignature field)) = "<reference>.<prettyPrint(field)>";
 public str prettyPrint(Variable::staticFieldRef(FieldSignature field)) = "<prettyPrint(field)>";
 
