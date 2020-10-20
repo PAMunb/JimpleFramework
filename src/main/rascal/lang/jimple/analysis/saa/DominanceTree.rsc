@@ -1,6 +1,8 @@
 module lang::jimple::analysis::saa::DominanceTree
 
 import demo::Dominators;
+import Set;
+import Relation;
 import lang::jimple::analysis::FlowGraph;
 import analysis::graphs::Graph;
 
@@ -12,20 +14,31 @@ import analysis::graphs::Graph;
 	to find for leaf that contains a given child. So that leaf would be the immediate domminator.
 */
 
-public rel[&T, set[&T]] createDominanceTree(Graph[&T] graph) {
-	return dominators(graph, entryNode());
+public map[&T, set[&T]] createDominanceTree(Graph[&T] graph) {
+	PRED = graph;
+	ROOT = entryNode();
+	
+	set[&T] rootDominators = reachX(PRED, {ROOT}, {});
+	set[&T] VERTICES = carrier(PRED);
+
+	return (V: (rootDominators - reachX(removeNodeFromGraph(graph, V), {ROOT}, {V}) - {V}) | &T V <- VERTICES );
 }
 
-public Node findIdom(FlowGraph flowGraph, rel[&T, set[&T]] dominanceTree, Node child) {
+public Graph[&T] removeNodeFromGraph(Graph[&T] graph, &T nodeToRemove) {
+ return { <father, graphChild> | <father, graphChild> <- graph, nodeToRemove != father || nodeToRemove == entryNode() };
+}
+
+
+public Node findIdom(map[&T, set[&T]] dominanceTree, Node child) {
 	ROOT = entryNode();
 	idom = entryNode();
 	
-	possibleIdoms = [ idom | <idom, childs> <- dominanceTree, child in childs];
+	possibleIdoms = [ father | father <- dominanceTree, child in dominanceTree[father] ];
 
 	for(possibleIdom <- possibleIdoms) {
-		tempGraph = { <father, child> | <father, child> <- flowGraph, father != possibleIdom };
-		reachableNodes = reachX(tempGraph, {ROOT}, {});
-		idom = child in reachableNodes ? idom : possibleIdom;
+		if(size(dominanceTree[possibleIdom]) < size(dominanceTree[idom])) {
+			idom = possibleIdom;
+		};
 	};
 	
 	return idom;
