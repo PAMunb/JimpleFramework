@@ -2,6 +2,7 @@ module TestDominanceFrontier
 
 import lang::jimple::analysis::FlowGraph;
 import lang::jimple::analysis::saa::DominanceFrontier;
+import lang::jimple::analysis::saa::DominanceTree;
 import lang::jimple::Syntax; 
 
 test bool testDominanceFrontier() {
@@ -22,11 +23,12 @@ test bool testDominanceFrontier() {
   
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
+  	dominanceTree = createDominanceTree(flowGraph);
   	
-  	result = createDominanceFrontier(flowGraph);
+	result = createDominanceFrontier(flowGraph, dominanceTree);
 	
 	return result == (
-		stmtNode(s3): {stmtNode(gotoStmt("print"))},
-		stmtNode(s6): {stmtNode(gotoStmt("print"))}
+	  stmtNode(s6): { stmtNode(gotoStmt("print")) },
+	  stmtNode(s3): { stmtNode(gotoStmt("print")) }
 	);
 }

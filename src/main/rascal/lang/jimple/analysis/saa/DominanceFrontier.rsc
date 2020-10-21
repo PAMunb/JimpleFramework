@@ -28,6 +28,6 @@ public map[Node, set[Node]] calculateDominanceFrontier(Node origin, Node destina
 	return dominanceFrontier;
 }
 
-public bool isJoinNode(FlowGraph flowGraph, Node child) {
-	return size(predecessors(flowGraph, child)) > 2;
+public bool isJoinNode(FlowGraph flowGraph, Node child) {	
+	return size(predecessors(flowGraph, child)) >= 2;
 }
