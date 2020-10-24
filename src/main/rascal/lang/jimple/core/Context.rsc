@@ -14,6 +14,7 @@ module lang::jimple::core::Context
 
 import lang::jimple::Syntax; 
 import lang::jimple::Decompiler; 
+import lang::jimple::toolkit::jimplify::ProcessLabels; 
 import lang::jimple::util::Converters; 
 
 import io::IOUtil;
@@ -21,6 +22,8 @@ import io::IOUtil;
 import List; 
 import String; 
 import IO;
+
+alias CID = ClassOrInterfaceDeclaration; 
 
 data ClassType = ApplicationClass()
                | LibraryClass()
@@ -36,7 +39,7 @@ alias MethodTable = map[Name, DeclaredMethod];
 
 data ExecutionContext = ExecutionContext(ClassTable ct, MethodTable mt);  
 
-data ClassDecompiler  = Success(ClassOrInterfaceDeclaration) 
+data ClassDecompiler  = Success(CID) 
                       | Error(str message); 
 
                       
@@ -57,6 +60,8 @@ public ClassDecompiler safeDecompile(loc classFile) {
  */ 
 data Analysis[&T] = Analysis(&T (ExecutionContext) run);
 
+alias Transformation = Analysis[ExecutionContext];
+
 /*
  * Create an ExecutionContext.
  *
@@ -72,24 +77,32 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool verbose) {
 	list[ClassDecompiler] classes = loadClasses(classPath);
 	
-	errors = [f | Error(f) <- classes]; 	
+	errors = [f | Error(f) <- classes]; 
+	
 	if(verbose) {
 		println(errors); 
 	}
-	
-	ClassTable ct  = (getTypeName(c) : Class(c, ApplicationClass()) | Success(c) <- classes);
+		
+	ClassTable ct  = (n : Class(jimplify(classDecl(n, ms, s, is, fs, mss)), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
 		
 	MethodTable mt = ();	
 	top-down visit(ct) {
     	case classDecl(TObject(cn), _, _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints);   
         case interfaceDecl(TObject(cn), _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints); 
-   	}  
+   	}     	
 		
 	return ExecutionContext(ct, mt);
 }
 
-private Type getTypeName(classDecl(cn, _, _, _, _, _)) = cn;
-private Type getTypeName(interfaceDecl(cn, _, _, _, _)) = cn;
+private CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
+
+private CID jimplify(list[CID (CID)] fs, CID c) { 
+  switch(fs) {
+    case [h, *t]: return jimplify(t, h(c));
+    default: return c; 
+  }
+} 
+
 private map[Name, DeclaredMethod] toMethodsTable(Name cn, list[Method] methods, list[str] entryPoints) {
 	return (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- methods);
 }
