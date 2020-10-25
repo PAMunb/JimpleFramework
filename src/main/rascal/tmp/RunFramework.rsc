@@ -1,17 +1,20 @@
 module tmp::RunFramework
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
 
-import lang::jimple::toolkit::CallGraph;
 //import lang::jimple::toolkit::GraphUtil;
-import lang::jimple::util::Converters;
+import lang::jimple::toolkit::CallGraph;
+import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::PrettyPrinter;
+import lang::jimple::util::Converters;
 import lang::jimple::util::JPrettyPrinter;
 
-import lang::jimple::analysis::FlowGraph;
 import lang::jimple::analysis::dataflow::Framework; 
+import lang::jimple::analysis::dataflow::AvailableExpressions;
+import lang::jimple::analysis::dataflow::LiveVariable;
 import lang::jimple::analysis::dataflow::ReachDefinition; 
+import lang::jimple::analysis::dataflow::VeryBusyExpressions;
 
 import IO;
 import Map;
@@ -19,9 +22,9 @@ import Relation;
 import Type;
 import Set;
 import List;
+import String;
 import util::Math;
 import analysis::graphs::Graph;
-import String;
 
 import vis::Figure;
 import vis::ParseTree;
@@ -44,27 +47,59 @@ public void testFlowGraph(){
 }
 
 public void testVeryBusyExpressions(){
+	files = [|project://JimpleFramework/target/test-classes/samples/dataflow/SimpleVeryBusyExpression.class|];
+	methodSig = "samples.dataflow.SimpleVeryBusyExpression.veryBusy()";
 	
+	AnalysisResult[Expression] veryBusyExpressions = execute(files, methodSig, vb);	
+
+	print(veryBusyExpressions);
 }
 
 public void testAvailableExpressions(){
+	files = [|project://JimpleFramework/target/test-classes/samples/dataflow/SimpleAvailableExpression.class|];
+	methodSig = "samples.dataflow.SimpleAvailableExpression.available(int,int)";
 	
+	AnalysisResult[Expression] availableExpressions = execute(files, methodSig, ae);	
+
+	print(availableExpressions);
 }
 
 public void testReachDefinition(){
 	files = [|project://JimpleFramework/target/test-classes/samples/dataflow/SimpleReachDefinition.class|];
-	es = [];
-	
 	methodSig = "samples.dataflow.SimpleReachDefinition.factorial(int)";
-	
-	ExecutionContext ctx = createExecutionContext(files,es,true);
-	
-	tuple[map[Node, set[Statement]] inSet, map[Node, set[Statement]] outSet] reachDefs = execute(rd, ctx.mt[methodSig].method.body);	
+			
+	AnalysisResult[Statement] reachDefs = execute(files, methodSig, rd);	
 
-	println(reachDefs);	
+	print(reachDefs);	
+}
+
+public void testLiveVariable(){
+	files = [|project://JimpleFramework/target/test-classes/samples/dataflow/SimpleLiveVariable.class|];	
+	methodSig = "samples.dataflow.SimpleLiveVariable.live()";
+	
+	AnalysisResult[LocalVariable] liveVariables = execute(files, methodSig, lv);	
+
+	print(liveVariables);
 }
 
 
+private AnalysisResult[&T] execute(list[loc] files, str methodSig, DFA[&T] dfa){
+	ExecutionContext ctx = createExecutionContext(files,[],true);	
+	body = ctx.mt[methodSig].method.body;	
+	return execute(dfa, body);	
+}
+
+
+private void print(AnalysisResult[&T] result){
+	println("RESULT:");
+	for(n <- result.inSet){
+		println("NODE: <n>");
+		println("\t IN: <result.inSet[n]>");
+		if(n in result.outSet){
+			println("\t OUT: <result.outSet[n]>");
+		}
+	}
+}
 
 
 public Figure toFigure(FlowGraph fg){

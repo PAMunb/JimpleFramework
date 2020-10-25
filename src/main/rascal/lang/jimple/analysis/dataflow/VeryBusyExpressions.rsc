@@ -1,7 +1,7 @@
 module lang::jimple::analysis::dataflow::VeryBusyExpressions
 
-import lang::jimple::Syntax; 
-import lang::jimple::analysis::FlowGraph;
+import lang::jimple::core::Syntax; 
+import lang::jimple::toolkit::FlowGraph;
 extend lang::jimple::analysis::dataflow::Framework; 
 
 import List;
@@ -14,7 +14,7 @@ private TransferFunctions[Expression] tf
              , set[Expression] (MethodBody b) { return initFunction(b); }
              );
 
-public DFA[Expression] ae = dfa(Backward(), Intersection(), tf); 
+public DFA[Expression] vb = dfa(Backward(), Intersection(), tf); 
 
 private set[Expression] boundaryFunction() = {}; 
 
