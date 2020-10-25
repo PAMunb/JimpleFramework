@@ -1,7 +1,7 @@
-module lang::jimple::analysis::FlowGraph
+module lang::jimple::toolkit::FlowGraph
 
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 
 import Relation;
 import analysis::graphs::Graph;
