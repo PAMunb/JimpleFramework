@@ -13,7 +13,7 @@ CGModel executeSimpleCallGraph(list[str] entryPoints, Analysis[&T] analysis){
 	return execute(files, entryPoints, analysis);
 }
 
-test bool testSimpleCallGraphStatistics(){	 
+/*test bool testSimpleCallGraphStatistics(){	 
     CGModel model = executeSimpleCallGraph([], Analysis(computeCallGraph));
     
     CG cg = model.cg;
@@ -23,4 +23,4 @@ test bool testSimpleCallGraphStatistics(){
     bool numberOfProcedures = (12 == size(carrier(cg)));
     
     return numberOfCalls && numberOfProcedures;
-}
+}*/

@@ -4,7 +4,7 @@ import lang::jimple::Syntax;
 import lang::jimple::core::Context;
 
 import lang::jimple::toolkit::CallGraph;
-import lang::jimple::toolkit::GraphUtil;
+//import lang::jimple::toolkit::GraphUtil;
 import lang::jimple::util::Converters;
 import lang::jimple::toolkit::PrettyPrinter;
 import lang::jimple::util::JPrettyPrinter;

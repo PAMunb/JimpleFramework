@@ -1,6 +1,6 @@
 module lang::jimple::util::JPrettyPrinter
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 
 import String;
 

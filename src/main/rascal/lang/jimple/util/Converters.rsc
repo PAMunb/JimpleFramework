@@ -1,6 +1,6 @@
 module lang::jimple::util::Converters
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 import lang::jimple::util::JPrettyPrinter;  
 
 import String; 
