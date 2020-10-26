@@ -1,7 +1,8 @@
-module lang::jimple::analysis::saa::DominanceTree
+module lang::jimple::toolkit::ssa::DominanceTree
+
+import lang::jimple::toolkit::FlowGraph;
 
 import List;
-import lang::jimple::analysis::FlowGraph;
 
 public map[Node, Node] createDominanceTree(FlowGraph flowGraph) {
 	result = (computeDominator(flowGraph, a): a | <a, _> <- flowGraph);

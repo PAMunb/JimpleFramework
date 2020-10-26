@@ -1,6 +1,6 @@
 module lang::jimple::toolkit::PrettyPrinter
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::util::JPrettyPrinter;
 

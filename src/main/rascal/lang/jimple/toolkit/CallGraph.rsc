@@ -1,14 +1,13 @@
 module lang::jimple::toolkit::CallGraph
 
 import lang::jimple::core::Context; 
-import lang::jimple::Syntax; 
+import lang::jimple::core::Syntax; 
 import lang::jimple::util::Converters; 
 
 import List; 
 import Map; 
 
 import String;
-import IO;
 
 
 

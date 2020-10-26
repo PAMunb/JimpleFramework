@@ -1,11 +1,11 @@
 module TestPrettyPrinter
 
-import lang::jimple::Syntax;
-import lang::jimple::Decompiler;
+import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
-import lang::jimple::util::JPrettyPrinter; 
+import lang::jimple::decompiler::Decompiler;
 import lang::jimple::toolkit::BasicMetrics;
 import lang::jimple::toolkit::PrettyPrinter;
+import lang::jimple::util::JPrettyPrinter; 
 
 import IO;
 

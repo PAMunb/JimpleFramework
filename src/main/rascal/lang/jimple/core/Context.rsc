@@ -12,12 +12,11 @@
  */ 
 module lang::jimple::core::Context
 
-import lang::jimple::Syntax; 
-import lang::jimple::Decompiler; 
-import lang::jimple::toolkit::jimplify::ProcessLabels; 
-import lang::jimple::util::Converters; 
-
-import io::IOUtil;
+import lang::jimple::core::Syntax; 
+import lang::jimple::decompiler::Decompiler; 
+import lang::jimple::decompiler::jimplify::ProcessLabels; 
+import lang::jimple::util::Converters;
+import  lang::jimple::util::IO;
 
 import List; 
 import String; 
