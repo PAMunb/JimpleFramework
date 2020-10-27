@@ -1,13 +1,9 @@
 package samples.dataflow;
 
 public class SimpleVeryBusyExpression {
-
-	public void veryBusy() {
-		int a = 0;
-		int b = 0;
-		int x = 0;
-		int y = 0;
-
+	
+	public void veryBusy(int a, int b, int x, int y) {
+		
 		if (a != b) {
 			x = b - a;
 			y = a - b;
