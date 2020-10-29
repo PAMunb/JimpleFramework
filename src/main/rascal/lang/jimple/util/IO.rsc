@@ -1,13 +1,13 @@
-module io::IOUtil
+module lang::jimple::util::IO
 
 import IO;
 
 /**
- * List all files from an original location. 
+ * List all files from a location. 
  */
 list[loc] findAllFiles(loc location, str ext) {
   res = [];
-  list[loc] allFiles; 
+  list[loc] allFiles = []; 
   
   if(isDirectory(location) || (location.extension == "jar") || (location.extension == "zip")) {
      allFiles = location.ls;

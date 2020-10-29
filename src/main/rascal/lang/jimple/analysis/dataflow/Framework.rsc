@@ -1,7 +1,7 @@
 module lang::jimple::analysis::dataflow::Framework
 
-import lang::jimple::Syntax; 
-import lang::jimple::analysis::FlowGraph; 
+import lang::jimple::core::Syntax; 
+import lang::jimple::toolkit::FlowGraph; 
 
 alias Definition = Statement; 
 alias LocalVariable = str;
