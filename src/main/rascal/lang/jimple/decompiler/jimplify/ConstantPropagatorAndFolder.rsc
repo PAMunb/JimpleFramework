@@ -3,6 +3,7 @@ module lang::jimple::decompiler::jimplify::ConstantPropagatorAndFolder
 import lang::jimple::core::Syntax;
 import lang::jimple::util::JPrettyPrinter;
 import lang::jimple::analysis::dataflow::ReachDefinition;
+import lang::jimple::toolkit::FlowGraph; 
 import Prelude;
 
 
@@ -17,17 +18,44 @@ public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInt
 	  return c;   
 	}
 
-private methodBody processConstants(MethodBody mb) {
-	top-down visit(mb) {
-		case localVariableDeclaration(t,l): if( evalType("t") == "int") processIntConstants(mb, l);
-	}
-	return methodBody(ls, ss, cs);
-}
+private MethodBody processConstants(MethodBody mb) {
+	
+	AnalysisResult[Statement] reachDefs = execute(rd, mb);
 
-private bool processIntConstants(methodBody mb, str id){
-	top-down visit(mb) {
-		case assign(localVariable(v,e)): if( v == id) return true;
-	}
-	return false;
-}
+	printlnExp("Quantidade de stmts ", size(mb.stmts)); 
+	printlnExp("Quantidade de elementos no mapa reach ", size(reachDefs.outSet)); 
 
+  map[str, int] consts = ();
+  //compute constants
+  for (n <- mb.stmts) {
+    set[Statement] reachs = reachDefs.outSet[stmtNode(n)];
+    for (r <- reachs) {
+      switch (r) {
+        case assign(localVariable(lhs), immediate(iValue(rhs))) : 
+      }    
+    }
+  }
+  //update values in expressions
+  //remove local variable declaration
+  
+  for(v <- mb.localVariableDecls) {
+    println(v);
+    for (n <- mb.stmts) {
+      set[Statement] reachs = reachDefs.outSet[stmtNode(n)];
+      
+    }
+  }
+  
+  for (n <- mb.stmts) {
+    println("--------------------");
+    println(size(reachDefs.outSet[stmtNode(n)]));
+  	println(reachDefs.outSet[stmtNode(n)]);
+    println("--------------------");
+  }
+	
+//	for (variable <- mb.localVariableDecls) {
+//		println("var " + prettyPrint(variable));
+//
+//	}
+	return  methodBody([], [], []);	
+}

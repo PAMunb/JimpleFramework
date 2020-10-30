@@ -2,9 +2,9 @@ module TestConstantPropagationAndFolder
 
 import lang::jimple::core::Syntax;
 import lang::jimple::decompiler::jimplify::ConstantPropagatorAndFolder;
-
-import Map; 
-import IO;
+import lang::jimple::decompiler::jimplify::ProcessLabels; 
+import lang::jimple::decompiler::Decompiler; 
+import Prelude;
 
 test bool testConstantFold() {
 	
@@ -22,7 +22,13 @@ test bool testConstantFold() {
 
 	m = method([], TInteger(), "add", [], [], b);
 	
-	processConstantPropagatorAndFolder(classDecl(TObject("Teste"), [], object(), [], [], [m]));
+	ClassOrInterfaceDeclaration c = decompile(|project://JimpleFramework/target/test-classes/samples/operators/ShortOps.class|);
+
+  c = processJimpleLabels(c);
+  
+	processConstantPropagatorAndFolder(c);
+	
+	//processConstantPropagatorAndFolder(classDecl(TObject("Teste"), [], object(), [], [], [m]));
 	 
 	return true;
 }
