@@ -6,6 +6,10 @@ import lang::jimple::analysis::dataflow::ReachDefinition;
 import Prelude;
 
 
+import Eval;
+import Set;
+
+
 public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInterfaceDeclaration c) { 
 	  c = top-down visit(c) {
 	    case methodBody(ls, ss, cs) => processConstants(methodBody(ls, ss, cs))   
@@ -13,11 +17,17 @@ public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInt
 	  return c;   
 	}
 
-private MethodBody processConstants(MethodBody mb) {
-	
-	AnalysisResult[Statement] reachDefs = execute(rd, mb);
-	for (v <- mb.localVariableDecls) {
-		println("var " + prettyPrint(v));
+private methodBody processConstants(MethodBody mb) {
+	top-down visit(mb) {
+		case localVariableDeclaration(t,l): if( evalType("t") == "int") processIntConstants(mb, l);
 	}
-	return  methodBody([], [], []);	
+	return methodBody(ls, ss, cs);
 }
+
+private bool processIntConstants(methodBody mb, str id){
+	top-down visit(mb) {
+		case assign(localVariable(v,e)): if( v == id) return true;
+	}
+	return false;
+}
+
