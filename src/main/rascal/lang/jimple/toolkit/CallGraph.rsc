@@ -24,9 +24,12 @@ data EntryPointsStrategy = full()
 						| publicMethods() 
 						| j2se();
 
-// the algorithm used to build the call graph						
+// the algorithm used to build the call graph
+// - 
+// - Class Hierarychy Analysis
+// - Rapid Type Analysis				
 data CallGraphType = RA()
-					| CHA()
+					| CHA() 
 					| RTA();						
 
 /* 
@@ -83,11 +86,11 @@ public &T(ExecutionContext) generateCallGraph(EntryPointsStrategy strategy, Call
  */ 
 CGModel computeCallGraph(ExecutionContext ctx, EntryPointsStrategy strategy, CallGraphType cgType) {
 	// select the entry points
-	methods = selectEntryPoints(ctx, strategy);
+	entrypoints = selectEntryPoints(ctx, strategy);
 	// init the parameters to be used at runtime (generation time)
 	rt = callGraphRuntime(ctx, cgType, strategy, createHT(ctx));
 	// generate and return the call graph
-	return computeCallGraph(methods, rt);
+	return computeCallGraph(entrypoints, rt);
 }			
 
 /*
@@ -127,6 +130,10 @@ private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPoint
 }
 
 
+/*
+ * Returns if a method (identified by a method name and class name) is a
+ * entrypoint based on the chosen entrypoint strategy.
+ */
 private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, full()){
 	return true;
 }
@@ -150,14 +157,13 @@ private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, j2se()){
 	return false;
 }
 
-
 /* 
  * Computes a call graph from runtime parameters, 
  * starting from the entry points list.
  */ 
 private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRuntime rt) {
 	map[str, str] mm = (); 
-  	rel[str from, str to] cg = {}; 
+  	rel[str from, str to] cg = {};
 		
 	// as long as there are methods to be visited
 	while(!isEmpty(methodsList)){		
@@ -185,7 +191,7 @@ private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRun
 				
 				newRelation = <mm[from], mm[to]>;
 				alreadyExists = newRelation in cg;
-				cg = cg + newRelation;  
+				cg = cg + newRelation;
 				
 				if(to in rt.ctx.mt){
 					//TODO update when decompiler replaces '/' for '.'
@@ -211,7 +217,6 @@ private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRun
 	return CGModel(cg, mm);
 }
 
-
 private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
 	methods = [];
 	//visit the method body, searching for invoke expressions
@@ -224,6 +229,10 @@ private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
   	}
   	return methods;
 }
+
+/*
+ * Retrieves the method signature from the method invocation info.
+ */
 private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) = ms; 
 private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) = ms; 
 private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) = ms;
@@ -231,14 +240,13 @@ private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) = ms;
 //TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
 private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) = ms; 
 
-
-
 private list[str] computeClasses(MethodSignature ms, callGraphRuntime(_,RA(),_,_)) = [];
 private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,CHA(),_,ht)){
 	methodsList = [];	
 	classList = hierarchy_types(ht, cn);
 	//removes the class (cn) because it has already been handled
 	classList = classList - cn;
+	
 	for(c <- classList){
 		m = signature(c,mn,args);
 		//TODO verificar se o metodo existe no contexto???
@@ -248,9 +256,22 @@ private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraph
 	}
 	return methodsList;
 }
-private list[str] computeClasses(ms: methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,RTA(),_,ht)){
-	//TODO implement RTA: hierarchy_types - instantiated_types
-	return [];
+private list[str] computeClasses(ms: methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx, RTA(), _, ht)) {
+	methodsList = [];
+	classList = hierarchy_types(ht, cn);
+	
+	for (c <- classList) {
+		instanciations = getProgramInstanciations(ctx);
+		print("instances: ");
+		println(instanciations);
+		if (TObject(c) in instanciations) {
+			methodsList = methodsList + signature(c, mn, args);
+		}
+	}
+	
+	print("methodList: ");
+	println(methodsList);
+	return methodsList;
 }
 
 
@@ -311,8 +332,15 @@ public MethodSignature toMethodSignature(str ms, ExecutionContext ctx) {
 	throw IllegalArgument(methodSignature, "The method does not exist in the execution context.");
 }
 
-
-
+private list[Type] getProgramInstanciations(ExecutionContext ctx) {
+	instanciations = [];
+	top-down visit(ctx) {
+		case newInstance(Type instanceType): {
+			instanciations = instanciations	+ instanceType;
+		}
+	}
+	return instanciations;
+}
 
 
 //TODO remover metodos abaixo
