@@ -1,4 +1,4 @@
-module lang::jimple::analysis::saa::DominanceFrontier
+module lang::jimple::toolkit::ssa::DominanceFrontier
 
 import Set;
 import analysis::graphs::Graph;

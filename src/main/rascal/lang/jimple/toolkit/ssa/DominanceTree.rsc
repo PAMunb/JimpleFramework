@@ -1,4 +1,4 @@
-module lang::jimple::toolkit::saa::DominanceTree
+module lang::jimple::toolkit::ssa::DominanceTree
 
 import demo::Dominators;
 import Set;

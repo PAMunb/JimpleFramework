@@ -3,7 +3,7 @@ module TestDominanceFrontier
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceFrontier;
 import lang::jimple::toolkit::ssa::DominanceTree;
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 
 test bool testDominanceFrontier() {
   	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
