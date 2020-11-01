@@ -6,7 +6,7 @@ import lang::jimple::analysis::dataflow::ReachDefinition;
 import lang::jimple::toolkit::FlowGraph; 
 import Prelude;
 
-public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInterfaceDeclaration c) { 
+public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInterfaceDeclaration c) {    
 	  c = top-down visit(c) {
 	    case methodBody(ls, ss, cs) => processConstants(methodBody(ls, ss, cs))
 	  }
@@ -17,27 +17,35 @@ private MethodBody processConstants(MethodBody mb) {
 	
 	AnalysisResult[Statement] reachDefs = execute(rd, mb);
 	
-	//printlnExp("Quantidade de stmts ", size(mb.stmts)); 
-	//printlnExp("Quantidade de elementos no mapa reach ", size(reachDefs.outSet)); 
-
-
   list[str] const_deleted = [];
   map[str, Value] const_final = ();
   
-  //compute constants
+  //compute constants (TODO: this logic is not good.)
   for (n <- mb.stmts) {
     set[Statement] reachs = reachDefs.outSet[stmtNode(n)];
     for (r <- reachs) {
       switch (r) {
         case assign(localVariable(lhs), immediate(iValue(rhs))) : {
-        	if (!(lhs in const_final) && !(lhs in const_deleted)) {
-            const_final[lhs] = rhs;
-        	} else { 
-        	   if (const_final[lhs] != rhs) {
-        	     delete(const_final, lhs);
-        	     const_deleted += lhs;
-        	   }
-        	}
+          //Not yet deleted or new var
+          if (!(lhs in const_deleted)) {          
+          	if (!(lhs in const_final)) {
+              const_final[lhs] = rhs;
+          	} else {
+          	   if (const_final[lhs] != rhs) {
+          	     const_final = delete(const_final, lhs); //Remove from Value store
+          	     const_deleted += lhs; //Put it on deleteted list (never more const)
+          	   }
+          	}
+          }
+        }
+        default: { 
+          if (assign(localVariable(lhs),exp) := r) {
+            //If the is a Expression (not iValue one) that kills a constant, remove it value store and put on deleted          
+            if (lhs in const_final) {
+              const_final = delete(const_final, lhs);
+              const_deleted += lhs;
+            }
+          }
         }
       }
     }

@@ -2,6 +2,17 @@ package samples.operators;
 
 public class ShortOps {
 
+  // public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
+  // ShortOps ops = new ShortOps();
+  // for (Method method : ops.getClass().getMethods()) {
+  // if (!method.getName().contains("main")) {
+  // System.out.println(method.getName());
+  // final O }bject invoke = method.invoke(ops);
+  // }
+  // }
+  //
+
+  public void addition() {
     short a = 5;
     short b = 5;
     short d = (short) (a + b);
