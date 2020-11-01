@@ -8,31 +8,6 @@ import lang::jimple::analysis::dataflow::ReachDefinition;
 import Map; 
 import IO;
 
-test bool testConstantFold() {
-	
-	Statement p1 = assign(localVariable("l1"), immediate(iValue(intValue(1))));
-
-	Statement p2 = assign(localVariable("l2"), immediate(iValue(intValue(2))));	
-    
-	Statement p3  = nop(); 
-	
-	Statement p4 = assign(localVariable("l1"), plus(local("l1"), iValue(intValue(1))));
-
-	list[Statement] ss = [p1, p2, p3, p4]; 
-	  
-	MethodBody b = methodBody([], ss, []);
-	 
-	tuple[map[Node, set[Statement]] inSet, map[Node, set[Statement]] outSet] reachDefs = execute(rd, b);
-	
-	//println(size(reachDefs.outSet));
-	println(reachDefs.outSet[stmtNode(p3)]);
-	//println(reachDefs.inSet[stmtNode(p4)]);	
-	return true;
-    //$i1 = 1;
- 
-    //$i1 = $i1 + 1;
-}
-
 test bool testReachDefinitions() {
 	Statement s1 = assign(localVariable("l1"), immediate(local("l0"))); 
 	Statement s2 = label("label1:"); 
