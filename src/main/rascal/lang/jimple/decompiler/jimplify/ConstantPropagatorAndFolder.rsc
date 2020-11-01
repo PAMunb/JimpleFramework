@@ -8,7 +8,7 @@ import Prelude;
 
 public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInterfaceDeclaration c) { 
 	  c = top-down visit(c) {
-	    case methodBody(ls, ss, cs) => processConstants(methodBody(ls, ss, cs))   
+	    case methodBody(ls, ss, cs) => processConstants(methodBody(ls, ss, cs))
 	  }
 	  return c;   
 	}
