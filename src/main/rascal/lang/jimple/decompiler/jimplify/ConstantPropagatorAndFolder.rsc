@@ -1,6 +1,10 @@
 module lang::jimple::decompiler::jimplify::ConstantPropagatorAndFolder
 
 import lang::jimple::core::Syntax;
+import lang::jimple::util::JPrettyPrinter;
+import lang::jimple::analysis::dataflow::ReachDefinition;
+import Prelude;
+
 
 import Eval;
 import Set;
