@@ -76,6 +76,23 @@ private MethodBody getMethodBody(){
   
 	return methodBody([], ss, []);
 }
+private MethodBody getMethodBodyPPA(){
+	Statement s1  = ifStmt(cmpgt(local("a"),local("b")),"label1");
+	Statement s6  = assign(localVariable("y"),minus(local("b"),local("a")));
+	Statement s8  = assign(localVariable("x"),minus(local("a"),local("b")));
+	Statement s4  = gotoStmt("label2");
+	
+	Statement s5  = label("label1");
+	Statement s2  = assign(localVariable("x"),minus(local("b"),local("a")));
+	Statement s3  = assign(localVariable("y"),minus(local("a"),local("b")));
+	
+	Statement s9  = label("label2");
+	Statement s10  = returnEmptyStmt();	
+	
+	list[Statement] ss = [ s1,  s2,  s3,  s4,  s5,  s6,  s8, s9, s10 ]; 
+  
+	return methodBody([], ss, []);
+}
 public void main(){
 	testVeryBusyExpressions2();
 }
@@ -84,21 +101,32 @@ public void testVeryBusyExpressions2(){
 	methodSig = "samples.dataflow.SimpleVeryBusyExpression.veryBusy(int,int,int,int)";
 	ExecutionContext ctx = createExecutionContext(files,[],true);	
 	//b = ctx.mt[methodSig].method.body;
-	b = getMethodBody();
+	//b = getMethodBody();
+	b = getMethodBodyPPA();
 	
 	g = backwardFlowGraph(b); 
 	//render(toFigure(g));
    	btm = exitNode(); 
 	Abstraction[Expression] set1 = ();
+	//Abstraction[Expression] set1 = (btm : vb.tf.boundary()) + (stmtNode(s) : vb.tf.init(b) | s <- b.stmts); 
    	Abstraction[Expression] set2 = (btm : vb.tf.boundary()) + (stmtNode(s) : vb.tf.init(b) | s <- b.stmts); 
    	Abstraction[Expression] genSet  = (stmtNode(s): vb.tf.gen(s)  | s <- b.stmts); 
-   	Abstraction[Expression] killSet = (stmtNode(s): vb.tf.kill(s) | s <- b.stmts);  
+   	//TODO rever a funcao KILL ... acho q esta errada!!!!!!!!
+   	Abstraction[Expression] killSet = (stmtNode(s): vb.tf.kill(s) | s <- b.stmts); 
+   	
+   	println("\n****************** GEN_KILL SETS");
+   	printGenKill(genSet,killSet);
+   	
+   	println("\n\n****************** ITERATION 0");
+   	printTable(<set2,set1>); 
+   	
    	int iteration = 1;
    	list[Node] ns = [stmtNode(s) | s <- b.stmts];  
-   	while( iteration < 10 ) { 
+   	//while( iteration < 5 ) { 
+   	solve(set2) {
    		println("\n\n****************** ITERATION <iteration>");
    		for(n <- ns) {
-   			println("***** node=<n>");
+   			//println("***** node=<n>");
 	    	set1[n]  = (vb.tf.init(b) | merge(vb.opr, it, set2[from]) | <from, to> <- g, to := n); 
 	    	//set1[n]  = (merge(Intersection(), vb.tf.init(b) , set2[from]) | <from, to> <- g, to := n);
 	     	set2[n] = genSet[n] + (set1[n] - killSet[n]);
@@ -106,11 +134,12 @@ public void testVeryBusyExpressions2(){
 	     	//println("******** OUT = <set2>");     
 	     	
 	  	}	 
-	  	print(<set2,set1>);  	
+	  	printTable(<set2,set1>);  	
 	  	iteration = iteration + 1;
    	}
   	
 }
+
 private set[&T] merge(Union(), set[&T] s1, set[&T] s2) = s1 + s2;           // merge using the union operator
 private set[&T] merge(Intersection(), set[&T] s1, set[&T] s2) = s1 & s2; 
 
@@ -148,7 +177,28 @@ private AnalysisResult[&T] execute(list[loc] files, str methodSig, DFA[&T] dfa){
 	return execute(dfa, body);	
 }
 
-
+private void printGenKill(Abstraction[Expression] genSet, Abstraction[Expression] killSet){
+	//println("GEN_KILL");
+	for(n <- genSet){
+		str noStr = right(toString(n),23);
+		println("<noStr> \t <tmp(genSet[n])> \t <tmp(killSet[n])>");
+	}
+}
+private void printTable(AnalysisResult[&T] result){
+	//println("RESULT_TABLE ....<result>");
+	str noTitle = "NODE";
+	println("<right(noTitle,23)> \t IN \t OUT");
+	//lista = sort(toList(result.inSet));
+	lista = result.inSet;
+	for(n <- lista){
+		str noStr = right(toString(n),23);
+		if(n in result.outSet){
+			println("<noStr> \t <tmp(result.inSet[n])> \t <tmp(result.outSet[n])>");
+		}else{
+			println("<noStr> \t <tmp(result.inSet[n])> \t { }");
+		}
+	}
+}
 private void print(AnalysisResult[&T] result){
 	println("RESULT:");
 	for(n <- result.inSet){
