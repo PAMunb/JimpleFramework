@@ -32,22 +32,6 @@ public list[Method] methodsIdentification(ExecutionContext ctx) {
   return lm;
 }
 
-public Method firstMethod(ExecutionContext ctx){
-	list[Method] lm = methodsIdentification(ctx);
-	Method m = head(lm);
-	return m;
-}
-
-public list[str] methodsName(ExecutionContext ctx){
-	list[str] name = [];
-	top-down visit(ctx) {
-    	
-    	case method(_, _, nm, _, _, _): name = name+nm;
-     	
-    }
-    return name;
-}
-
 /**
  * Computes the number of public methods from an
  * execution context.
