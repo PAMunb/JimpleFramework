@@ -18,8 +18,8 @@ public DFA[Expression] vb = dfa(Backward(), Intersection(), tf);
 
 private set[Expression] boundaryFunction() = {}; 
 
-private set[Expression] initFunction(MethodBody b) = allExpressions 
-  when allExpressions := { e | /Expression e <- b, binArithmeticExpression(e) }; 
+private set[Expression] initFunction(MethodBody b) = allBinArithmeticExpressions 
+  when allBinArithmeticExpressions := { e | /Expression e <- b, binArithmeticExpression(e) }; 
 
 private set[Expression] genFunction(Statement s) 
    = { e | /Expression e <- s, binArithmeticExpression(e), size(localReferences(e)) > 0 };
@@ -32,3 +32,5 @@ private set[Expression] killFunction(_) = {};
 private bool useVariable(Expression e, str v) = local(v) in localReferences(e); 
 
 private list[Immediate] localReferences(Expression e) = [local(v) | /local(v) <- e];
+ 
+

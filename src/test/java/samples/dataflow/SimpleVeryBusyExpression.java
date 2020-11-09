@@ -14,4 +14,14 @@ public class SimpleVeryBusyExpression {
 		}
 	}
 
+	public void ppa(int a, int b, int x, int y) {		
+		if (a > b) {
+			x = b - a;
+			y = a - b;
+		} else {
+			y = b - a;
+			x = a - b;
+		}
+	}
+	
 }

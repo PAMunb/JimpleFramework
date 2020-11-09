@@ -98,11 +98,11 @@ public void main(){
 }
 public void testVeryBusyExpressions2(){
 	files = [|project://JimpleFramework/target/test-classes/samples/dataflow/SimpleVeryBusyExpression.class|];
-	methodSig = "samples.dataflow.SimpleVeryBusyExpression.veryBusy(int,int,int,int)";
+	methodSig = "samples.dataflow.SimpleVeryBusyExpression.ppa(int,int,int,int)";
 	ExecutionContext ctx = createExecutionContext(files,[],true);	
-	//b = ctx.mt[methodSig].method.body;
+	b = ctx.mt[methodSig].method.body;
 	//b = getMethodBody();
-	b = getMethodBodyPPA();
+	//b = getMethodBodyPPA();
 	
 	g = backwardFlowGraph(b); 
 	//render(toFigure(g));
@@ -111,7 +111,6 @@ public void testVeryBusyExpressions2(){
 	//Abstraction[Expression] set1 = (btm : vb.tf.boundary()) + (stmtNode(s) : vb.tf.init(b) | s <- b.stmts); 
    	Abstraction[Expression] set2 = (btm : vb.tf.boundary()) + (stmtNode(s) : vb.tf.init(b) | s <- b.stmts); 
    	Abstraction[Expression] genSet  = (stmtNode(s): vb.tf.gen(s)  | s <- b.stmts); 
-   	//TODO rever a funcao KILL ... acho q esta errada!!!!!!!!
    	Abstraction[Expression] killSet = (stmtNode(s): vb.tf.kill(s) | s <- b.stmts); 
    	
    	println("\n****************** GEN_KILL SETS");
