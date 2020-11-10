@@ -13,6 +13,7 @@ public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInt
 	  return c;   
 	}
 
+//TODO: Check Arrays.java (twoDimensions has a bug)
 private MethodBody processConstants(MethodBody mb) {
 	
 	AnalysisResult[Statement] reachDefs = execute(rd, mb);
