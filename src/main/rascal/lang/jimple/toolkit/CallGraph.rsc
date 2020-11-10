@@ -2,6 +2,7 @@ module lang::jimple::toolkit::CallGraph
 
 import lang::jimple::core::Context; 
 import lang::jimple::core::Syntax; 
+import lang::jimple::toolkit::GraphUtil;
 import lang::jimple::util::Converters; 
 import Map;
 import Set;
@@ -14,11 +15,6 @@ import Exception;
 import Type;
 import IO;
 import vis::Render;
-
-import lang::jimple::core::Context; 
-import lang::jimple::Syntax; 
-import lang::jimple::toolkit::GraphUtil;
-import lang::jimple::util::Converters;
 
 //TODO redefinir nomes ...
 data EntryPointsStrategy = full() 
