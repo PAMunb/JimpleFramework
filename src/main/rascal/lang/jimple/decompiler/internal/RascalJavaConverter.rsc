@@ -1,4 +1,4 @@
-module lang::jimple::internal::RascalJavaConverter
+module lang::jimple::decompiler::internal::RascalJavaConverter
 
 import IO; 
 import List;
@@ -9,11 +9,14 @@ import lang::rascal::\syntax::Rascal;
 
 /**
  * From a Rascal module, it exports a set 
- * of Java classes corresponding to the algebraic 
+ * of Java classes corresponding to the Vallang algebraic 
  * data types. 
  * 
- * status: This implementation is too experimental, and 
- * does not suppor all Rascal structured types (such as map). 
+ * Status: This implementation is too experimental, and 
+ * does not suppor all Rascal structured types (such as map).
+ * Nonetheless, we can use it to generate all internal Java 
+ * classes that are necessary to decompile Java byte code 
+ * into Jimple.  
  */
 public void generateJavaCode(loc location) {
   Module m = parse(#Module, location);

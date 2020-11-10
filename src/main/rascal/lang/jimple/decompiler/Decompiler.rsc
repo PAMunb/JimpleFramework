@@ -1,7 +1,6 @@
-module lang::jimple::Decompiler
+module lang::jimple::decompiler::Decompiler
 
-import lang::jimple::Syntax;
-import lang::jimple::core::Context;
+import lang::jimple::core::Syntax;
  
 import IO;  
 

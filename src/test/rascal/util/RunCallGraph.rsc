@@ -1,4 +1,4 @@
-module lang::jimple::toolkit::RunCallGraph
+module util::RunCallGraph
 
 import IO;
 import Map;
@@ -10,7 +10,7 @@ import util::Math;
 import vis::Render;
 import analysis::graphs::Graph;
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
 import lang::jimple::toolkit::GraphUtil;

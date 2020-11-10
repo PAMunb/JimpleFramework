@@ -1,4 +1,4 @@
-module lang::jimple::Syntax
+module lang::jimple::core::Syntax
 
 alias String = str;
 alias Int = int; 

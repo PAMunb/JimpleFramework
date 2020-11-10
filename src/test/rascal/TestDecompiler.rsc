@@ -1,16 +1,16 @@
 module TestDecompiler
 
-import lang::jimple::Syntax;
-import lang::jimple::Decompiler; 
+import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
+import lang::jimple::decompiler::Decompiler; 
+import lang::jimple::decompiler::jimplify::ProcessLabels; 
 import lang::jimple::toolkit::PrettyPrinter; 
-import lang::jimple::toolkit::jimplify::ProcessLabels; 
 
 import List; 
 import Set;
 import IO;
 import String;
-import io::IOUtil;
+import lang::jimple::util::IO;
 
 
 loc classLocation = |project://JimpleFramework/target/test-classes/samples/AbstractClassSample.class|;  

@@ -1,6 +1,6 @@
 module TestSignatureAsString
 
-import lang::jimple::Syntax; 
+import lang::jimple::core::Syntax; 
 import lang::jimple::util::Converters;
 
 MethodSignature sig01 = methodSignature("lang.jimple.Method", TObject("java.lang.String"), "signature", [TObject("java.lang.String")]); 

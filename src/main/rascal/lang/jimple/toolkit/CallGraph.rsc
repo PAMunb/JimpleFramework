@@ -1,5 +1,8 @@
 module lang::jimple::toolkit::CallGraph
 
+import lang::jimple::core::Context; 
+import lang::jimple::core::Syntax; 
+import lang::jimple::util::Converters; 
 import Map;
 import Set;
 import List;

@@ -1,7 +1,7 @@
 module lang::jimple::analysis::dataflow::ReachDefinition  
 
-import lang::jimple::Syntax;
-import lang::jimple::analysis::FlowGraph;
+import lang::jimple::core::Syntax;
+import lang::jimple::toolkit::FlowGraph;
 extend lang::jimple::analysis::dataflow::Framework; 
 
 @synopsis{ the set of transfer functions for reach definition analysis }  

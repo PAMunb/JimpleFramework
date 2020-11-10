@@ -1,7 +1,7 @@
 module lang::jimple::analysis::dataflow::LiveVariable
 
-import lang::jimple::Syntax;
-import lang::jimple::analysis::FlowGraph; 
+import lang::jimple::core::Syntax;
+import lang::jimple::toolkit::FlowGraph; 
 extend lang::jimple::analysis::dataflow::Framework; 
 
 private TransferFunctions[LocalVariable] tf 
@@ -16,7 +16,7 @@ public DFA[LocalVariable] lv = dfa(Backward(), Union(), tf);
 private set[LocalVariable] boundaryFunction() = {}; 
 
 @synopsis{ the init function... only returning the empty set for every statement }  
-private set[LocalVariable] initFunction(MethodBody body) ={};
+private set[LocalVariable] initFunction(MethodBody _) ={};
 
 @synopsis{ the gen function of live variables. In this case, we generate 
  a reference to every variable in the statement. }  
