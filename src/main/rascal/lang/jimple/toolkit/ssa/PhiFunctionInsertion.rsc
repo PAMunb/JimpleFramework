@@ -11,9 +11,10 @@ import IO;
 import Node;
 import List;
 
-public list[Variable] insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] dominanceFrontier) {
-	assignVariableStmts = {graphNode | <graphNode, _> <- flowGraph, isVariable(graphNode)};
-	variableList = [getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode)];
+public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] dominanceFrontier) {
+	newFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph };
+	assignVariableStmts = { graphNode | <graphNode, _> <- flowGraph, isVariable(graphNode) };
+	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
 	
 	for(Variable variable <- variableList) {
 		F = {}; // set of basic blocks where φ is added
@@ -34,9 +35,9 @@ public list[Variable] insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] d
 				frontierNodes = dominanceFrontier[X];
 				for(Y <- frontierNodes) { // Y : basic block ∈ DF(X )
 					if(size({Y} & F) == 0) { // Y \notin F
-						flowGraph = insertPhiFunction(flowGraph, Y, variable); // add v←φ(...) at entry of Y
+						newFlowGraph = insertPhiFunction(newFlowGraph, Y, variable); // add v←φ(...) at entry of Y
 						F = F + {Y}; // F ← F ∪ {Y}
-						if(size({Y} & assignVariableStmts) ) { // Y \notin Defs(v)
+						if(size({Y} & assignVariableStmts) == 0) { // Y \notin Defs(v)
 							W = W + {Y}; // W ←W ∪{Y}
 						};
 					};
@@ -45,7 +46,7 @@ public list[Variable] insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] d
 		};
 	};
 
-	return [];
+	return newFlowGraph;
 }
 
 public list[Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {

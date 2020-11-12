@@ -30,7 +30,17 @@ test bool testPhiFunctionInsertion() {
 	  stmtNode(s3): { stmtNode(gotoStmt("print")) }
 	);
 
-	insertPhiFunctions(flowGraph, dominanceFrontier);
+	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 
-	return false;
+	return result == {
+		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1")))>,
+		<stmtNode(phiFunction(localVariable("v1"))), stmtNode(gotoStmt("print"))>,
+		<entryNode(), stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false)))))>,
+		<stmtNode(returnStmt(local("v2"))) ,exitNode()>,
+		<stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false))))),stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:"))>,
+		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1))))), stmtNode(phiFunction(localVariable("v1")))>,
+		<stmtNode(gotoStmt("print")),stmtNode(returnStmt(local("v2")))>,
+		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
+		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>
+	};
 }
