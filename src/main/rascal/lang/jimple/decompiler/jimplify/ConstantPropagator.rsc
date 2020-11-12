@@ -1,4 +1,4 @@
-module lang::jimple::decompiler::jimplify::ConstantPropagatorAndFolder
+module lang::jimple::decompiler::jimplify::ConstantPropagator
 
 import lang::jimple::core::Syntax;
 import lang::jimple::util::JPrettyPrinter;
@@ -6,7 +6,7 @@ import lang::jimple::analysis::dataflow::ReachDefinition;
 import lang::jimple::toolkit::FlowGraph; 
 import Prelude;
 
-public ClassOrInterfaceDeclaration processConstantPropagatorAndFolder(ClassOrInterfaceDeclaration c) {    
+public ClassOrInterfaceDeclaration processConstantPropagator(ClassOrInterfaceDeclaration c) {    
 	  c = top-down visit(c) {
 	    case methodBody(ls, ss, cs) => processConstants(methodBody(ls, ss, cs))
 	  }
@@ -28,7 +28,7 @@ private MethodBody processConstants(MethodBody mb) {
       switch (r) {
         case assign(localVariable(lhs), immediate(iValue(rhs))) : {
           //Not yet deleted or new var
-          if (!(lhs in const_deleted)) {          
+          if (!(lhs in const_deleted)) { 
           	if (!(lhs in const_final)) {
               const_final[lhs] = rhs;
           	} else {

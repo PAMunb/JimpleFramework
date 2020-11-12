@@ -1,7 +1,7 @@
-module TestConstantPropagationAndFolder
+module TestConstantPropagator
 
 import lang::jimple::core::Syntax;
-import lang::jimple::decompiler::jimplify::ConstantPropagatorAndFolder;
+import lang::jimple::decompiler::jimplify::ConstantPropagator;
 import lang::jimple::decompiler::jimplify::ProcessLabels; 
 import lang::jimple::decompiler::Decompiler; 
 import Prelude;
@@ -45,7 +45,7 @@ test bool testConstantPropCase1() {
 
   c = processJimpleLabels(c);
   
-	c = processConstantPropagatorAndFolder(c);
+	c = processConstantPropagator(c);
 
   bool eval = false;
   top-down visit(c.methods[indexOf(c.methods, m)].body.stmts) {
@@ -94,7 +94,7 @@ test bool testConstantPropDoNotChange() {
   
   c1 = classDecl(TObject("samples.operators.ShortOps"),[Public()],TObject("java.lang.Object"),[],[],[m]);      
 
-  c2 = processConstantPropagatorAndFolder(processJimpleLabels(c1));
+  c2 = processConstantPropagator(processJimpleLabels(c1));
   
   return (c1 == c2);
 }
@@ -129,7 +129,7 @@ test bool testConstantPropConstThenUse() {
   
   c1 = classDecl(TObject("samples.operators.ShortOps"),[Public()],TObject("java.lang.Object"),[],[],[m]);      
 
-  c2 = processConstantPropagatorAndFolder(processJimpleLabels(c1));
+  c2 = processConstantPropagator(processJimpleLabels(c1));
   
   return (c1 == c2);
 
