@@ -13,7 +13,6 @@ import List;
 
 public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] dominanceFrontier) {
 	newFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph };
-	assignVariableStmts = { graphNode | <graphNode, _> <- flowGraph, isVariable(graphNode) };
 	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
 	
 	for(Variable variable <- variableList) {
@@ -37,7 +36,7 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 					if(size({Y} & F) == 0) { // Y \notin F
 						newFlowGraph = insertPhiFunction(newFlowGraph, Y, variable); // add v←φ(...) at entry of Y
 						F = F + {Y}; // F ← F ∪ {Y}
-						if(size({Y} & assignVariableStmts) == 0) { // Y \notin Defs(v)
+						if(size([Y] & blocksWithVariable(flowGraph, variable)) == 0) { // Y \notin Defs(v)
 							W = W + {Y}; // W ←W ∪{Y}
 						};
 					};
