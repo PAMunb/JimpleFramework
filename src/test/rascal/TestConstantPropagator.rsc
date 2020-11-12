@@ -45,7 +45,7 @@ test bool testConstantPropCase1() {
 
   c = processJimpleLabels(c);
   
-	c = processConstantPropagator(c);
+  c = processConstantPropagator(c);
 
   bool eval = false;
   top-down visit(c.methods[indexOf(c.methods, m)].body.stmts) {
