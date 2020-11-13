@@ -7,18 +7,25 @@ import Type;
 import Set;
 import List;
 import util::Math;
-import vis::Figure;
-import vis::ParseTree;
 import vis::Render;
 import analysis::graphs::Graph;
 
 import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
+import lang::jimple::toolkit::GraphUtil;
+import lang::jimple::util::Converters;
+import lang::jimple::toolkit::PrettyPrinter;
+
+public tuple[list[loc] classPath, list[str] entryPoints] android() {
+	files = [|project://JimpleFramework/src/test/resources/android-app/|];
+    es = [];
+	return <files, es>;
+}
 
 public tuple[list[loc] classPath, list[str] entryPoints] iris() {
 	files = [|project://JimpleFramework/src/test/resources/iris-core/|];
-    es = ["br.unb.cic.iris.core.SystemFacade.send(TObject(\"br.unb.cic.iris.core.model.EmailMessage\"))"];
+    es = ["br.unb.cic.iris.core.SystemFacade.send(br.unb.cic.iris.core.model.EmailMessage)"];
 	return <files, es>;
 }
 
@@ -28,33 +35,65 @@ public tuple[list[loc] classPath, list[str] entryPoints] slf4j() {
     return <files, es>;
 }
 
+public tuple[list[loc] classPath, list[str] entryPoints] polymorphism() {
+	//TODO compile class before using: mvn test -DskipTests
+	files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
+    //es = ["samples.callgraph.polymorphism.Main.execute2()"];
+    es = ["samples.callgraph.polymorphism.Main.execute(samples.callgraph.polymorphism.service.factory.ServiceFactory)"];
+    //es = ["samples.callgraph.polymorphism.Main.execute3(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
+	return <files, es>;
+}
+
 public tuple[list[loc] classPath, list[str] entryPoints] simple() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];//["samples.TestCallGraph.execute()"];
+    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
     //es = ["samples.TestCallGraph.execute()"];
     //es = ["samples.callgraph.simple.SimpleCallGraph.B()","samples.TestCallGraph.C()"];
     return <files, es>;
 }
 
+public tuple[list[loc] classPath, list[str] entryPoints] simpleWithRecursion() {
+	//TODO compile class before using: mvn test -DskipTests
+	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/CallGraphWithRecursion.class|];
+    es = ["samples.callgraph.simple.CallGraphWithRecursion.execute(int[])"];
+    return <files, es>;
+}
 
-public void main(){
-	tuple[list[loc] cp, list[str] e] t = simple();
+public tuple[list[loc] classPath, list[str] entryPoints] simpleWithCycle() {
+	//TODO compile class before using: mvn test -DskipTests
+	files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/CallGraphWithCycle.class|];
+    es = ["samples.callgraph.simple.CallGraphWithCycle.execute()"];
+    return <files, es>;
+}
+
+
+public void main() {
+	// possible tests
+	//tuple[list[loc] cp, list[str] e] t = polymorphism();
+	//tuple[list[loc] cp, list[str] e] t = simple();
+	tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
+	//tuple[list[loc] cp, list[str] e] t = simpleWithCycle();
 	//tuple[list[loc] cp, list[str] e] t = iris();
 	//tuple[list[loc] cp, list[str] e] t = slf4j();
+	//tuple[list[loc] cp, list[str] e] t = android();
 
     files = t.cp;
     es = t.e;
    
     // EXECUTION
-    //CGModel model = execute(files, es, Analysis(computeCallGraph));
-    CGModel model = execute(files, es, Analysis(computeCallGraphConditional));
+    //CGModel model = execute(files, es, Analysis(generateCallGraph(full(), RA())));
+    CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
+    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), CHA())));
+    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RTA())));
     //println(model.cg);        
     
     CG cg = model.cg;
-    mm = invert(model.methodMap);
+    mm = invertUnique(model.methodMap);
+    //mm = invert(model.methodMap);
+    println("MM=<mm>");
     println("\n\n");
-    println(typeOf(cg));    
+    println(typeOf(mm));    
     
     nCalls = size(model.cg);
     println("Number os calls: "+toString(nCalls));
@@ -68,7 +107,7 @@ public void main(){
     println("\nNumber of Entry Points: "+toString(size(entryPoints)));
     println("Entry Points: "+toString(entryPoints));
     procsList = toList(procs);
-    println([name | nn <- procsList, name <- mm[nn]]);
+    println([mm[name] | name <- procsList]);
     
     bottomCalls = bottom(cg);
     println("\nNumber of Bottom Calls (leaves): "+toString(size(bottomCalls)));
@@ -81,21 +120,32 @@ public void main(){
     println("\nConnected Components: "+toString(connections));
     
     // draw the call graph
-    procsList = toList(procs);
-    //nodes = toList({box(text(name), id(name), size(50), fillColor("lightgreen")) | name <- procsList});    
-    nodes = toList({box(text(name), id(nn), size(50), fillColor("lightgreen")) | nn <- procsList, name <- mm[nn]});
-    edges = [edge(c.from,c.to) | c <- cg];    
-    render(graph(nodes, edges, hint("layered"), std(size(20)), gap(10)));    
+    //render(toFigure(cg));   
+    render(toFigure(cg,mm));
+    
+    //to dot (use xdot or graphviz to view)
+    //EX: save text to ra.dot, then: xdot ra.dot
+    //println("DOT:");
+    //println(toDot(cg, "CallGraph", mm));
 }
 
 
 public void show(){
-	files = [|project://JimpleFramework/src/test/resources/slf4j/|];	
-	//files = [|project://JimpleFramework/src/test/resources/iris-core/|];
-	es = [];
-
-	ExecutionContext ctx =  createExecutionContext(files,es,true);	
-		
+	//tuple[list[loc] cp, list[str] e] t = polymorphism();
+	//tuple[list[loc] cp, list[str] e] t = simple();
+	tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
+	//tuple[list[loc] cp, list[str] e] t = simpleWithCycle();
+	//tuple[list[loc] cp, list[str] e] t = iris();
+	//tuple[list[loc] cp, list[str] e] t = slf4j();
+	//tuple[list[loc] cp, list[str] e] t = android();
+	
+	show(t.cp, t.e);
+}
+public void show(list[loc] files, list[str] es){    
+    ExecutionContext ctx =  createExecutionContext(files,es,true);	
+    show(ctx);
+}
+public void show(ExecutionContext ctx){			
 	top-down visit(ctx.ct) {	 	
   		case ClassOrInterfaceDeclaration c:{
   			show(c);
@@ -121,36 +171,4 @@ private void show(list[Method] methods){
 
 private void show(method(_, _, Name name, list[Type] args, _, _)){
 	println("\t - <name>(<intercalate(",", args)>)");
-}
-
-public void novo(){
-    files = [|project://JimpleFramework/target/test-classes/samples/callgraph/simple/SimpleCallGraph.class|];
-    es = ["samples.callgraph.simple.SimpleCallGraph.A()"];
-
-    ExecutionContext ctx =  createExecutionContext(files,es);
-    //println(ctx.mt);
-    
-    println(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body);
-    
-    //para testar uma forma de tratar os invokes
-    println("visitando");
-    visit(ctx.mt["samples.callgraph.simple.SimpleCallGraph.A()"].method.body){
-    	//case InvokeExp e: {
-    	case InvokeExp e: {//_(_,methodSignature(cn, r, mn, args),_): {
-    		//sig = signature(cn,mn,args); 
-      		println("ENTROU!!! ");//+sig);
-      		//println(e);
-      		teste(e);
-    	} 
-
-    	//esse funciona mas fica mostrando erro no eclipse  
-    	//case &T _(_, methodSignature(cn, r, mn, args), _): {
-        //    println("aaa");
-        //} 	
-    }
-
-}
-
-public void teste(virtualInvoke(_, sig, _)) {
-	println("teste");
 }

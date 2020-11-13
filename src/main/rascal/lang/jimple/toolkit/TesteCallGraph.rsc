@@ -1,20 +1,23 @@
-module lang::jimple::toolkit::CallGraph
+module lang::jimple::toolkit::TesteCallGraph
 
-import lang::jimple::core::Context; 
-import lang::jimple::core::Syntax; 
-import lang::jimple::toolkit::GraphUtil;
-import lang::jimple::util::Converters; 
 import Map;
 import Set;
 import List;
 import String;
 import analysis::graphs::Graph;
-import Exception;
+
+
+//TODO remover antes de fazer merge
+
 
 //TODO remover qdo remover o metodo usado para teste (testePolimorfismo)
 import Type;
 import IO;
 import vis::Render;
+
+import lang::jimple::core::Context; 
+import lang::jimple::Syntax; 
+import lang::jimple::toolkit::GraphUtil;
 
 //TODO redefinir nomes ...
 data EntryPointsStrategy = full() 
@@ -23,12 +26,9 @@ data EntryPointsStrategy = full()
 						| publicMethods() 
 						| j2se();
 
-// the algorithm used to build the call graph
-// - 
-// - Class Hierarychy Analysis
-// - Rapid Type Analysis				
+// the algorithm used to build the call graph						
 data CallGraphType = RA()
-					| CHA() 
+					| CHA()
 					| RTA();						
 
 /* 
@@ -70,7 +70,7 @@ data CGModel = CGModel(CG cg, MethodMap methodMap);
  * - the entry points selection strategy
  * - the algorithm to be used to generate the call graph 
  */						
-public &T(ExecutionContext) generateCallGraph(EntryPointsStrategy strategy, CallGraphType cgType){
+public &T(ExecutionContext) executar(EntryPointsStrategy strategy, CallGraphType cgType){
 	return CGModel(ExecutionContext ctx) { 
         return computeCallGraph(ctx, strategy, cgType);
     }; 
@@ -85,33 +85,24 @@ public &T(ExecutionContext) generateCallGraph(EntryPointsStrategy strategy, Call
  */ 
 CGModel computeCallGraph(ExecutionContext ctx, EntryPointsStrategy strategy, CallGraphType cgType) {
 	// select the entry points
-	entrypoints = selectEntryPoints(ctx, strategy);
+	methods = selectEntryPoints(ctx, strategy);
 	// init the parameters to be used at runtime (generation time)
 	rt = callGraphRuntime(ctx, cgType, strategy, createHT(ctx));
 	// generate and return the call graph
-	return computeCallGraph(entrypoints, rt);
+	return computeCallGraph(methods, rt);
 }			
 
-/*
- * Returns the entry points list based on the "given methods" strategy
- */
-private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, given(list[str] givenMethods)) {
-	list[MethodSignature] methods = []; 
-		
-	for(m <- givenMethods){
-		if(m in ctx.mt){
-			methods = methods + toMethodSignature(m,ctx);
-		}
-	}
-	
-  	return methods;
-}
 /*
  * Returns the entry points list based on the defined strategy
  */
 private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPointsStrategy strategy) {
 	list[MethodSignature] methods = []; 
-		
+	
+	//TODO tratar separado o caso de given(), para nao precisar percorrer todos os metodos de todas as classes
+	//if(strategy := given(mss)){
+	//	println("");
+	//}	
+	
 	//visit all methods of all classes
 	top-down visit(ctx) {
      	case classDecl(TObject(cn), _, _, _, _, mss): {
@@ -128,11 +119,6 @@ private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPoint
   	return methods;
 }
 
-
-/*
- * Returns if a method (identified by a method name and class name) is a
- * entrypoint based on the chosen entrypoint strategy.
- */
 private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, full()){
 	return true;
 }
@@ -156,17 +142,17 @@ private bool isEntryPoint(Name cn, Method m, ExecutionContext ctx, j2se()){
 	return false;
 }
 
+
 /* 
  * Computes a call graph from runtime parameters, 
  * starting from the entry points list.
  */ 
 private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRuntime rt) {
-	map[str, str] mm = (); 
-  	rel[str from, str to] cg = {};
+	mm = (); 
+  	cg = {}; 
 		
 	// as long as there are methods to be visited
-	while(!isEmpty(methodsList)){		
-		//TODO rever isso: um pop() resolveria com um comando apenas?	 	
+	while(!isEmpty(methodsList)){			 	
 		MethodSignature currentMethod = head(methodsList);
 		methodsList = drop(1,methodsList);	
 		
@@ -184,26 +170,25 @@ private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRun
 	    	for(methodSignature(cn, r, mn, args) <- invokedMethods){
 	    		str to = signature(cn,mn,args); 
 	    		if(! (to in mm)) {
-	    			//TODO fazer sem concat
 					mm[to] = "M" + "<size(mm) + 1>"; 
 				}
 				
 				newRelation = <mm[from], mm[to]>;
 				alreadyExists = newRelation in cg;
-				cg = cg + newRelation;
+				cg = cg + newRelation;  
 				
 				if(to in rt.ctx.mt){
 					//TODO update when decompiler replaces '/' for '.'
 					sig = methodSignature(replaceAll(cn, "/", "."), r, mn, args);
 					
-			  		if( !(sig in methodsList) && !alreadyExists){			
+					//TODO rever .....							
+			  		if( !(sig in methodsList) && !alreadyExists){// && (!(to in mm))){  			
 			  			methodsList = methodsList + sig;
 			  		}
 					
 					hierarchyMethods = computeClasses(sig, rt);
 					for(hm <- hierarchyMethods){
 						if(! (hm in mm)) {
-							//TODO fazer sem concat
 							mm[hm] = "M" + "<size(mm) + 1>"; 
 						}
 						cg = cg + <mm[from], mm[hm]>;
@@ -215,6 +200,7 @@ private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRun
 
 	return CGModel(cg, mm);
 }
+
 
 private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
 	methods = [];
@@ -228,10 +214,6 @@ private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
   	}
   	return methods;
 }
-
-/*
- * Retrieves the method signature from the method invocation info.
- */
 private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) = ms; 
 private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) = ms; 
 private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) = ms;
@@ -239,13 +221,14 @@ private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) = ms;
 //TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
 private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) = ms; 
 
+
+
 private list[str] computeClasses(MethodSignature ms, callGraphRuntime(_,RA(),_,_)) = [];
 private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,CHA(),_,ht)){
 	methodsList = [];	
 	classList = hierarchy_types(ht, cn);
 	//removes the class (cn) because it has already been handled
 	classList = classList - cn;
-	
 	for(c <- classList){
 		m = signature(c,mn,args);
 		//TODO verificar se o metodo existe no contexto???
@@ -255,22 +238,9 @@ private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraph
 	}
 	return methodsList;
 }
-private list[str] computeClasses(ms: methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx, RTA(), _, ht)) {
-	methodsList = [];
-	classList = hierarchy_types(ht, cn);
-	
-	for (c <- classList) {
-		instanciations = getProgramInstanciations(ctx);
-		print("instances: ");
-		println(instanciations);
-		if (TObject(c) in instanciations) {
-			methodsList = methodsList + signature(c, mn, args);
-		}
-	}
-	
-	print("methodList: ");
-	println(methodsList);
-	return methodsList;
+private list[str] computeClasses(ms: methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,RTA(),_,ht)){
+	//TODO implement RTA: hierarchy_types - instantiated_types
+	return [];
 }
 
 
@@ -312,37 +282,6 @@ private list[str] hierarchy_types(HT ht, str name) {
 	return hierarquia;
 }
 
-
-
-//TODO mover para algum local???
-public str getClassName(str methodSignature) {
-	if(contains(methodSignature,"(") && contains(methodSignature,".")){
-		untilMethodName = substring(methodSignature,0,findFirst(methodSignature,"("));	
-		return substring(untilMethodName,0,findLast(untilMethodName,"."));
-	}
-	return "";
-}
-public MethodSignature toMethodSignature(str ms, ExecutionContext ctx) {
-	Name className = getClassName(ms);
-	if(className != ""){
-		m = ctx.mt[ms].method;		
-		return methodSignature(className, m.returnType, m.name, m.formals);
-	}
-	throw IllegalArgument(methodSignature, "The method does not exist in the execution context.");
-}
-
-private list[Type] getProgramInstanciations(ExecutionContext ctx) {
-	instanciations = [];
-	top-down visit(ctx) {
-		case newInstance(Type instanceType): {
-			instanciations = instanciations	+ instanceType;
-		}
-	}
-	return instanciations;
-}
-
-
-//TODO remover metodos abaixo
 public void testePolimorfismo(){
 	//polymorphism
     files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
@@ -350,13 +289,13 @@ public void testePolimorfismo(){
     es = ["samples.callgraph.polymorphism.Main.execute(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
     //es = ["samples.callgraph.polymorphism.Main.execute3(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
     
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(full())));
-    CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), CHA())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RTA())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(given(["samples.callgraph.simple.SimpleCallGraph.B()","samples.callgraph.simple.SimpleCallGraph.C()"]))));
-    //TODO nao esta funcionando::::CGModel model = execute(files, es, Analysis(generateCallGraph(publicMethods())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(j2se())));
+    //CGModel model = execute(files, es, Analysis(executar(full())));
+    CGModel model = execute(files, es, Analysis(executar(context(), RA())));
+    //CGModel model = execute(files, es, Analysis(executar(context(), CHA())));
+    //CGModel model = execute(files, es, Analysis(executar(context(), RTA())));
+    //CGModel model = execute(files, es, Analysis(executar(given(["samples.callgraph.simple.SimpleCallGraph.B()","samples.callgraph.simple.SimpleCallGraph.C()"]))));
+    //TODO nao esta funcionando::::CGModel model = execute(files, es, Analysis(executar(publicMethods())));
+    //CGModel model = execute(files, es, Analysis(executar(j2se())));
     
     CG cg = model.cg;
     mm = invertUnique(model.methodMap);
@@ -364,18 +303,8 @@ public void testePolimorfismo(){
     mm = (simpleName : replaceAll(mm[simpleName],"samples.callgraph.polymorphism.","s.c.p.") | simpleName <- mm);
 
     //render(toFigure(cg));
-    //render(toFigure(cg,mm));   
+    render(toFigure(cg,mm));   
     
-    //println("DOT:");
-    //println(toDot(cg,mm));
-}
-
-public void testeNomeClasse(){
-	//nome = "samples.callgraph.simple.SimpleCallGraph.A()";
-	nome = "samples.callgraph.simple.SimpleCallGraph.log(TObject(\"java.lang.String\"))";
-	
-	
-	untilMethodName = substring(nome,0,findFirst(nome,"("));
-	
-	println(substring(untilMethodName,0,findLast(untilMethodName,".")));
+    println("DOT:");
+    println(toDot(cg,mm));
 }

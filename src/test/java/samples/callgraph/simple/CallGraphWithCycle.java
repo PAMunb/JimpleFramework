@@ -1,16 +1,10 @@
 package samples.callgraph.simple;
 
 /**
-    A 
-   / \
-  B   C
- / \ / \
-D   E   F
-     \ /
-      G
+ * Cycle between A and D
+ *
  */
-public class SimpleCallGraph {
-
+public class CallGraphWithCycle {
 	public void execute() {
 		A();
 	}
@@ -31,6 +25,7 @@ public class SimpleCallGraph {
 	}
 
 	private void D() {	
+		A();
 		log("Executing D");
 	}
 
@@ -49,5 +44,4 @@ public class SimpleCallGraph {
 	static void log(String message) {
 		System.out.println(message);
 	}
-
 }
