@@ -1,4 +1,4 @@
-package lang.jimple.tests;
+package lang.jimple;
 
 import org.junit.runner.RunWith;
 import org.rascalmpl.test.infrastructure.RascalJUnitTestPrefix;
