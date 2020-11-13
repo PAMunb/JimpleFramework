@@ -1,6 +1,6 @@
-module lang::jimple::toolkit::jimplify::ProcessLabels
+module lang::jimple::decompiler::jimplify::ProcessLabels
 
-import lang::jimple::Syntax;
+import lang::jimple::core::Syntax;
  
 /**
  * An auxiliarly function to process all Jimple labels and 

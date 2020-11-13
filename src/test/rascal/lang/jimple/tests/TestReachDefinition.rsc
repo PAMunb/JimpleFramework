@@ -1,7 +1,7 @@
 module lang::jimple::tests::TestReachDefinition
 
-import lang::jimple::Syntax;
-import lang::jimple::analysis::FlowGraph;
+import lang::jimple::core::Syntax;
+import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::analysis::dataflow::Framework; 
 import lang::jimple::analysis::dataflow::ReachDefinition; 
 

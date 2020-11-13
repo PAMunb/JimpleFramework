@@ -1,7 +1,7 @@
 module lang::jimple::tests::TestFlowGraph
 
-import lang::jimple::analysis::FlowGraph;
-import lang::jimple::Syntax; 
+import lang::jimple::core::Syntax; 
+import lang::jimple::toolkit::FlowGraph;
 
 import Set; 
 

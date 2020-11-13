@@ -1,8 +1,8 @@
 module lang::jimple::tests::TestDominanceTree
 
-import lang::jimple::analysis::FlowGraph;
-import lang::jimple::analysis::saa::DominanceTree;
-import lang::jimple::Syntax; 
+import lang::jimple::toolkit::FlowGraph;
+import lang::jimple::toolkit::ssa::DominanceTree;
+import lang::jimple::core::Syntax; 
 
 test bool testDominanceTree() {
   	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
