@@ -1,4 +1,4 @@
-module TestBasicMetrics
+module lang::jimple::tests::TestBasicMetrics
 
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::BasicMetrics;

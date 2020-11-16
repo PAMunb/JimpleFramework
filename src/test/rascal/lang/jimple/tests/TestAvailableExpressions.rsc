@@ -1,4 +1,4 @@
-module TestAvailableExpressions
+module lang::jimple::tests::TestAvailableExpressions
 
 import lang::jimple::core::Syntax; 
 

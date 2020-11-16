@@ -1,4 +1,4 @@
-module TestCallGraph
+module lang::jimple::tests::TestCallGraph
 
 import lang::jimple::core::Context;
 import lang::jimple::toolkit::CallGraph;
