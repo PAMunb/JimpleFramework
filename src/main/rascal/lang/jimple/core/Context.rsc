@@ -14,9 +14,10 @@ module lang::jimple::core::Context
 
 import lang::jimple::core::Syntax; 
 import lang::jimple::decompiler::Decompiler; 
-import lang::jimple::decompiler::jimplify::ProcessLabels; 
+import lang::jimple::decompiler::jimplify::ProcessLabels;
+import lang::jimple::decompiler::jimplify::ConstantPropagator;
 import lang::jimple::util::Converters;
-import  lang::jimple::util::IO;
+import lang::jimple::util::IO;
 
 import List; 
 import String; 
@@ -94,7 +95,7 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 	return ExecutionContext(ct, mt);
 }
 
-private CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
+private CID jimplify(CID c) = jimplify([processJimpleLabels, processConstantPropagator], c); 
 
 private CID jimplify(list[CID (CID)] fs, CID c) { 
   switch(fs) {
