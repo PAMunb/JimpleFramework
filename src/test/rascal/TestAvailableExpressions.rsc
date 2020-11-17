@@ -51,7 +51,6 @@ public MethodBody b = methodBody([], ss, []);
 
 test bool testAvailableExpressions() {
    tuple[Abstraction[Expression] inSet, Abstraction[Expression] outSet] res = execute(ae, b); 
-   println(res.outSet[stmtNode(s8)]);
    return res.inSet[stmtNode(s1)]   == {}
        && res.outSet[stmtNode(s1)]  == {}
        && res.inSet[stmtNode(s2)]   == {}
