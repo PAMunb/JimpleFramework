@@ -1,4 +1,4 @@
-module TestFlowGraph
+module lang::jimple::tests::TestFlowGraph
 
 import lang::jimple::core::Syntax; 
 import lang::jimple::decompiler::Decompiler; 
