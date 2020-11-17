@@ -1,4 +1,4 @@
-module TestConstantFolder
+module lang::jimple::tests::TestConstantFolder
 
 import lang::jimple::core::Syntax;
 import lang::jimple::decompiler::jimplify::ConstantPropagator;

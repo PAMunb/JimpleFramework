@@ -1,4 +1,4 @@
-module TestConstantPropagator
+module lang::jimple::tests::TestConstantPropagator
 
 import lang::jimple::core::Syntax;
 import lang::jimple::decompiler::jimplify::ConstantPropagator;
