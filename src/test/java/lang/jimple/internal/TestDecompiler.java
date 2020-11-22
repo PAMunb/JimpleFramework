@@ -37,7 +37,7 @@ public class TestDecompiler {
 	@Test 
 	public void decompileInterface() {
 		try {
-			File classFile = new File("./target/test-classes/samples/NewStatementSample.class"); 
+			File classFile = new File("./target/test-classes/samples/InterfaceSample.class"); 
 			assertNotNull(classFile);
 			
 			IValueFactory vf = ValueFactory.getInstance();
