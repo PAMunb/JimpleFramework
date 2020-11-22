@@ -77,7 +77,8 @@ public class Decompiler {
 	private static final String INVOKE_DYNAMIC_FAKE_CLASS = "lang.jimple.InvokeDynamic";
 	
 	private static final String LOCAL_VARIABLE_PARAMETER_PREFIX = "i";
-	private static final String LOCAL_VARIABLE_PREFIX = "$i";
+	private static final String LOCAL_VARIABLE_PREFIX = "i";
+	private static final String SATCK_BASED_LOCAL_VARIABLE_PREFIX = "$r";
 	private static final String THIS_VARIABLE = "this";
 	private static final String LOCAL_PARAMETER_PREFIX = "@parameter";
 	private static final String IMPLICIT_PARAMETER_NAME = "@this";
@@ -251,16 +252,10 @@ public class Decompiler {
 					LocalVariableNode var = nodes.get(i);
 					Type type = type(var.desc);
 					if(!isStatic && i == 0 && var.name.equals(THIS_VARIABLE)) { // being really conservative here. 
-						name = LOCAL_NAME_FOR_IMPLICIT_PARAMETER;
+						name = LOCAL_NAME_FOR_IMPLICIT_PARAMETER;  // DO NOT INCREMENT idx here
 					} 
-					else if(!isStatic && (i >= 1 && i <= formals)) {
-						name = LOCAL_VARIABLE_PARAMETER_PREFIX + idx++;
-					} 
-					else if(isStatic && (i >= 0 && i < formals)) {
-						name = LOCAL_VARIABLE_PARAMETER_PREFIX + idx++; 
-					}
 					else {
-						name = LOCAL_VARIABLE_PREFIX + idx++; 
+						name = JimpleObjectFactory.localVariableName(false, type.getConstructor(), idx++); 
 					}
 				    localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name)); 
 				}
@@ -325,7 +320,7 @@ public class Decompiler {
 			this.localVariables = localVariables;
 			operandStack = new Stack<>();
 			auxiliarlyLocalVariables = new ArrayList<>();
-			locals = localVariables.size();
+			locals = 1; // localVariables.size();
 			instructions = new ArrayList<>();
 			
 			catchClauses.forEach(c -> this.catchClauses.put(c.with, c));
@@ -727,7 +722,7 @@ public class Decompiler {
 				}
 			}
 			// the following code deals with the situations 
-			// where the source code has not been compiler with 
+			// where the source code has not been compiled with 
 			// debugging information 
 			//
 			// throw new RuntimeException("local variable not found");
@@ -1191,7 +1186,7 @@ public class Decompiler {
 		}
 
 		private LocalVariableDeclaration createLocal(Type type) {
-			String name = LOCAL_VARIABLE_PREFIX + locals++;
+			String name = JimpleObjectFactory.localVariableName(true, type.getConstructor(), locals++);
 			LocalVariableDeclaration local = LocalVariableDeclaration.localVariableDeclaration(type, name);
 			auxiliarlyLocalVariables.add(local);
 			return local;
@@ -1299,5 +1294,7 @@ public class Decompiler {
 		}
 		
 	}
+	
+	
 	
 }
