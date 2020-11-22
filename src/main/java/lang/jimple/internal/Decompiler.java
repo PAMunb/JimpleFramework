@@ -534,7 +534,7 @@ public class Decompiler {
 		@Override
 		public void visitTypeInsn(int opcode, String type) {
 			switch(opcode) {
-			 case Opcodes.NEW        : newInstanceIns(type(type));  break;
+			 case Opcodes.NEW        : newInstanceIns(objectConstructor(type.replace("/", ".")));  break;
 			 case Opcodes.ANEWARRAY  : aNewArrayIns(type(type));    break;
 			 case Opcodes.CHECKCAST  : simpleCastIns(type(type));   break;
 			 case Opcodes.INSTANCEOF : instanceOfIns(type(type));   break; 
