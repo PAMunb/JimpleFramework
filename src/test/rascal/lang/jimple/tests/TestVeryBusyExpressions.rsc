@@ -1,4 +1,4 @@
-module TestVeryBusyExpressions
+module lang::jimple::tests::TestVeryBusyExpressions
 
 import lang::jimple::core::Syntax; 
 

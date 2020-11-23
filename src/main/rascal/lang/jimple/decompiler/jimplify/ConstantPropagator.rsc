@@ -16,7 +16,7 @@ public ClassOrInterfaceDeclaration processConstantPropagator(ClassOrInterfaceDec
 //TODO: Check Arrays.java (twoDimensions has a bug)
 private MethodBody processConstants(MethodBody mb) {
 	
-	AnalysisResult[Statement] reachDefs = execute(rd, mb);
+  AnalysisResult[Statement] reachDefs = execute(rd, mb);
 	
   list[str] const_deleted = [];
   map[str, Value] const_final = ();
