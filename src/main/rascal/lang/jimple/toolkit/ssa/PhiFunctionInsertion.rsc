@@ -6,6 +6,7 @@ import Relation;
 import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
+import lang::jimple::toolkit::ssa::Util;
 import Type;
 import IO;
 import Node;
@@ -62,13 +63,6 @@ public bool isVariable(Node graphNode) {
 	if (size(typeOfVariableArg[..]) == 0) return false;
 	
 	return typeOfVariableArg.name == "Variable";
-}
-
-public &T getStmtVariable(Node graphNode) {
-	stmtNode(assignStatement) = graphNode;
-	variableArg = assignStatement[0];
-
-	return variableArg;
 }
 
 public bool isSameVariable(Node graphNode, Variable variable) {
