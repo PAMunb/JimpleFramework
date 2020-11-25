@@ -7,7 +7,7 @@ import analysis::graphs::LabeledGraph;
 //alias LGraph[&T,&L] = rel[&T from, &L label, &T to];
 alias ValueFlowGraph = LGraph[ValueFlowNode,ValueFlowEdge];
 
-data ValueFlowNode = sourceNode()
+data ValueFlowNodeType = sourceNode()
 					| sinkNode()
 					| simpleNode()
 					| callSiteNode();
@@ -15,4 +15,4 @@ data ValueFlowNode = sourceNode()
 data ValueFlowEdge = callSiteOpenEdge()
 					| callSiteCloseEdge();
 					
-					
+data ValueFlowNode = valueFlowNode(Name className, Name methodName, Statement stmt, ValueFlowNodeType nodeType);					

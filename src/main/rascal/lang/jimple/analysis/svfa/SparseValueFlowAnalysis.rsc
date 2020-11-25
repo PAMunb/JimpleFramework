@@ -61,7 +61,7 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 		top-down visit(rt.ctx.mt[currentMethod].method.body.stmts) {	 	
 	  		case a: assign(Variable var, Expression expression): {
 	  			println("* ASSIGN ==== var=<var> ... expr=<expression>");
-	  			traverse(a);
+	  			traverse(a, currentMethodSig.className, currentMethodSig.methodName);
 	  		}  
 	  		case i: invokeStmt(InvokeExp invokeExpression):{
 	  			println("* INVOKE ==== <invokeExpression>");
@@ -75,14 +75,17 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 	return SVFAModel({});
 }
 
-private ValueFlowNode analyze(Statement stmt) {
-	//TODO implementar
-	return sourceNode();	
-}
 
-private void traverse(assign(Variable var, Expression expression)) {
+private void traverse(stmt: assign(Variable var, immediate(Immediate i)), Name cn, Name m){
+	println("\timmediate= <i>");	
+	copyRule(i, stmt, cn, m);
+}
+private void traverse(stmt: assign(Variable var, Expression expression), Name className, Name methodName) {
 	switch(expression){
-		case immediate(Immediate i):      println("\timmediate= <i>");
+		//case immediate(Immediate i):      {
+		//	println("\timmediate= <i>");
+		//	copyRule(i, stmt, className, methodName);
+		//}
 		case invokeExp(expr):             println("\tinvokeExpr <expr>");
 		case localFieldRef(l, cn,ft, fn): println("\tlocalFieldRef <l>");
 		case fieldRef(cn, ft, fn):        println("\tfieldRef <cn>");		
@@ -106,21 +109,47 @@ private void traverseSinkStatement(){
 
 
 
-private void copyRule(){
+private void copyRule(Immediate local, Statement targetStmt, Name className, Name methodName){
+	println("\t\t **** COPY_RULE ...");
+	for(sourceStmt <- getDefsOfAt(local, targetStmt)){
+		source = createNode(className, methodName, sourceStmt);
+      	target = createNode(className, methodName, targetStmt);
+      	println("\t\t **** COPY_RULE: <source> TO <target>");
+	}
 }
 
 private void loadRule(){
 }
 
-private void invokeRule(){
+private void invokeRule(tmt: assign(Variable var, Expression expression), Name className, Name methodName){
 }
 
 
 
-private void createNode(MethodBody mb){	
+private list[Statement] getDefsOfAt(Immediate local, Statement stmt) {
+	//TODO implementar
+	return [];
 }
 
+private ValueFlowNodeType analyze(Statement stmt) {
+	//TODO implementar
+	return sourceNode();	
+}
+
+private ValueFlowNode createNode(Name className, Name methodName, Statement stmt) {	
+	return valueFlowNode(className, methodName, stmt, analyze(stmt));
+}
+
+private list[ValueFlowNode] findAllocationSites() {
+    return [];
+}
+
+
+//esses 2 metodos apareciam na versao 0.0.7-SNAPSHOT
+//https://github.com/rbonifacio/svfa-scala/blob/develop/src/main/scala/br/unb/cic/soot/svfa/jimple/JSVFA.scala
+@deprecated
 private void createCSOpenLabel(){}
 
+@deprecated
 private void createCSCloseLabel(){}
 
