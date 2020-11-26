@@ -11,16 +11,16 @@ import analysis::graphs::LabeledGraph;
 //As for Lhotak these, we have to do these steps below;
 //1 - Build Pointer Assignment Graph
 //2 - Simplify of Pointer Assignment Graph
-//3 - Propagation of points-to set
+//3 - Propagation of points-to set (turns candidates edges into real edges)
 //3.1 - Use Iterative algorithm or 
-//3.2 - Use Worklist algoritm 
+//3.2 - Use Worklist algorithm 
 //Outpus: 
 //1 - Points-to set output (graph) and 
 //2 - Helper functions over points-to set.
 
 //Types of node on graph
-data PointerAssignmentNodeType = AllocationNode()
-								| VariableNode()
+data PointerAssignmentNodeType = AllocationNode(str name)
+								| VariableNode(str name)
 								| FieldRefNode()
 								| ConcreteFieldNode();
 
@@ -32,6 +32,7 @@ data PointerAssignmentEdgeType = AllocationEdge()
 
 
 //Try using a labeled graph for mapping node types (nodes)  and edge types (labels).
+//OBS it is not possible to do a transitive clojure with labeled graph
 alias PointerAssignGraph = LGraph[PointerAssignmentNodeType , PointerAssignmentEdgeType];
 
 
