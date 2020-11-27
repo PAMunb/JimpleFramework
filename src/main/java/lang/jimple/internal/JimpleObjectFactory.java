@@ -3,16 +3,11 @@ package lang.jimple.internal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.swing.text.html.HTML.Tag;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 
-import io.usethesource.vallang.io.binary.util.TaggedInt;
-import lang.jimple.internal.Decompiler.InstructionSetVisitor.Operand;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
