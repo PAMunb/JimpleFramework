@@ -1,4 +1,4 @@
-package samples.pointsto;
+package samples.pointsto.ex1;
 
 public class MyContainer {
 	public void go() {
