@@ -11,7 +11,7 @@ import List;
 //CallGraph (Entrypoint?)
 //Jimple IR for all methods.
 //Process: 
-//As for Lhotak thesis, we have to do these steps below;
+//As for Lhotak thesis, we have to do thesis steps below;
 //1 - Build Pointer Assignment Graph
 //2 - Simplify of Pointer Assignment Graph
 //3 - Propagation of points-to set (turns candidates edges into real edges)
@@ -33,12 +33,6 @@ data PointerAssignmentEdgeType = AllocationEdge()
 								| StoreEdge()
 								| LoadEdge();
 
-
-//r1.<samples.pointsto.ex2.O: samples.pointsto.ex2.O f> = r4;
-//$r1 = r1.<samples.pointsto.ex2.O: samples.pointsto.ex2.O f>;
-//assign(Variable var, Expression expression)
-//Variable -> localVariable or fieldRef
-
 //Try using a labeled graph for mapping node types (nodes)  and edge types (labels).
 //OBS it is not possible to do a transitive clojure with labeled graph
 alias PointerAssignGraph = LGraph[PointerAssignmentNodeType , PointerAssignmentEdgeType];
@@ -59,42 +53,34 @@ public PointerAssignGraph computePointsToGraph(list[Method] methodsList) {
 				i += 1;
 				alloc = AllocationNode("blue", methodSig, "<i>", newInstance(\type));
 				var = VariableNode("green", methodSig, "Global<lhs>", TUnknown()); // Get type from LocalVariableDeclaration
-				edge = AllocationEdge();
-				elemen = <alloc, edge, var>;
-				pag += elemen;
+				edge = AllocationEdge(); 
+				pag += <alloc, edge, var>;
 			}
 			case assign(localVariable(lhs), immediate(local(rhs))): { 
 				println("<currentMethod.name> Creates VariableNode and VariableNode and AssignmentEdge"); // y = x
 				var1 = VariableNode("green", methodSig, "Global<lhs>", TUnknown()); // Get type from LocalVariableDeclaration
 				var2 = VariableNode("green", methodSig, "Global<rhs>", TUnknown()); // Get type from LocalVariableDeclaration
-				edge = AssignmentEdge();
-				elemen = <var1, edge, var2>;
-				pag += elemen;
+				edge = AssignmentEdge(); 
+				pag += <var1, edge, var2>;
 			}
 			case assign(localVariable(lhs), localFieldRef(rhs, class, \type, fieldName)): { 
 				println("<currentMethod.name> Creates VariableNode and FieldRefNode and LoadEdge"); // z = x.f
 				var = VariableNode("green", methodSig, "Global<lhs>", TUnknown()); // Get type from LocalVariableDeclaration
 				ref = FieldRefNode("red", methodSig, "<rhs>.<fieldName>");
-				edge = LoadEdge();
-				elemen = <var, edge, ref>;
-				pag += elemen;
+				edge = LoadEdge(); 
+				pag += <var, edge, ref>;
 			}
 			case assign(fieldRef(lhs,fieldSignature(class, \type, fieldName)),immediate(local(rhs))): {
 				println("<currentMethod.name> Creates FieldRefNode abd VariableNode and StoreEdge");  // x.f = z
 				ref = FieldRefNode("red", methodSig, "<lhs>.<fieldName>");
 				var = VariableNode("green", methodSig, "Global<rhs>", TUnknown()); // Get type from LocalVariableDeclaration				
-				edge = StoreEdge();
-				elemen = <ref, edge, var>;
-				pag += elemen;
+				edge = StoreEdge(); 
+				pag += <ref, edge, var>;
 			}
 		}		
 	}
 			
 	return pag;
-//	for(m <- methods) {	
-//	for(/assign(var, exp) := m)
-//		println("Match <var>:<exp>");
-//}	
 }
 
 private str buildMethodSignatureFromMethod(Method m) {

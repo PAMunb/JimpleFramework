@@ -3,7 +3,6 @@ module lang::jimple::tests::TestPointsTo
 import lang::jimple::analysis::pointsto::Framework;
 import lang::jimple::toolkit::CallGraph;
 import lang::jimple::core::Context;
-//import lang::jimple::toolkit::GraphUtil;
 import lang::jimple::core::Syntax;
 import analysis::graphs::LabeledGraph;
 
@@ -93,7 +92,7 @@ public Figure toFigure(PointerAssignGraph pag) {
   top-down visit(nodes) {
     case AllocationNode(color, methodSig, name, _): {
       println("<methodSig>.<name>");
-      boxes += box(text(name), id("<methodSig>.<name>"), size(50), fillColor(color));
+      boxes += box(text("Alloc <name>"), id("<methodSig>.<name>"), size(50), fillColor(color));
     } 
     case VariableNode(color, methodSig, name, _): {
       println("<methodSig>.<name>");
@@ -109,7 +108,6 @@ public Figure toFigure(PointerAssignGraph pag) {
   //Create edges
   edges = [];  
   edges += [edge("<t1.methodSig>.<t1.name>", "<t2.methodSig>.<t2.name>") | <t1, f, t2> <- pag];
-  //println(edges);
       
   return scrollable(graph(boxes, edges, hint("layered"), std(size(20)), std(gap(10))));    
 }
