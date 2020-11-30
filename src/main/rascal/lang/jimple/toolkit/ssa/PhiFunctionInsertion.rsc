@@ -6,7 +6,6 @@ import Relation;
 import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
-import lang::jimple::toolkit::ssa::Util;
 import Type;
 import IO;
 import Node;
@@ -47,6 +46,13 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 	};
 
 	return newFlowGraph;
+}
+
+public &T getStmtVariable(Node graphNode) {
+	stmtNode(assignStatement) = graphNode;
+	variableArg = assignStatement[0];
+
+	return variableArg;
 }
 
 public list[Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {

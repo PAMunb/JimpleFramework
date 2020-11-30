@@ -1,19 +1,19 @@
 module TestVariableRenaming
 
+import analysis::graphs::Graph;
+import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::decompiler::Decompiler; 
 import lang::jimple::decompiler::jimplify::ProcessLabels; 
 import lang::jimple::toolkit::PrettyPrinter; 
+import lang::jimple::toolkit::ssa::DominanceTree;
+import lang::jimple::toolkit::ssa::PhiFunctionInsertion; 
+import lang::jimple::toolkit::ssa::VariableRenaming; 
+import lang::jimple::toolkit::ssa::Util;
 
-import List; 
-import Set;
-import IO;
-import String;
-import lang::jimple::util::IO;
-
-test bool testDominanceFrontier() {
-	  	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
+test bool testVariableRenaming() {
+	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
 
 	Statement s2 = ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:");
 	Statement s3 = assign(localVariable("v1"), immediate(iValue(intValue(1))));
@@ -29,6 +29,7 @@ test bool testDominanceFrontier() {
 	list[Statement] stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
 
   	methodStatments = methodBody([], stmts, []);
+  	flowGraph = forwardFlowGraph(methodStatments);	
   	dominanceTree = createDominanceTree(flowGraph);
 
 	FlowGraph phiFunctionFlowGraph = {
@@ -42,8 +43,8 @@ test bool testDominanceFrontier() {
 		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
 		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>
 	};
-	
-	result = applyVariableRenaming(phiFunctionFlowGraph);
+		
+	result = applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
 	
 	return false;
 
