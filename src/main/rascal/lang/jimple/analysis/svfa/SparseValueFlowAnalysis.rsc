@@ -3,6 +3,7 @@ module lang::jimple::analysis::svfa::SparseValueFlowAnalysis
 
 import lang::jimple::core::Context; 
 import lang::jimple::core::Syntax; 
+import lang::jimple::analysis::dataflow::ReachDefinition;
 import lang::jimple::toolkit::ValueFlowGraph;
 import lang::jimple::util::Converters; 
 
@@ -12,16 +13,23 @@ import IO;
 
 data SVFAModel = SVFAModel(ValueFlowGraph cg);
 
-data SVFARuntime = svfaRuntime(ExecutionContext ctx);
+data SVFARuntime = svfaRuntime(ExecutionContext ctx, ValueFlowNodeType (Statement) defineNodeType);
 
-public &T(ExecutionContext) generateSVFGraph(list[str] entrypoints){
+
+public &T(ExecutionContext) generateSVFGraph(list[str] entrypoints, ValueFlowNodeType (Statement) defineNodeType ){
 	return SVFAModel(ExecutionContext ctx) { 
 		println("cts");
-        return computeSVFGraph(ctx, entrypoints);
+		
+		println("func=<defineNodeType(label("teste"))>");
+		
+        return computeSVFGraph(ctx, entrypoints, defineNodeType);
     }; 
 }
 
-SVFAModel computeSVFGraph(ExecutionContext ctx, list[str] entrypoints) {	
+
+
+
+SVFAModel computeSVFGraph(ExecutionContext ctx, list[str] entrypoints, ValueFlowNodeType (Statement) defineNodeType) {	
 	println("entrou .....");
 	
 	list[MethodSignature] methods = []; 		
@@ -43,7 +51,7 @@ SVFAModel computeSVFGraph(ExecutionContext ctx, list[str] entrypoints) {
       	}
   	} 
 
-	SVFARuntime rt = svfaRuntime(ctx);
+	SVFARuntime rt = svfaRuntime(ctx, defineNodeType);
 	
 	return computeSVFGraph(methods, rt);
 }
@@ -61,11 +69,11 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 		top-down visit(rt.ctx.mt[currentMethod].method.body.stmts) {	 	
 	  		case a: assign(Variable var, Expression expression): {
 	  			println("* ASSIGN ==== var=<var> ... expr=<expression>");
-	  			traverse(a, currentMethodSig.className, currentMethodSig.methodName);
+	  			traverse(a, currentMethodSig.className, currentMethodSig.methodName, rt);
 	  		}  
 	  		case i: invokeStmt(InvokeExp invokeExpression):{
 	  			println("* INVOKE ==== <invokeExpression>");
-	  			traverse(i);
+	  			traverse(i, rt);
 	  		}	
 	  		//TODO
 	  		//case _ if(analyze(unit) == SinkNode) => traverseSinkStatement(v, method, defs)
@@ -76,17 +84,20 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 }
 
 
-private void traverse(stmt: assign(Variable var, immediate(Immediate i)), Name cn, Name m){
+private void traverse(stmt: assign(Variable var, immediate(Immediate i)), Name cn, Name m, SVFARuntime rt){
 	println("\timmediate= <i>");	
 	copyRule(i, stmt, cn, m);
 }
-private void traverse(stmt: assign(Variable var, Expression expression), Name className, Name methodName) {
+private void traverse(stmt: assign(Variable var, Expression expression), Name className, Name methodName, SVFARuntime rt) {
 	switch(expression){
 		//case immediate(Immediate i):      {
 		//	println("\timmediate= <i>");
 		//	copyRule(i, stmt, className, methodName);
 		//}
-		case invokeExp(expr):             println("\tinvokeExpr <expr>");
+		case invokeExp(expr): {            
+			println("\tinvokeExpr <expr>");
+			traverse(invokeStmt(expr), rt);
+		}
 		case localFieldRef(l, cn,ft, fn): println("\tlocalFieldRef <l>");
 		case fieldRef(cn, ft, fn):        println("\tfieldRef <cn>");		
 		case arraySubscript(n, i):        println("\tarraySubscript <n>");
@@ -97,10 +108,10 @@ private void traverse(stmt: assign(Variable var, Expression expression), Name cl
 	}
 }
 
-private void traverse(stmt: invokeStmt(InvokeExp invokeExpression)){
-	switch(analyze(stmt)){
-		case sourceNode(): println("\t sourceNode");
-		case sinkNode(): println("\t sinkNode");
+private void traverse(stmt: invokeStmt(InvokeExp invokeExpression), SVFARuntime rt){
+	switch(rt.defineNodeType(stmt)){
+		case sourceNode(): println("\t ***** sourceNode");
+		case sinkNode(): println("\t ***** sinkNode");
 	}
 }
 

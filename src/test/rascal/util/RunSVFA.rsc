@@ -23,6 +23,31 @@ private tuple[list[loc] classPath, list[str] entryPoints] basic11() {
     return <files, es>;
 }
 
+ValueFlowNodeType analyze(Statement stmt) {
+	return getNodeType(stmt);	
+}
+
+ValueFlowNodeType getNodeType(assign(_, Expression expression)) = getNodeType(expression);
+ValueFlowNodeType getNodeType(invokeStmt(InvokeExp invokeExpression)) = getNodeType(invokeExpression);
+ValueFlowNodeType getNodeType(Statement stmt) = simpleNode();
+
+ValueFlowNodeType getNodeType(InvokeExp invokeExpression) = getNodeType(invokeExpression);
+ValueFlowNodeType getNodeType(Expression _) = simpleNode();
+
+ValueFlowNodeType getNodeType(specialInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
+ValueFlowNodeType getNodeType(virtualInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
+ValueFlowNodeType getNodeType(interfaceInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
+ValueFlowNodeType getNodeType(staticMethodInvoke(methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
+ValueFlowNodeType getNodeType(dynamicInvoke(MethodSignature bsmSig, _, MethodSignature sig, _)) = simpleNode();
+
+ValueFlowNodeType getNodeType(Name methodName) {
+	switch(methodName){
+		case "source": return sourceNode();
+		case "sink": return sinkNode();
+		default: return simpleNode();
+	}
+}
+
 public void main(){
 	tuple[list[loc] cp, list[str] e] t = basic11();
 	
@@ -31,7 +56,7 @@ public void main(){
     
     println("iniciando ....");
     
-    SVFAModel model = execute(files, es, Analysis(generateSVFGraph([])),true);
+    SVFAModel model = execute(files, es, Analysis(generateSVFGraph([], analyze)),true);
     
     println("model=<model>");
     
