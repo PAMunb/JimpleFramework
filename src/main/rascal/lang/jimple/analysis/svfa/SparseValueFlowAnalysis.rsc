@@ -17,11 +17,7 @@ data SVFARuntime = svfaRuntime(ExecutionContext ctx, ValueFlowNodeType (Statemen
 
 
 public &T(ExecutionContext) generateSVFGraph(list[str] entrypoints, ValueFlowNodeType (Statement) analyze ){
-	return SVFAModel(ExecutionContext ctx) { 
-		println("cts");
-		
-		println("func=<analyze(label("teste"))>");
-		
+	return SVFAModel(ExecutionContext ctx) { 		
         return computeSVFGraph(ctx, entrypoints, analyze);
     }; 
 }
@@ -149,6 +145,16 @@ private void invokeRule(stmt: invokeStmt(InvokeExp expr), MethodSignature method
 	}
 }
 
+private ValueFlowNode createNode(MethodSignature method, Statement stmt, SVFARuntime rt) {	
+	return valueFlowNode(method.className, method.methodName, stmt, rt.analyze(stmt));
+}
+
+
+private void createCSOpenLabel(){}
+
+private void createCSCloseLabel(){}
+
+
 
 
 private list[Statement] getDefsOfAt(Immediate local, Statement stmt) {
@@ -156,19 +162,9 @@ private list[Statement] getDefsOfAt(Immediate local, Statement stmt) {
 	return [];
 }
 
-
-private ValueFlowNode createNode(MethodSignature method, Statement stmt, SVFARuntime rt) {	
-	return valueFlowNode(method.className, method.methodName, stmt, rt.analyze(stmt));
-}
-
 private list[ValueFlowNode] findAllocationSites() {
     return [];
 }
 
 
-
-private void createCSOpenLabel(){}
-
-
-private void createCSCloseLabel(){}
 

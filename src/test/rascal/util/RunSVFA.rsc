@@ -16,31 +16,44 @@ import lang::jimple::toolkit::ValueFlowGraph;
 import lang::jimple::util::Converters;
 import lang::jimple::toolkit::PrettyPrinter;
 
-private tuple[list[loc] classPath, list[str] entryPoints] basic11() {
+private tuple[list[loc] classPath, list[str] entryPoints, ValueFlowNodeType (Statement) analyze] runBasic11() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/svfa/basic/Basic11.class|];
     es = ["samples.svfa.basic.Basic11.main(java.lang.String[])"];
-    return <files, es>;
+    return <files, es, simpleSourceSinkAnalysis>;
 }
 
-ValueFlowNodeType analyze(Statement stmt) {
-	return getNodeType(stmt);	
+private tuple[list[loc] classPath, list[str] entryPoints, ValueFlowNodeType (Statement) analyze] runArraySample() {
+	files = [|project://JimpleFramework/target/test-classes/samples/svfa/ArraySample.class|];
+    es = ["samples.svfa.ArraySample.main(java.lang.String[])"];
+    return <files, es, simpleSourceSinkAnalysis>;
 }
 
-ValueFlowNodeType getNodeType(assign(_, Expression expression)) = getNodeType(expression);
-ValueFlowNodeType getNodeType(invokeStmt(InvokeExp invokeExpression)) = getNodeType(invokeExpression);
-ValueFlowNodeType getNodeType(Statement stmt) = simpleNode();
+private tuple[list[loc] classPath, list[str] entryPoints, ValueFlowNodeType (Statement) analyze] runIfElseScenario() {
+	files = [|project://JimpleFramework/target/test-classes/samples/svfa/IfElseScenario.class|];
+    es = ["samples.svfa.IfElseScenario.main(java.lang.String[])"];
+    return <files, es, simpleSourceSinkAnalysis>;
+}
 
-ValueFlowNodeType getNodeType(InvokeExp invokeExpression) = getNodeType(invokeExpression);
-ValueFlowNodeType getNodeType(Expression _) = simpleNode();
-
-ValueFlowNodeType getNodeType(specialInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
-ValueFlowNodeType getNodeType(virtualInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
-ValueFlowNodeType getNodeType(interfaceInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
-ValueFlowNodeType getNodeType(staticMethodInvoke(methodSignature(_, _, Name mn, _), _)) = getNodeType(mn);
-ValueFlowNodeType getNodeType(dynamicInvoke(MethodSignature bsmSig, _, MethodSignature sig, _)) = simpleNode();
-
-ValueFlowNodeType getNodeType(Name methodName) {
+// method name based analysis
+ValueFlowNodeType simpleSourceSinkAnalysis(Statement stmt) {
+	return simpleSourceSinkAnalysis(stmt);	
+}
+// Statements
+ValueFlowNodeType simpleSourceSinkAnalysis(assign(_, Expression expression)) = simpleSourceSinkAnalysis(expression);
+ValueFlowNodeType simpleSourceSinkAnalysis(invokeStmt(InvokeExp invokeExpression)) = simpleSourceSinkAnalysis(invokeExpression);
+ValueFlowNodeType simpleSourceSinkAnalysis(Statement stmt) = simpleNode();
+// Expressions
+ValueFlowNodeType simpleSourceSinkAnalysis(InvokeExp invokeExpression) = simpleSourceSinkAnalysis(invokeExpression);
+ValueFlowNodeType simpleSourceSinkAnalysis(Expression _) = simpleNode();
+// InvokeExpressions
+ValueFlowNodeType simpleSourceSinkAnalysis(specialInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = simpleSourceSinkAnalysis(mn);
+ValueFlowNodeType simpleSourceSinkAnalysis(virtualInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = simpleSourceSinkAnalysis(mn);
+ValueFlowNodeType simpleSourceSinkAnalysis(interfaceInvoke(Name local, methodSignature(_, _, Name mn, _), _)) = simpleSourceSinkAnalysis(mn);
+ValueFlowNodeType simpleSourceSinkAnalysis(staticMethodInvoke(methodSignature(_, _, Name mn, _), _)) = simpleSourceSinkAnalysis(mn);
+ValueFlowNodeType simpleSourceSinkAnalysis(dynamicInvoke(MethodSignature bsmSig, _, MethodSignature sig, _)) = simpleNode();
+// define node type
+ValueFlowNodeType simpleSourceSinkAnalysis(Name methodName) {
 	switch(methodName){
 		case "source": return sourceNode();
 		case "sink": return sinkNode();
@@ -48,15 +61,16 @@ ValueFlowNodeType getNodeType(Name methodName) {
 	}
 }
 
+
+
 public void main(){
-	tuple[list[loc] cp, list[str] e] t = basic11();
-	
-	files = t.cp;
-    es = t.e;
+	tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasic11();
+	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runArraySample();
+	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runIfElseScenario();
     
     println("iniciando ....");
     
-    SVFAModel model = execute(files, es, Analysis(generateSVFGraph([], analyze)),true);
+    SVFAModel model = execute(t.cp, t.e, Analysis(generateSVFGraph([], t.analyze)),true);
     
     println("model=<model>");
     
