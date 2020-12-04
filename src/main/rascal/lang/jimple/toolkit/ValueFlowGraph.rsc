@@ -12,7 +12,16 @@ data ValueFlowNodeType = sourceNode()
 					| simpleNode()
 					| callSiteNode();
 					
-data ValueFlowEdge = callSiteOpenEdge()
+data ValueFlowEdgeType = callSiteOpenEdge()
 					| callSiteCloseEdge();
 					
-data ValueFlowNode = valueFlowNode(Name className, Name methodName, Statement stmt, ValueFlowNodeType nodeType);					
+data ValueFlowEdge = valueFlowEdge(Name className, Name methodName, Statement stmt, ValueFlowEdgeType edgeType);
+					
+data ValueFlowNode = valueFlowNode(Name className, Name methodName, Statement stmt, ValueFlowNodeType nodeType);
+
+
+public bool isCallSiteOpen(valueFlowEdge(_, _, _, callSiteOpenEdge())) = true;
+public bool isCallSiteOpen(valueFlowEdge(_, _, _, _)) = false;
+
+public bool isCallSiteClose(valueFlowEdge(_, _, _, callSiteCloseEdge())) = true;
+public bool isCallSiteClose(valueFlowEdge(_, _, _, _)) = false;
