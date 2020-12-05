@@ -78,7 +78,7 @@ test bool testInitial_2() {
   
   Method bar =  method([Static()], TObject("samples.pointsto.ex2.O"), "bar", [], [], c);
     
-  PointerAssignGraph pag = computePointsToGraph([main, bar]);
+  PointerAssignGraph pag = buildsPointsToGraph([main, bar]);
   //println("CG=<pag>");
   render(toFigure(pag));  
   return true;

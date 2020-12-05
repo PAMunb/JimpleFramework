@@ -88,7 +88,7 @@ test bool testClassWithMethod() {
 
 test bool testProcessAllFiles() {
 	list[str] es = [];
-	x = execute([|project://JimpleFramework/target/test-classes/samples/|], es, Analysis(PrettyPrint));		
+	x = execute([|project://JimpleFramework/target/test-classes/samples/|], es, Analysis(PrettyPrint), true);		
 	for(k <- x) {
 		println(k);
 		writeFile(|file:///tmp/jimpleframework/<k>.jimple|, x[k]);		
