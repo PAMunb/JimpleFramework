@@ -1,4 +1,4 @@
-module tmp::RunFramework
+module util::RunFramework
 
 import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;

@@ -15,34 +15,23 @@ data DefUse = defUse(VariableDefinition def, set[Statement] uses);
 
 map[LocalVariable, set[Statement]] localDefs = (); 
 
-public list[DefUse] teste(MethodBody b){
-	list[DefUse] retorno = [];
+public map[LocalVariable, DefUse] createDefUse(MethodBody b){
+	map[LocalVariable var, DefUse def] retorno = ();
 	localDefs = loadDefinitions(b.stmts);
 	
 	for(localDef <- localDefs){
 		VariableDefinition def = varDef(localDef);
 		set[Statement] uses = findUses(def, b);
-		retorno = retorno + defUse(def,uses);
+		//retorno = retorno + defUse(def,uses);
+		retorno = retorno + (localDef:defUse(def,uses));
 	}
 	return retorno;
 }
 
 private set[Statement] findUses(VariableDefinition def, MethodBody b) {
-	return { stmt | stmt <- b.stmts, uses(stmt, def.var)};
-	//for(stmt <- b.stmts){
-	//	uses(stmt, def.var);
-	//}
+	//return { stmt | stmt: assign(Variable var, Expression expression) <- b.stmts, uses(stmt, def.var)};
+	return { stmt | stmt: assign(_, Expression expression) <- b.stmts, useVariable(expression, def.var)};
 }
-
-private bool uses(Statement stmt, LocalVariable var) {
-	top-down visit(stmt) {	
-		case Expression e: return useVariable(e,var);
-	}
-	return false;
-}
-
-//private set[Statement] uses(MethodBody b, LocalVariable var) 
-//   = { stmt | /Expression e <- stmt, useVariable(e, var) | stmt <- b.stmts };
 
 private bool useVariable(Expression e, str v) = local(v) in localReferences(e); 
 
@@ -66,7 +55,8 @@ map[LocalVariable, set[Definition]] loadDefinitions([_, *Statement SS]) = defs
       
       
       
-      
+/////////////////////////
+//TODO remover antes do merge      
 private tuple[list[loc] classPath, list[str] entryPoints] runBasic11() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/svfa/basic/Basic11.class|];
@@ -80,10 +70,11 @@ public void testeDef(){
 	ExecutionContext ctx = createExecutionContext(t.cp, t.e);
     MethodBody b = ctx.mt[sig].method.body;
     
-    list[DefUse] lista = teste(b);
-    for(l <- lista){
-    	println("\n <l.def>");
-    	for(u <- l.uses){
+    //list[DefUse] lista = createDefUse(b);
+    map[LocalVariable var, DefUse def] mapa = createDefUse(b);
+    for(l <- mapa){
+    	println("\n <l>");
+    	for(u <- mapa[l].uses){
     		println("\t- <u>");
     	}
     }

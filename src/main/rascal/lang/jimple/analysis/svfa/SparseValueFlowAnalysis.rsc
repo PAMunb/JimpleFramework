@@ -3,9 +3,13 @@ module lang::jimple::analysis::svfa::SparseValueFlowAnalysis
 
 import lang::jimple::core::Context; 
 import lang::jimple::core::Syntax; 
+import lang::jimple::analysis::dataflow::Framework;
 import lang::jimple::analysis::dataflow::ReachDefinition;
+import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ValueFlowGraph;
+import lang::jimple::toolkit::DefUse;
 import lang::jimple::util::Converters; 
+import lang::jimple::util::JPrettyPrinter;
 
 import List;
 import IO;
@@ -14,6 +18,7 @@ import IO;
 data SVFAModel = SVFAModel(ValueFlowGraph cg);
 
 data SVFARuntime = svfaRuntime(ExecutionContext ctx, ValueFlowNodeType (Statement) analyze);
+//map[LocalVariable, set[Definition]] localDefs = (); 
 
 
 public &T(ExecutionContext) generateSVFGraph(list[str] entrypoints, ValueFlowNodeType (Statement) analyze ){
@@ -64,9 +69,13 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 
 private void traverse(MethodSignature method, SVFARuntime rt) {
 	str currentMethod = signature(method.className, method.methodName, method.formals);
-	println("\n\ncurrentMethod=<currentMethod>");
+	println("\n\ncurrentMethod=<currentMethod>");	
+	//println(prettyPrint(rt.ctx.mt[currentMethod].method));	
 	
-	top-down visit(rt.ctx.mt[currentMethod].method.body.stmts) {	 	
+	MethodBody b = rt.ctx.mt[currentMethod].method.body;
+	//localDefs = loadDefinitions(b.stmts);
+	
+	top-down visit(b.stmts) {	 	
   		case a: assign(Variable var, Expression expression): {
   			println("* ASSIGN ==== var=<var> ... expr=<expression>");
   			traverse(a, method, rt);
@@ -121,12 +130,19 @@ private void traverseSinkStatement(){
 
 
 
-private void copyRule(Immediate local, Statement targetStmt, MethodSignature method, SVFARuntime rt){
+private void copyRule(local(String var) , Statement targetStmt, MethodSignature method, SVFARuntime rt){
 	println("\t\t **** COPY_RULE ...");
-	for(sourceStmt <- getDefsOfAt(local, targetStmt)){
+	
+	str sig = signature(method.className, method.methodName, method.formals);
+	MethodBody b = rt.ctx.mt[sig].method.body;
+	map[LocalVariable var, DefUse def] defUses = createDefUse(b);
+	//DefUse def = null;
+	
+	//for(sourceStmt <- getDefsOfAt(local, targetStmt, method, rt)){
+	for(sourceStmt <- defUses[var].uses){
 		source = createNode(method, sourceStmt, rt);
       	target = createNode(method, targetStmt, rt);
-      	println("\t\t **** COPY_RULE: <source> TO <target>");
+      	println("\t\t ****** COPY_RULE: <source> TO <target>");
 	}
 }
 
@@ -155,16 +171,73 @@ private void createCSOpenLabel(){}
 private void createCSCloseLabel(){}
 
 
-
-
-private list[Statement] getDefsOfAt(Immediate local, Statement stmt) {
-	//TODO implementar
-	return [];
+//TODO implementar
+// dummy impl
+private list[Statement] getDefsOfAt(local(String l), a: assign(Variable var, Expression expression), MethodSignature method, SVFARuntime rt) {
+	println("getDefsOfAt(<l>, <a>)");
+	list[Statement] retorno = [];
+	str sig = signature(method.className, method.methodName, method.formals); 
+	AnalysisResult[Statement] reachDefs = execute(rd, rt.ctx.mt[sig].method.body);
+	//print(reachDefs);
+	println("SERA? <reachDefs.inSet[stmtNode(a)]>");
+	println("DEFS::: <local> == <retorno>");
+	return retorno;
 }
+
+private void getDefs(AnalysisResult[Statement] reachDefs){
+
+}
+
+
+private map[LocalVariable, set[Definition]] loadDefinitions([]) = (); 
+
+private map[LocalVariable, set[Definition]] loadDefinitions([assign(localVariable(v), e), *Statement SS]) = defs + (v : (assign(localVariable(v), e) + defs[v]))
+  when defs := loadDefinitions(SS)
+     , v in defs
+     ;
+
+private map[LocalVariable, set[Definition]] loadDefinitions([assign(localVariable(v), e), *Statement SS]) = defs + (v : { (assign(localVariable(v), e)) } )
+  when defs := loadDefinitions(SS)
+     , v notin defs
+     ; 
+           
+private map[LocalVariable, set[Definition]] loadDefinitions([_, *Statement SS]) = defs
+   when defs := loadDefinitions(SS)
+      ;
+
+
+
+private void print(AnalysisResult[&T] result){
+	println("RESULT:");
+	for(n <- result.inSet){
+		println("NODE: <toString(n)>");
+		println("\t IN: <tmp(result.inSet[n])>");
+		if(n in result.outSet){
+			//tmp(result.outSet[n]);
+			//println("\t OUT: <result.outSet[n]>");
+			println("\t OUT: <tmp(result.outSet[n])>");
+		}
+	}
+}
+private str toString(entryNode()) = "ENTRY";
+private str toString(exitNode()) = "EXIT";
+private str toString(s:stmtNode(_)) = prettyPrint(s.s);
+private set[str] tmp(set[&T] conjunto){
+	set[str] retorno = {};
+	for(c <- conjunto){
+		retorno = retorno + prettyPrint(c);
+	}
+	return retorno;
+}
+
+private list[Statement] getDefsOfAt(Immediate local, Statement stmt, MethodSignature method, SVFARuntime rt) = [];
 
 private list[ValueFlowNode] findAllocationSites() {
     return [];
 }
 
+private bool useVariable(Expression e, str v) = local(v) in localReferences(e); 
+
+private list[Immediate] localReferences(Expression e) = [local(v) | /local(v) <- e];
 
 
