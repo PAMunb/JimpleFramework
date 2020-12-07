@@ -14,9 +14,11 @@ import List;
 import IO;
 import Type;
 
-data SVFAModel = SVFAModel(ValueFlowGraph cg);
+data SVFAModel = SVFAModel(ValueFlowGraph vfg);
 
 data SVFARuntime = svfaRuntime(ExecutionContext ctx, ValueFlowNodeType (Statement) analyze);
+
+ValueFlowGraph grafo = {};
 
 
 public &T(ExecutionContext) generateSVFGraph(list[str] entrypoints, ValueFlowNodeType (Statement) analyze ){
@@ -62,7 +64,7 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 		traverse(currentMethod, rt);
 	}
 	
-	return SVFAModel({});
+	return SVFAModel(grafo);
 }
 
 private void traverse(method: methodSignature(Name className, _, Name methodName, list[Type] formals), SVFARuntime rt) {
@@ -152,6 +154,7 @@ private void copyRule(l: local(String var), Statement targetStmt, MethodSignatur
 		source = createNode(method, sourceStmt, rt);
       	target = createNode(method, targetStmt, rt);
       	println("\t\t ****** COPY_RULE: <source.stmt> TO <target.stmt>");
+      	updateGraph(source,target);
 	}
 }
 
@@ -237,3 +240,11 @@ private list[ValueFlowNode] findAllocationSites() {
 }
 
 
+private void updateGraph(ValueFlowNode source, ValueFlowNode target){
+	println("updateGraph .... <source> TO <target>");
+	ValueFlowEdge edge = valueFlowEdge(simpleEdge());
+	updateGraph(source,edge,target);
+}
+private void updateGraph(ValueFlowNode source, ValueFlowEdge edge, ValueFlowNode target){
+	grafo = grafo + <source,edge,target>;
+}

@@ -16,6 +16,7 @@ import lang::jimple::toolkit::ValueFlowGraph;
 import lang::jimple::util::Converters;
 import lang::jimple::toolkit::PrettyPrinter;
 
+import vis::Render;
 
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::analysis::dataflow::ReachDefinition;
@@ -76,53 +77,18 @@ ValueFlowNodeType simpleSourceSinkAnalysis(Name methodName) {
 
 
 public void main(){
-	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasic11();
+	tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasic11();
 	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasicDouble();
-	tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runArraySample();
+	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runArraySample();
 	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runIfElseScenario();
     
     println("iniciando ....");
     
     SVFAModel model = execute(t.cp, t.e, Analysis(generateSVFGraph([], t.analyze)),true);
-    
-    println("model=<model>");
-    
-    
-    //ExecutionContext ctx = createExecutionContext(files,es,true);	    
-    //show(ctx);    
-    //for(m <- ctx.mt){
-    //	println(m);
-    //}    
+    ValueFlowGraph vfg = model.vfg;
+    //println("model=<model>");
+    //render(toFigure(vfg));
+    str dot = toDot(vfg,"VFG");
+    println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+    println(dot);
 }
-
-
-
-
-private void show(ExecutionContext ctx){			
-	top-down visit(ctx.ct) {	 	
-  		case ClassOrInterfaceDeclaration c:{
-  			show(c);
-  		}  			  		
-  	}    
-}
-
-private void show(classDecl(TObject(name), _, _, _, _, list[Method] methods)){
-	println("CLASS: <name>");
-	show(methods);	
-}
-
-private void show(interfaceDecl(TObject(name), _, _, _, list[Method] methods)){
-	println("INTERFACE: <name>");
-	show(methods);	
-}
-
-private void show(list[Method] methods){
-	for(Method m <- methods){
-		show(m);
-	}
-}
-
-private void show(method(_, _, Name name, list[Type] args, _, _)){
-	println("\t - <name>(<intercalate(",", args)>)");
-}
-
