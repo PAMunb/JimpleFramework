@@ -77,8 +77,8 @@ ValueFlowNodeType simpleSourceSinkAnalysis(Name methodName) {
 
 public void main(){
 	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasic11();
-	tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasicDouble();
-	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runArraySample();
+	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runBasicDouble();
+	tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runArraySample();
 	//tuple[list[loc] cp, list[str] e, ValueFlowNodeType (Statement) analyze] t = runIfElseScenario();
     
     println("iniciando ....");

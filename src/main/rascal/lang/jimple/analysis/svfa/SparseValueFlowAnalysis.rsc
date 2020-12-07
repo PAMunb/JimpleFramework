@@ -17,7 +17,6 @@ import Type;
 data SVFAModel = SVFAModel(ValueFlowGraph cg);
 
 data SVFARuntime = svfaRuntime(ExecutionContext ctx, ValueFlowNodeType (Statement) analyze);
-//map[LocalVariable, set[Definition]] localDefs = (); 
 
 
 public &T(ExecutionContext) generateSVFGraph(list[str] entrypoints, ValueFlowNodeType (Statement) analyze ){
@@ -66,28 +65,36 @@ private SVFAModel computeSVFGraph(list[MethodSignature] methodsList, SVFARuntime
 	return SVFAModel({});
 }
 
-private void traverse(MethodSignature method, SVFARuntime rt) {
-	str currentMethod = signature(method.className, method.methodName, method.formals);
-	println("\n\ncurrentMethod=<currentMethod>");	
+private void traverse(method: methodSignature(Name className, _, Name methodName, list[Type] formals), SVFARuntime rt) {
+	str currentMethod = signature(className, methodName, formals);
+	//println("\n\ncurrentMethod=<currentMethod>");	
 	//println(prettyPrint(rt.ctx.mt[currentMethod].method));	
 	
-	MethodBody b = rt.ctx.mt[currentMethod].method.body;
+	if(currentMethod in rt.ctx.mt){
+		MethodBody b = rt.ctx.mt[currentMethod].method.body;
+		
+		top-down visit(b.stmts) {	 	
+	  		case a: assign(Variable var, Expression expression): {
+	  			println("* ASSIGN ==== var=<var> ... expr=<expression>");
+	  			traverse(a, method, rt);
+	  		}  
+	  		case i: invokeStmt(InvokeExp invokeExpression):{
+	  			println("* INVOKE ==== <invokeExpression>");
+	  			traverse(i, method, rt);
+	  			//TODO adicionar o metodo q eh chamado na lista de metodos
+	  		}	
+	  		//TODO
+	  		//case _ if(analyze(unit) == SinkNode) => traverseSinkStatement(v, method, defs)
+	    	//case _ =>	  		
+		}
+	} else{
+		println("*** Don\'t visit foreign method: <currentMethod>");
+	}	
 	
-	top-down visit(b.stmts) {	 	
-  		case a: assign(Variable var, Expression expression): {
-  			println("* ASSIGN ==== var=<var> ... expr=<expression>");
-  			traverse(a, method, rt);
-  		}  
-  		case i: invokeStmt(InvokeExp invokeExpression):{
-  			println("* INVOKE ==== <invokeExpression>");
-  			traverse(i, method, rt);
-  			//TODO adicionar o metodo q eh chamado na lista de metodos
-  		}	
-  		//TODO
-  		//case _ if(analyze(unit) == SinkNode) => traverseSinkStatement(v, method, defs)
-    	//case _ =>	  		
-	}
 }
+//private void traverse(stmt: assign(_, a: newArray(Type baseType, list[ArrayDescriptor] dims)), MethodSignature method, SVFARuntime rt){
+//	println("\tnewArray= <a>");		
+//}
 private void traverse(stmt: assign(_, immediate(Immediate i)), MethodSignature method, SVFARuntime rt){
 	println("\timmediate= <i>");	
 	copyRule(i, stmt, method, rt);
@@ -96,13 +103,13 @@ private void traverse(stmt: assign(_, invokeExp(expr)), MethodSignature method, 
 	println("\tinvokeExpr <expr>");
 	traverse(invokeStmt(expr), method, rt);
 }
-private void traverse(stmt: assign(_, localFieldRef(Name local, _, _, _)), MethodSignature method, SVFARuntime rt){
+private void traverse(stmt: assign(_, e: localFieldRef(Name local, _, _, _)), MethodSignature method, SVFARuntime rt){
 	println("\tlocalFieldRef= <local>");	
-	loadRule();
+	loadRule(e, stmt, method, rt);
 }
-private void traverse(stmt: assign(_, fieldRef(Name className, _, _)), MethodSignature method, SVFARuntime rt){
+private void traverse(stmt: assign(_, e: fieldRef(Name className, _, _)), MethodSignature method, SVFARuntime rt){
 	println("\tfieldRef= <className>");	
-	loadRule();
+	loadRule(e, stmt, method, rt);
 }
 private void traverse(stmt: assign(_, Expression expression), MethodSignature method, SVFARuntime rt) {
 	switch(expression){		
@@ -121,6 +128,13 @@ private void traverse(Statement stmt, MethodSignature method, SVFARuntime rt){
 		traverseSinkStatement();
 	}
 }
+
+private void traverse(specialInvoke(_, MethodSignature sig, _), SVFARuntime rt) = traverse(sig, rt);
+private void traverse(virtualInvoke(_, MethodSignature sig, _), SVFARuntime rt) = traverse(sig, rt);
+private void traverse(interfaceInvoke(_, MethodSignature sig, _), SVFARuntime rt) = traverse(sig, rt);
+private void traverse(staticMethodInvoke(MethodSignature sig, _), SVFARuntime rt) = traverse(sig, rt);
+//TODO dynamicInvoke
+
 
 private void traverseSinkStatement(){
 	println("\t **** traverseSinkStatement ...");
@@ -141,25 +155,66 @@ private void copyRule(l: local(String var), Statement targetStmt, MethodSignatur
 	}
 }
 
-private void loadRule(){	
+private void copyRule(l: iValue(Value v), Statement targetStmt, MethodSignature method, SVFARuntime rt){
+	println("\t\t **** COPY_RULE ... iValue");	
+}
+
+private void loadRule(e: localFieldRef(Name local, Name className, TString(), Name fieldName), Statement targetStmt, MethodSignature method, SVFARuntime rt){	
+	println("\t\t **** LOAD_RULE ... instance field STRING");
+}
+
+private void loadRule(e: localFieldRef(_, _, _, _), Statement targetStmt, MethodSignature method, SVFARuntime rt){	
+	println("\t\t **** LOAD_RULE ... instance field DEFAULT");
+}
+
+private void loadRule(Expression expression, Statement targetStmt, MethodSignature method, SVFARuntime rt){	
 	println("\t\t **** LOAD_RULE ...");
 }
 
 private void invokeRule(stmt: invokeStmt(InvokeExp expr), MethodSignature method, SVFARuntime rt){
 	println("\t\t **** INVOKE_RULE ...");
 	switch(rt.analyze(stmt)){
-		case sourceNode(): println("\t\t ******* sourceNode");
-		case sinkNode(): println("\t\t ******* sinkNode");
+		case sourceNode(): {
+			println("\t\t ******* sourceNode");
+			source = createNode(method, stmt, rt);
+			//TODO add node to graph
+		}
+		case sinkNode(): defsToCallOfSinkMethod(stmt, method);
 		case simpleNode(): println("\t\t ******* simpleNode");
 		case callSiteNode(): println("\t\t ******* callSiteNode");
-		default: println("********* ERRO *********");
+		default: println("********* ERROR *********");
 	}
+	
+	//TODO terminar logica
+	
+	//visit callee method
+	println("\t\t ********* visiting: <expr>");
+	traverse(expr, rt);	
 }
+
+
+private void defsToCallOfSinkMethod(stmt: invokeStmt(InvokeExp expr), MethodSignature method) {
+	println("\t\t ******* sinkNode ... defsToCallOfSinkMethod");
+}
+
+private void defsToCallSite(){
+	println("\t\t ******* defsToCallSite");
+}
+
+private void defsToThisObject(){
+	println("\t\t ******* defsToThisObject");
+}
+
+private void defsToFormalArgs(){
+	println("\t\t ******* defsToFormalArgs");
+}
+
+
+
 
 private ValueFlowNode createNode(MethodSignature method, Statement stmt, SVFARuntime rt) {	
 	return valueFlowNode(method.className, method.methodName, stmt, rt.analyze(stmt));
 }
-
 
 private void createCSOpenLabel(){}
 
@@ -169,7 +224,7 @@ private void createCSCloseLabel(){}
 
 //TODO implementar
 // dummy impl
-private list[Statement] getDefsOfAt(local(String l), a: assign(Variable var, Expression expression), MethodBody methodBody) {
+private list[Statement] getDefsOfAt(local(String l), a: assign(_, _), MethodBody methodBody) {
 	AnalysisResult[Statement] reachDefs = execute(rd, methodBody);		
 	return [def | def:assign(localVariable(v), _) <- reachDefs.inSet[stmtNode(a)], v == l];
 }
