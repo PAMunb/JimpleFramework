@@ -48,6 +48,8 @@ private tuple[list[loc] classPath, list[str] entryPoints, ValueFlowNodeType (Sta
     return <files, es, simpleSourceSinkAnalysis>;
 }
 
+
+
 // method name based analysis
 ValueFlowNodeType simpleSourceSinkAnalysis(Statement stmt) {
 	return simpleSourceSinkAnalysis(stmt);	
@@ -86,8 +88,9 @@ public void main(){
     
     SVFAModel model = execute(t.cp, t.e, Analysis(generateSVFGraph([], t.analyze)),true);
     ValueFlowGraph vfg = model.vfg;
-    //println("model=<model>");
+    
     //render(toFigure(vfg));
+    
     str dot = toDot(vfg,"VFG");
     println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     println(dot);

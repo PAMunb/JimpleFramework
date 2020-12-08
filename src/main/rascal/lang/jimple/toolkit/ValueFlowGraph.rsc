@@ -45,33 +45,13 @@ public bool isCallSiteClose(valueFlowEdge(callSiteCloseEdge())) = true;
 public bool isCallSiteClose(valueFlowEdge(_)) = false;
 
 
-public Figure toFigure(ValueFlowGraph g){
-	procs = toList(carrier(g));
-	println("PROCS...........................");  
-	for(p <- procs){
-		println(p);
-	}
-	//nodes = [];
-	//edges = [];
-	println("GRAFO ......");
-	for(a <- g){
-		println("a=<a>");
-		println("\tFROM=<a.from>");
-		println("\tTO=<a.to>");
-		//from = box(text(a.from), id(a.from), size(50), fillColor("lightgreen"));
-		//to = box(text(a.to), id(a.to), size(50), fillColor("lightgreen"));
-		//if(! (from in nodes)){
-		//	nodes = nodes + from;
-		//}
-	}
-	
-	//nodes = [box(text(nn), id(nn), size(50), fillColor("lightgreen")) | nn <- procs];
+
+public Figure toFigure(ValueFlowGraph g){	
 	nodes = [box(text(prettyPrint(stmt)), id(prettyPrint(stmt)), size(50), fillColor("lightgreen")) | nn: valueFlowNode(Name className, Name methodName, Statement stmt, ValueFlowNodeType nodeType) <- procs];
-	println("NODES=<nodes>");
 	return toFigure(g, nodes);
 }
 private Figure toFigure(ValueFlowGraph g, Figures nodes){
-    edges = [edge(prettyPrint(c.from),prettyPrint(c.to)) | c <- g];   
+    edges = [edge(prettyPrint(c.from.stmt),prettyPrint(c.to.stmt)) | c <- g];   
     return scrollable(graph(nodes, edges, hint("layered"), std(size(20)), std(gap(10))));
 }
 
@@ -87,6 +67,5 @@ public str toDot(ValueFlowGraph g, str title) {
          '  <for (call <- g) {>                  
          '  \"<prettyPrint(call.from.stmt)>\" -\> \"<prettyPrint(call.to.stmt)>\" <}>
          '}";	
-         //'  \"<call.from>\" -\> \"<call.to>\" [arrowhead=\"empty\"]<}>
 }
 
