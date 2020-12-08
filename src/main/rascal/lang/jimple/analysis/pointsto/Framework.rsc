@@ -38,6 +38,8 @@ data PointerAssignmentEdgeType = AllocationEdge()
 //	Try using a labeled graph for mapping node types (nodes)  and edge types (labels).
 //	OBS it is not possible to do a transitive clojure with labeled graph
 alias PointerAssignGraph = LGraph[PointerAssignmentNodeType , PointerAssignmentEdgeType];
+ 
+alias PointsToSet[&T] = map[Node, set[&T]];
 
 public PointerAssignGraph propagatesPointsToGraph(PointerAssignGraph pag) {
 	return pag;
@@ -52,43 +54,56 @@ public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 		Method currentMethod = head(methodsList);
 		str methodSig = buildMethodSignatureFromMethod(currentMethod);
 		methodsList = drop(1,methodsList);
-		println("metodo <currentMethod.name>");
 		top-down visit(currentMethod.body.stmts) {
+			
+			case assign(localVariable(lhs), newArray(\type, _)): {
+				println("<currentMethod.name> Creates NewArray AllocNode and VariableNode and AllocationEdge"); // x = new A[][]
+				i += 1;
+				alloc = AllocationNode("blue", methodSig, "<i>", immediate(stringValue(s)));
+				var = VariableNode("green", methodSig, "Global<lhs>", \type);
+				edge = AllocationEdge();
+				pag += <alloc, edge, var>;
+			}
 			case assign(localVariable(lhs), immediate(stringValue(s))): {
 				println("<currentMethod.name> Creates String AllocNode and VariableNode and AllocationEdge"); // x = "Hello"
 				i += 1;
 				alloc = AllocationNode("blue", methodSig, "<i>", immediate(stringValue(s)));
-				var = VariableNode("green", methodSig, "Global<lhs>", TObject("java.lang.String")); // Get type from LocalVariableDeclaration
-				edge = AllocationEdge(); 
-				pag += <alloc, edge, var>;				
+				var = VariableNode("green", methodSig, "Global<lhs>", TObject("java.lang.String"));
+				edge = AllocationEdge();
+				pag += <alloc, edge, var>;
 			}
 			case assign(localVariable(lhs), newInstance(\type)): {
 				println("<currentMethod.name> Creates AllocNode and VariableNode and AllocationEdge"); // x = new A
 				i += 1;
 				alloc = AllocationNode("blue", methodSig, "<i>", newInstance(\type));
-				var = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs)); // Get type from LocalVariableDeclaration
-				edge = AllocationEdge(); 
+				var = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs));
+				edge = AllocationEdge();
 				pag += <alloc, edge, var>;
 			}
-			case assign(localVariable(lhs), immediate(local(rhs))): { 
+			case assign(localVariable(lhs), immediate(local(rhs))): {
 				println("<currentMethod.name> Creates VariableNode and VariableNode and AssignmentEdge"); // y = x
-				var1 = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs)); // Get type from LocalVariableDeclaration
-				var2 = VariableNode("green", methodSig, "Global<rhs>", getVarType(currentMethod.body, rhs)); // Get type from LocalVariableDeclaration
-				edge = AssignmentEdge(); 
+				var1 = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs));
+				var2 = VariableNode("green", methodSig, "Global<rhs>", getVarType(currentMethod.body, rhs));
+				edge = AssignmentEdge();
 				pag += <var1, edge, var2>;
+			}
+			case assign(localVariable(lhs), invokeExp(exp)): {
+				println("<currentMethod.name> An assign with invoke to other method"); // x = bar(something)
+				//var = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs));
+				
 			}
 			case assign(localVariable(lhs), localFieldRef(rhs, class, \type, fieldName)): { 
 				println("<currentMethod.name> Creates VariableNode and FieldRefNode and LoadEdge"); // z = x.f
-				var = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs)); // Get type from LocalVariableDeclaration
+				var = VariableNode("green", methodSig, "Global<lhs>", getVarType(currentMethod.body, lhs));
 				ref = FieldRefNode("red", methodSig, "<rhs>.<fieldName>");
-				edge = LoadEdge(); 
+				edge = LoadEdge();
 				pag += <var, edge, ref>;
 			}
 			case assign(fieldRef(lhs,fieldSignature(class, \type, fieldName)),immediate(local(rhs))): {
 				println("<currentMethod.name> Creates FieldRefNode abd VariableNode and StoreEdge");  // x.f = z
 				ref = FieldRefNode("red", methodSig, "<lhs>.<fieldName>");
-				var = VariableNode("green", methodSig, "Global<rhs>", getVarType(currentMethod.body, rhs)); // Get type from LocalVariableDeclaration				
-				edge = StoreEdge(); 
+				var = VariableNode("green", methodSig, "Global<rhs>", getVarType(currentMethod.body, rhs));
+				edge = StoreEdge();
 				pag += <ref, edge, var>;
 			}
 		}		
@@ -97,6 +112,11 @@ public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 	return pag;
 }
 
+
 private str buildMethodSignatureFromMethod(Method m) {
 	return signature(methodSignature("", m.returnType, m.name, m.formals)); 	
 }
+
+private PointerAssignGraph buildAllocNode(str methodSig, int id, Expression exp) = AllocationNode("blue", methodSig, "<id>", exp);
+private PointerAssignGraph buildVarNode(str methodSig, str name, Type \type) = VariableNode("green", methodSig, "Global<name>", \type);
+private PointerAssignGraph buildFieldRefNode(str methodSig, str name) = FieldRefNode("red", methodSig, name);
