@@ -180,7 +180,7 @@ private void invokeRule(stmt: invokeStmt(InvokeExp expr), MethodSignature method
 		case sourceNode(): {
 			println("\t\t ******* sourceNode");
 			source = createNode(method, stmt, rt);
-			//TODO add node to graph
+			//TODO add node to graph (how ?)
 		}
 		case sinkNode(): defsToCallOfSinkMethod(stmt, method);
 		case simpleNode(): println("\t\t ******* simpleNode");
@@ -242,7 +242,7 @@ private list[ValueFlowNode] findAllocationSites() {
 
 private void updateGraph(ValueFlowNode source, ValueFlowNode target){
 	println("updateGraph .... <source> TO <target>");
-	ValueFlowEdge edge = valueFlowEdge(simpleEdge());
+	ValueFlowEdge edge = valueFlowEdge(simpleEdge(), vfDataEmpty());
 	updateGraph(source,edge,target);
 }
 private void updateGraph(ValueFlowNode source, ValueFlowEdge edge, ValueFlowNode target){

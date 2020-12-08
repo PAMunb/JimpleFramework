@@ -28,8 +28,11 @@ data ValueFlowEdgeType = callSiteOpenEdge()
 					| callSiteCloseEdge()
 					| simpleEdge();
 					
+data ValueFlowEdgeData = vfData(Name className, Method callerMethod, Method calleeMethod, Statement stmt) 
+					| vfDataEmpty();					
+					
 //data ValueFlowEdge = valueFlowEdge(Name className, Method callerMethod, Method calleeMethod, Statement stmt, ValueFlowEdgeType edgeType);
-data ValueFlowEdge = valueFlowEdge(ValueFlowEdgeType edgeType);
+data ValueFlowEdge = valueFlowEdge(ValueFlowEdgeType edgeType, ValueFlowEdgeData edgeData);
 					
 data ValueFlowNode = valueFlowNode(Name className, Name methodName, Statement stmt, ValueFlowNodeType nodeType);
 
