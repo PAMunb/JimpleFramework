@@ -47,10 +47,20 @@ alias PointsToSet = map[str, set[AllocationSite]];
 
 public PointsToSet propagatesPointsToGraph(PointerAssignGraph pag) {
 	PointsToSet pSet = ();	
-	// Process allocations edges
+	// Propagate Allocation Edge
 	allocsEdges = (t2.name : t1 | <t1, f, t2> <- pag, f == AllocationEdge());
     for(e <- allocsEdges) {
     	pSet[e] = {AllocSiteFromAllocNode(allocsEdges[e])};
+    }
+
+	// Propagate Assignment Edge    
+    solve(pSet) {
+    	assignEdges = (t2.name : t1.name | <t1, f, t2> <- pag, f == AssignmentEdge());    	
+        for(e <- assignEdges) {
+        	if (e in pSet) {
+        		pSet[assignEdges[e]] = pSet[e];
+        	}
+        }
     }
 	return pSet;
 }
