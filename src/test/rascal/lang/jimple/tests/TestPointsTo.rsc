@@ -106,7 +106,7 @@ public Figure toFigure(PointerAssignGraph pag) {
   }  
   
   //Create edges
-  edges = [];  
+  edges = [];
   edges += [edge("<t1.methodSig>.<t1.name>", "<t2.methodSig>.<t2.name>") | <t1, f, t2> <- pag];
       
   return scrollable(graph(boxes, edges, hint("layered"), std(size(20)), std(gap(10))));    

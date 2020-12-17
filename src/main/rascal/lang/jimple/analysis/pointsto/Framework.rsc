@@ -24,6 +24,7 @@ import Relation;
 //1 - Points-to set output (graph) and 
 //2 - Helper functions over points-to set.
 
+
 //Types of node on graph
 data PointerAssignmentNodeType = AllocationNode(str color, str methodSig, str name, Expression exp)
 								| VariableNode(str color, str methodSig, str name, Type \type)
@@ -38,14 +39,22 @@ data PointerAssignmentEdgeType = AllocationEdge()
 								| ToBeResolved();
 
 //	Try using a labeled graph for mapping node types (nodes)  and edge types (labels).
-//	OBS it is not possible to do a transitive clojure with labeled graph
+//	OBS: it is not possible to do a transitive clojure with labeled graph
 alias PointerAssignGraph = LGraph[PointerAssignmentNodeType , PointerAssignmentEdgeType];
  
-alias PointsToSet[&T] = map[str, set[&T]];
+data AllocationSite = allocsite(str methodSig, str name, Expression exp);
+alias PointsToSet = map[str, set[AllocationSite]];
 
-public PointerAssignGraph propagatesPointsToGraph(PointerAssignGraph pag) {
-	return pag;
+public PointsToSet propagatesPointsToGraph(PointerAssignGraph pag) {
+	PointsToSet pSet = ();	
+	// Process allocations edges
+	allocsEdges = (t2.name : t1 | <t1, f, t2> <- pag, f == AllocationEdge());
+    for(e <- allocsEdges) {
+    	pSet[e] = {AllocSiteFromAllocNode(allocsEdges[e])};
+    }
+	return pSet;
 }
+
 
 public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 	PointerAssignGraph pag = {};
@@ -141,4 +150,8 @@ private list[Immediate] getAllPagVars(PointerAssignGraph pag) {
 
 private str buildMethodSignatureFromMethod(Method m) {
 	return signature(methodSignature("", m.returnType, m.name, m.formals)); 	
+}
+
+private AllocationSite AllocSiteFromAllocNode(PointerAssignmentNodeType n) {
+	return allocsite(n.methodSig, n.name, n.exp);	
 }
