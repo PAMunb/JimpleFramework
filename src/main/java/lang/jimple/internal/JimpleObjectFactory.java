@@ -102,6 +102,20 @@ public class JimpleObjectFactory {
 		return res;
 	}
 	
+	public static String localVariableName(boolean isStackVariable, String type, int idx) {
+		String infix = "r"; 
+		
+		switch(type) {
+		 case "TLong" : infix = "l"; break;
+		 case "TChar" : infix = "c"; break;
+		 case "TByte" : infix = "b"; break;
+		 case "TShort" : infix = "s"; break;
+		 case "TFloat" : infix = "f"; break;
+		 case "TDouble" : infix = "d"; break;
+		}
+		
+		return isStackVariable ? "$" + (infix + idx) : (infix + idx); 
+	}
 	public static Type type(String descriptor) {
 		// primitive types 
 		switch(descriptor) {

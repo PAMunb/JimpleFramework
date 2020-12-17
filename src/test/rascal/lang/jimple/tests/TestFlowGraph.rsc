@@ -1,9 +1,16 @@
-module TestFlowGraph
+module lang::jimple::tests::TestFlowGraph
 
 import lang::jimple::core::Syntax; 
+import lang::jimple::decompiler::Decompiler; 
+import lang::jimple::decompiler::jimplify::ProcessLabels; 
+
 import lang::jimple::toolkit::FlowGraph;
+import lang::jimple::util::JPrettyPrinter;
 
 import Set; 
+import List;
+
+import  IO;
 
 test bool testSimpleGraph() {
   vars = [localVariableDeclaration(TInteger(), "x"), localVariableDeclaration(TInteger(), "y")];
@@ -66,4 +73,34 @@ test bool testFactorialFlowGraph() {
                               , <stmtNode(s7), stmtNode(s3)>
                               , <stmtNode(s9), exitNode()> 
                               }; 
+}
+
+
+loc intOps = |project://JimpleFramework/target/test-classes/samples/operators/IntOps.class|;
+
+loc whileLocation = |project://JimpleFramework/target/test-classes/samples/WhileStmtSample.class|;
+
+test bool controlFlowFromWhileStmtSample() {
+  ClassOrInterfaceDeclaration c = processJimpleLabels(decompile(whileLocation));
+  c = processJimpleLabels(c);
+  
+  methods = [m | /MethodBody m <- c];  
+ 
+  for(MethodBody m <- methods) {
+  	println(forwardFlowGraph(m));
+  }
+  return size(methods) == 2; 
+}
+
+test bool controlFlowFromIntOps() {
+  ClassOrInterfaceDeclaration c = processJimpleLabels(decompile(intOps));
+  //c = processJimpleLabels(c);
+  
+  methods = [m | /MethodBody m <- c];  
+ 
+  for(MethodBody m <- methods) {
+  	println(prettyPrint(m));
+  }
+  println(size(methods));
+  return size(methods) == 2; 
 }

@@ -22,7 +22,7 @@ str cleanClassName(str className) = replaceAll(className, "/","."); //TODO: do t
 */
 public str prettyPrint(Value::intValue(Int iv)) = "<iv>";
 public str prettyPrint(Value::longValue(Long lv)) = "<lv>L";
-public str prettyPrint(Value::floatValue(Float fv)) = "<fv>";
+public str prettyPrint(Value::floatValue(Float fv)) = "<fv>F";
 public str prettyPrint(Value::doubleValue(Double fv)) = "<fv>";
 public str prettyPrint(Value::stringValue(String sv)) = "\"<sv>\"";
 public str prettyPrint(Value::booleanValue(bool bl)) = "<bl>";

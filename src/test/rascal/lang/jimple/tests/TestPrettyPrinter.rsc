@@ -1,4 +1,4 @@
-module TestPrettyPrinter
+module lang::jimple::tests::TestPrettyPrinter
 
 import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
