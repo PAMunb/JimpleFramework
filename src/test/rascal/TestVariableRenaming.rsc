@@ -3,14 +3,9 @@ module TestVariableRenaming
 import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
-import lang::jimple::core::Context;
-import lang::jimple::decompiler::Decompiler; 
-import lang::jimple::decompiler::jimplify::ProcessLabels; 
-import lang::jimple::toolkit::PrettyPrinter; 
 import lang::jimple::toolkit::ssa::DominanceTree;
 import lang::jimple::toolkit::ssa::PhiFunctionInsertion; 
-import lang::jimple::toolkit::ssa::VariableRenaming; 
-import lang::jimple::toolkit::ssa::Util;
+import lang::jimple::toolkit::ssa::VariableRenaming;
 
 test bool testVariableRenaming() {
 	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
@@ -30,7 +25,7 @@ test bool testVariableRenaming() {
 
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);	
-  	dominanceTree = createDominanceTree(flowGraph);
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
 
 	FlowGraph phiFunctionFlowGraph = {
 		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1")))>,
@@ -43,8 +38,9 @@ test bool testVariableRenaming() {
 		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
 		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>
 	};
-		
-	result = applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
+	
+	
+	applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
 	
 	return false;
 

@@ -3,22 +3,21 @@ module lang::jimple::toolkit::ssa::VariableRenaming
 import Set;
 import Relation;
 import analysis::graphs::Graph;
-import lang::jimple::toolkit::FlowGraph;
-import lang::jimple::core::Syntax;
-import lang::jimple::toolkit::ssa::Util;
 import Node;
 import List;
 import Type;
 import lang::jimple::util::Stack;
+import lang::jimple::toolkit::FlowGraph;
+import lang::jimple::core::Syntax;
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
-	newFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph };
+	FlowGraph newFlowGraph = { graphNode | graphNode <- flowGraph };
 	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
 	map[Variable, Stack[int]] S = (); 
 	map[Variable, int] C = ();
 
 	for(Variable variable <- variableList) {
-		for(variableNode <- blocksWithVariable(flowGraph, variable)) {
+		for(<variableNode, childNode> <- blocksWithVariable(flowGraph, variable)) {
 			if(isOrdinaryAssignment(variableNode)) {
 				if(isRightHandSideVariable(variableNode)) {
 					// rhsVariable =  getRightHandSideVariable(variableNode)
@@ -28,7 +27,8 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 				if(isLeftHandSideVariable(variableNode)) {
 					Variable V = getStmtVariable(variableNode);
 					int i = V in C ? C[V] : 0;
-					// Replace C by Ci as LHS(A)
+					// Replace V by Vi as LHS(A)
+					replaceVariableVersion(newFlowGraph, variableNode, childNode);
 					S[V] = V in S ? push(S[V], i) : push(i, emptyStack());
 					C[V] = i + 1;
 				};
@@ -39,7 +39,10 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 	return flowGraph;
 }
 
-public FlowGraph replaceVariableVersion(FlowGraph newFlowGraph, Variable version) {
+public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode) {
+	filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
+	Variable V = getStmtVariable(variableNode);
+	
 	// Replace use of V by use of Vi where i = Top(S(V))
 	return newFlowGraph;
 }
@@ -87,8 +90,8 @@ public Variable getStmtVariable(Node graphNode) {
 	}
 }
 
-public list[Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {
-	return [graphNode | <graphNode, _> <- flowGraph, isSameVariable(graphNode, variable)];;
+public lrel[Node, Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {
+	return [<fatherNode, childStmt> | <fatherNode, childStmt> <- flowGraph, isSameVariable(fatherNode, variable)];;
 }
 
 public bool isVariable(Node graphNode) {
