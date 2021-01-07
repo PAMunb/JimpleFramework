@@ -6,6 +6,7 @@ import analysis::graphs::Graph;
 import Node;
 import List;
 import Type;
+import util::Math;
 import lang::jimple::util::Stack;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
@@ -27,9 +28,9 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 				if(isLeftHandSideVariable(variableNode)) {
 					Variable V = getStmtVariable(variableNode);
 					int i = V in C ? C[V] : 0;
-					// Replace V by Vi as LHS(A)
-					replaceVariableVersion(newFlowGraph, variableNode, childNode);
 					S[V] = V in S ? push(S[V], i) : push(i, emptyStack());
+					replaceVariableVersion(newFlowGraph, variableNode, childNode, S);
+					
 					C[V] = i + 1;
 				};
 			};
@@ -39,12 +40,29 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 	return flowGraph;
 }
 
-public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode) {
-	filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
+public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, map[Variable, Stack[int]] S) {
+	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
+
+	// Replace use of V by use of Vi where i = Top(S(V))	
 	Variable V = getStmtVariable(variableNode);
+	String variableOriginalName = getVariableName(V);
+	int versionIndex = peek(S[V]); // AQUI TÁ RETORNANDO UM ELEMENTO DA STACK, TEM QUE ENTENDER  COMO TRATA ISSO
+	String newVersionName = variableOriginalName + "_" + toString(versionIndex);
+	V[0] = newVersionName;
 	
-	// Replace use of V by use of Vi where i = Top(S(V))
-	return newFlowGraph;
+	stmtNode(assignStmt) = variableNode;
+	assign(_, rightHandSide) = assignStmt;
+	newAssignStmt = assign(V, rightHandSide);
+	variableNode[0] = newAssignStmt;
+	
+
+	return filteredFlowGraph + <variableNode, childNode>;;
+}
+
+public String getVariableName(Variable variable) {
+	switch(variable[0]) {
+		case String variableName: return variableName;
+	}
 }
 
 public bool isLeftHandSideVariable(Node variableNode) {
@@ -70,11 +88,6 @@ public bool isOrdinaryAssignment(variableNode) {
 		case assign(_, _): return true; 
 		default: return false;
 	}
-}
-
-public String renameVariable(Variable variable, int index) {
-	
-	return "";
 }
 
 // Duplicated code
