@@ -28,7 +28,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 				if(isLeftHandSideVariable(variableNode)) {
 					Variable V = getStmtVariable(variableNode);
 					int i = V in C ? C[V] : 0;
-					S[V] = V in S ? push(S[V], i) : push(i, emptyStack());
+					S[V] = V in S ? push(i, S[V]) : push(i, emptyStack());
 					replaceVariableVersion(newFlowGraph, variableNode, childNode, S);
 					
 					C[V] = i + 1;
@@ -46,8 +46,8 @@ public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, 
 	// Replace use of V by use of Vi where i = Top(S(V))	
 	Variable V = getStmtVariable(variableNode);
 	String variableOriginalName = getVariableName(V);
-	int versionIndex = peek(S[V]); // AQUI TÁ RETORNANDO UM ELEMENTO DA STACK, TEM QUE ENTENDER  COMO TRATA ISSO
-	String newVersionName = variableOriginalName + "_" + toString(versionIndex);
+	int versionIndex = peekIntValue(S[V]);
+	String newVersionName = variableOriginalName + "_version-" + toString(versionIndex);
 	V[0] = newVersionName;
 	
 	stmtNode(assignStmt) = variableNode;

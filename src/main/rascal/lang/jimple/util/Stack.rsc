@@ -20,3 +20,9 @@ tuple[Maybe[&T] v, Stack[&T] stack] pop(Stack[&T] s) {
    
   return <nothing(), emptyStack()>;
 }
+
+public int peekIntValue(Stack[int] stack) {
+	switch(peek(stack)[0]) {
+		case int stackValue: return stackValue;
+	}
+}
