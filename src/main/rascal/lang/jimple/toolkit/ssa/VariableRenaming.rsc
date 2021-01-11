@@ -21,7 +21,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 		for(<variableNode, childNode> <- blocksWithVariable(flowGraph, variable)) {
 			if(isOrdinaryAssignment(variableNode)) {
 				if(isRightHandSideVariable(variableNode)) {
-					// rhsVariable =  getRightHandSideVariable(variableNode)
+					// rhsVariable = getRightHandSideVariable(variableNode)
 					// replaceVariableVersion(newFlowGraph, peek(S[rhsVariable]));
 				};
 				
@@ -30,7 +30,6 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 					int i = V in C ? C[V] : 0;
 					S[V] = V in S ? push(i, S[V]) : push(i, emptyStack());
 					replaceVariableVersion(newFlowGraph, variableNode, childNode, S);
-					
 					C[V] = i + 1;
 				};
 			};
@@ -54,7 +53,6 @@ public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, 
 	assign(_, rightHandSide) = assignStmt;
 	newAssignStmt = assign(V, rightHandSide);
 	variableNode[0] = newAssignStmt;
-	
 
 	return filteredFlowGraph + <variableNode, childNode>;;
 }
@@ -78,7 +76,12 @@ public bool isRightHandSideVariable(Node variableNode) {
 	assign(_, rightHandSide) = assignStatement;
 	typeOfVariableArg = typeOf(rightHandSide);
 
-	return size(typeOfVariableArg[..]) != 0 && typeOfVariableArg.name == "Variable";
+	if(typeOfVariableArg.name != "Expression") return false;
+
+	list[Immediate] immediates = getExpressionImmediates(rightHandSide);
+	int variablesCount = size([ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""]);
+
+	return variablesCount != 0;
 }
 
 public bool isOrdinaryAssignment(variableNode) {
@@ -89,8 +92,6 @@ public bool isOrdinaryAssignment(variableNode) {
 		default: return false;
 	}
 }
-
-// Duplicated code
 
 public Variable getStmtVariable(Node graphNode) {
 	stmtNode(assignStatement) = graphNode;
@@ -129,4 +130,51 @@ public bool isSameVariable(Node graphNode, Variable variable) {
 	if (size(typeOfVariableArg[..]) == 0) return false;
 	
 	return variableArg == variable;
+}
+
+public String getVariableImmediateName(Immediate immediate) {
+	switch(immediate) {
+		case local(String localName): return localName;
+		default: return "";
+	}
+}
+
+public list[Immediate] getExpressionImmediates(Expression expression) {
+	switch(expression) {
+	  case newInstance(Type instanceType): return [];
+	  case newArray(Type baseType, list[ArrayDescriptor] dims): return [];
+	  case cast(Type toType, Immediate immeadiate): return [];
+	  case instanceOf(Type baseType, Immediate immediate): return [immediate];
+	  case invokeExp(InvokeExp expression): return [];
+	  case arraySubscript(Name name, Immediate immediate): return [immediate];
+	  case stringSubscript(String string, Immediate immediate): return [immediate];
+	  case localFieldRef(Name local, Name className, Type fieldType, Name fieldName): return [];
+	  case fieldRef(Name className, Type fieldType, Name fieldName): return [];
+	  case and(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case or(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case xor(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case reminder(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case isNull(Immediate immediate): return [immediate];
+	  case isNotNull(Immediate immediate): return [immediate];
+	  case cmp(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case cmpg(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case cmpl(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case cmpeq(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case cmpne(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case cmpgt(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case cmpge(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case cmplt(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case cmple(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case shl(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case shr(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case ushr(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case plus(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case minus(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case mult(Immediate lhs, Immediate rhs): return [lhs, rhs]; 
+	  case div(Immediate lhs, Immediate rhs): return [lhs, rhs];
+	  case lengthOf(Immediate immediate): return [immediate];
+	  case neg(Immediate immediate): return [immediate]; 
+	  case immediate(Immediate immediate): return [immediate];
+	  default: return [];
+	}
 }
