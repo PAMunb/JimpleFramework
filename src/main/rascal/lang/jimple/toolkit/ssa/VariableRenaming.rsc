@@ -20,8 +20,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 	for(Variable variable <- variableList) {
 		for(<variableNode, childNode> <- blocksWithVariable(flowGraph, variable)) {
 			if(isOrdinaryAssignment(variableNode)) {
-				if(isRightHandSideVariable(variableNode)) {
-					// rhsVariable = getRightHandSideVariable(variableNode)
+				for(rightHandSideImmediate <- getRightHandSideImmediates(variableNode)) {
 					// replaceVariableVersion(newFlowGraph, peek(S[rhsVariable]));
 				};
 				
@@ -71,17 +70,19 @@ public bool isLeftHandSideVariable(Node variableNode) {
 	return size(typeOfVariableArg[..]) != 0 && typeOfVariableArg.name == "Variable";
 }
 
-public bool isRightHandSideVariable(Node variableNode) {
+public list[Immediate] getRightHandSideImmediates(Node variableNode) {
 	stmtNode(assignStatement) = variableNode;
 	assign(_, rightHandSide) = assignStatement;
 	typeOfVariableArg = typeOf(rightHandSide);
 
-	if(typeOfVariableArg.name != "Expression") return false;
+	if(typeOfVariableArg.name != "Expression") return [];
 
 	list[Immediate] immediates = getExpressionImmediates(rightHandSide);
-	int variablesCount = size([ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""]);
+	Immediate variablesCount = size([ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""]);
 
-	return variablesCount != 0;
+	if(variablesCount != 0) return immediates;
+
+	return [];
 }
 
 public bool isOrdinaryAssignment(variableNode) {
