@@ -56,7 +56,11 @@ test bool testRightHandSideImmediatesRename() {
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
 	
-	applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
+	FlowGraph result = applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
 	
-	return false;
+	return result == {
+	  <entryNode(),stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false)))))>,
+	  <stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false))))), stmtNode(assign(localVariable("v1"), immediate(local("v0_version-0"))))>,
+	  <stmtNode(assign(localVariable("v1"), immediate(local("v0_version-0")))), exitNode()>
+	};
 }

@@ -23,11 +23,11 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 				for(rightHandSideImmediate <- getRightHandSideImmediates(variableNode)) {
 					int variableVersion = rightHandSideImmediate in S ? peek(S[rightHandSideImmediate]) : 0;
 					if(variableVersion == 0) S[rightHandSideImmediate] =  push(0, emptyStack()); // Initialize empty stack
-
-					replaceRightVariableVersion(newFlowGraph, variableNode, childNode, variableVersion);
+					newFlowGraph = replaceRightVariableVersion(newFlowGraph, rightHandSideImmediate, variableNode, variableVersion);
 				};
 				
 				if(isLeftHandSideVariable(variableNode)) {
+					// Ajuste aqui, tem que ser dos dois lados do no o rename, pq tem a ligacao, ex: <a, b> <b, c>, se tiver o rename em b, tem que ser nos dois nós
 					Variable V = getStmtVariable(variableNode);
 					Immediate localVariable = local(V[0]);
 					int i = localVariable in C ? C[localVariable] : 0;
@@ -39,7 +39,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 		};
 	};
 
-	return flowGraph;
+	return newFlowGraph;
 }
 
 public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, int versionIndex) {
@@ -58,27 +58,31 @@ public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNo
 	return filteredFlowGraph + <variableNode, childNode>;;
 }
 
-public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, int versionVersion) {
-	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
-	
-	// int versionIndex = peekIntValue(S[V]);
+public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Immediate variableToRename, Node variableNode, int versionVersion) {
+	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != variableNode) };
 
-	// Variable V = getStmtVariable(variableNode);
-	// String variableOriginalName = getVariableName(V);
-	// String newVersionName = variableOriginalName + "_version-" + toString(versionIndex);
-	// V[0] = newVersionName;
+	String variableOriginalName = getImmediateName(variableToRename);
+	String newVersionName = variableOriginalName + "_version-" + toString(versionVersion);
 	
-	// stmtNode(assignStmt) = variableNode;
-	// assign(_, rightHandSide) = assignStmt;
-	// newAssignStmt = assign(V, rightHandSide);
-	// variableNode[0] = newAssignStmt;
+	stmtNode(assignStmt) = variableNode;
+	assign(leftHandSide, _) = assignStmt;
+	Node newAssignStmt = stmtNode(assign(leftHandSide, immediate(local(newVersionName))));
 
-	return filteredFlowGraph;
+	FlowGraph newPredecessorNodes = { <origin, newAssignStmt> | <origin, destination> <- flowGraph, (destination == variableNode) };
+	FlowGraph newDestinations = { <newAssignStmt, destination> | <origin, destination> <- flowGraph, (origin == variableNode) };
+		
+	return filteredFlowGraph + newPredecessorNodes + newDestinations;
 }
 
 public String getVariableName(Variable variable) {
 	switch(variable[0]) {
 		case String variableName: return variableName;
+	}
+}
+
+public String getImmediateName(Immediate immediate) {
+	switch(immediate[0]) {
+		case String immediateName: return immediateName;
 	}
 }
 
