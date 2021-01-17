@@ -14,22 +14,26 @@ import lang::jimple::core::Syntax;
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
 	FlowGraph newFlowGraph = { graphNode | graphNode <- flowGraph };
 	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
-	map[Variable, Stack[int]] S = (); 
-	map[Variable, int] C = ();
+	map[Immediate, Stack[int]] S = (); 
+	map[Immediate, int] C = ();
 
 	for(Variable variable <- variableList) {
 		for(<variableNode, childNode> <- blocksWithVariable(flowGraph, variable)) {
 			if(isOrdinaryAssignment(variableNode)) {
 				for(rightHandSideImmediate <- getRightHandSideImmediates(variableNode)) {
-					// replaceVariableVersion(newFlowGraph, peek(S[rhsVariable]));
+					int variableVersion = rightHandSideImmediate in S ? peek(S[rightHandSideImmediate]) : 0;
+					if(variableVersion == 0) S[rightHandSideImmediate] =  push(0, emptyStack()); // Initialize empty stack
+
+					replaceRightVariableVersion(newFlowGraph, variableNode, childNode, variableVersion);
 				};
 				
 				if(isLeftHandSideVariable(variableNode)) {
 					Variable V = getStmtVariable(variableNode);
-					int i = V in C ? C[V] : 0;
-					S[V] = V in S ? push(i, S[V]) : push(i, emptyStack());
-					replaceVariableVersion(newFlowGraph, variableNode, childNode, S);
-					C[V] = i + 1;
+					Immediate localVariable = local(V[0]);
+					int i = localVariable in C ? C[localVariable] : 0;
+					replaceLeftVariableVersion(newFlowGraph, variableNode, childNode, i);
+					S[localVariable] = localVariable in S ? push(i, S[localVariable]) : push(i, emptyStack());  // Push new item or initialize empty stack
+					C[localVariable] = i + 1;
 				};
 			};
 		};
@@ -38,13 +42,11 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 	return flowGraph;
 }
 
-public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, map[Variable, Stack[int]] S) {
+public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, int versionIndex) {
 	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
 
-	// Replace use of V by use of Vi where i = Top(S(V))	
 	Variable V = getStmtVariable(variableNode);
 	String variableOriginalName = getVariableName(V);
-	int versionIndex = peekIntValue(S[V]);
 	String newVersionName = variableOriginalName + "_version-" + toString(versionIndex);
 	V[0] = newVersionName;
 	
@@ -54,6 +56,24 @@ public FlowGraph replaceVariableVersion(FlowGraph flowGraph, Node variableNode, 
 	variableNode[0] = newAssignStmt;
 
 	return filteredFlowGraph + <variableNode, childNode>;;
+}
+
+public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, int versionVersion) {
+	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
+	
+	// int versionIndex = peekIntValue(S[V]);
+
+	// Variable V = getStmtVariable(variableNode);
+	// String variableOriginalName = getVariableName(V);
+	// String newVersionName = variableOriginalName + "_version-" + toString(versionIndex);
+	// V[0] = newVersionName;
+	
+	// stmtNode(assignStmt) = variableNode;
+	// assign(_, rightHandSide) = assignStmt;
+	// newAssignStmt = assign(V, rightHandSide);
+	// variableNode[0] = newAssignStmt;
+
+	return filteredFlowGraph;
 }
 
 public String getVariableName(Variable variable) {
@@ -78,7 +98,7 @@ public list[Immediate] getRightHandSideImmediates(Node variableNode) {
 	if(typeOfVariableArg.name != "Expression") return [];
 
 	list[Immediate] immediates = getExpressionImmediates(rightHandSide);
-	Immediate variablesCount = size([ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""]);
+	int variablesCount = size([ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""]);
 
 	if(variablesCount != 0) return immediates;
 

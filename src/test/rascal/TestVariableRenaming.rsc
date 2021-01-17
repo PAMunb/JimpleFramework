@@ -43,5 +43,20 @@ test bool testVariableRenaming() {
 	applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
 	
 	return false;
+}
 
+test bool testRightHandSideImmediatesRename() {
+	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
+	Statement s2 = assign(localVariable("v1"), immediate(local("v0")));
+
+	list[Statement] stmts = [s1, s2];
+
+  	methodStatments = methodBody([], stmts, []);
+  	flowGraph = forwardFlowGraph(methodStatments);	
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
+	
+	applyVariableRenaming(phiFunctionFlowGraph, dominanceTree);
+	
+	return false;
 }
