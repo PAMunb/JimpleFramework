@@ -33,7 +33,7 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 			if(X in dominanceFrontier) { // Avoids NoSuchKey error
 				frontierNodes = dominanceFrontier[X];
 				for(Y <- frontierNodes) { // Y : basic block ∈ DF(X )
-					if(size({Y} & F) == 0) { // Y \notin F
+					if(size({Y} & F) == 0 && isJoinNode(flowGraph, Y)) { // Y \notin F && Y is a join node
 						newFlowGraph = insertPhiFunction(newFlowGraph, Y, variable); // add v←φ(...) at entry of Y
 						F = F + {Y}; // F ← F ∪ {Y}
 						if(size([Y] & blocksWithVariable(flowGraph, variable)) == 0) { // Y \notin Defs(v)
@@ -46,6 +46,12 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 	};
 
 	return newFlowGraph;
+}
+
+public bool isJoinNode(FlowGraph flowGraph, Node frontierNode) {
+	int fathersSize = size([ fatherNode | <fatherNode, childNode> <- flowGraph, childNode == frontierNode ]);
+
+	return fathersSize > 1;
 }
 
 public &T getStmtVariable(Node graphNode) {

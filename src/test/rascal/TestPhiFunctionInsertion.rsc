@@ -6,6 +6,20 @@ import lang::jimple::toolkit::ssa::DominanceTree;
 import lang::jimple::toolkit::ssa::PhiFunctionInsertion;
 import lang::jimple::core::Syntax;
 
+test bool testDoesNotInserntInSimpleAssigment() {
+	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
+	Statement s2 = assign(localVariable("v1"), immediate(local("v0")));
+
+	list[Statement] stmts = [s1, s2];
+
+  	methodStatments = methodBody([], stmts, []);
+  	flowGraph = forwardFlowGraph(methodStatments);	
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
+	
+	return phiFunctionFlowGraph == flowGraph;
+}
+
 test bool testPhiFunctionInsertion() {
   	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
 
