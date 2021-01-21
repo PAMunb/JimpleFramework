@@ -12,37 +12,48 @@ import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
-	FlowGraph newFlowGraph = { graphNode | graphNode <- flowGraph };
-	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
 	map[Immediate, Stack[int]] S = (); 
 	map[Immediate, int] C = ();
 
-	for(Variable variable <- variableList) {
-		for(<variableNode, childNode> <- blocksWithVariable(flowGraph, variable)) {
-			if(isOrdinaryAssignment(variableNode)) {
-				for(rightHandSideImmediate <- getRightHandSideImmediates(variableNode)) {
-					int variableVersion = rightHandSideImmediate in S ? peek(S[rightHandSideImmediate]) : 0;
-					if(variableVersion == 0) S[rightHandSideImmediate] =  push(0, emptyStack()); // Initialize empty stack
-					newFlowGraph = replaceRightVariableVersion(newFlowGraph, rightHandSideImmediate, variableNode, variableVersion);
-				};
-				
-				if(isLeftHandSideVariable(variableNode)) {
-					// Ajuste aqui, tem que ser dos dois lados do no o rename, pq tem a ligacao, ex: <a, b> <b, c>, se tiver o rename em b, tem que ser nos dois nós
-					Variable V = getStmtVariable(variableNode);
-					Immediate localVariable = local(V[0]);
-					int i = localVariable in C ? C[localVariable] : 0;
-					newFlowGraph = replaceLeftVariableVersion(newFlowGraph, variableNode, childNode, i);
-					S[localVariable] = localVariable in S ? push(i, S[localVariable]) : push(i, emptyStack());  // Push new item or initialize empty stack
-					C[localVariable] = i + 1;
-				};
+	tuple[Node, Node] entryNodeBlock = head([ <origin, destination> | <origin, destination> <- flowGraph, origin == entryNode() ]);
+
+	FlowGraph newFlowGraph = replace(flowGraph, entryNodeBlock, S, C);
+
+	return newFlowGraph;
+}
+
+public FlowGraph replace(FlowGraph flowGraph, tuple[Node, Node] X, map[Immediate, Stack[int]] S, map[Immediate, int] C) {
+	FlowGraph newFlowGraph = { graphNode | graphNode <- flowGraph };
+	
+	for(variableNode <- X) {
+		if(isOrdinaryAssignment(variableNode)) {
+			for(rightHandSideImmediate <- getRightHandSideImmediates(variableNode)) {
+				int variableVersion = rightHandSideImmediate in S ? peek(S[rightHandSideImmediate]) : 0;
+				if(variableVersion == 0) S[rightHandSideImmediate] =  push(0, emptyStack()); // Initialize empty stack
+				newFlowGraph = replaceRightVariableVersion(newFlowGraph, rightHandSideImmediate, variableNode, variableVersion);
 			};
-		};
+			
+			if(isLeftHandSideVariable(variableNode)) {
+				Variable V = getStmtVariable(variableNode);
+				Immediate localVariable = local(V[0]);
+				int i = localVariable in C ? C[localVariable] : 0;
+				newFlowGraph = replaceLeftVariableVersion(newFlowGraph, variableNode, i);
+				S[localVariable] = localVariable in S ? push(i, S[localVariable]) : push(i, emptyStack());  // Push new item or initialize empty stack
+				C[localVariable] = i + 1;
+			};
+		}
+	};
+	
+	<_, destination> = X;
+	list[tuple[Node, Node]] blockChildren = [<parent, child> | <parent, child> <- flowGraph, parent == destination];
+	for(child <- blockChildren) {
+		newFlowGraph = replace(newFlowGraph, child, S, C);
 	};
 
 	return newFlowGraph;
 }
 
-public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, int versionIndex) {
+public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNode, int versionIndex) {
 	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != variableNode) };
 
 	Variable V = getStmtVariable(variableNode);
@@ -111,7 +122,13 @@ public list[Immediate] getRightHandSideImmediates(Node variableNode) {
 	return [];
 }
 
-public bool isOrdinaryAssignment(variableNode) {
+public bool isOrdinaryAssignment(Node variableNode) {
+	switch(variableNode) {
+		case entryNode(): return false;
+		case skipNode(): return false;
+		case exitNode(): return false;
+	}
+
 	stmtNode(assignStatement) = variableNode;
 	
 	switch(assignStatement) {
