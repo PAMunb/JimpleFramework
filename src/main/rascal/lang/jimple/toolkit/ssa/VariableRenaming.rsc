@@ -31,7 +31,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 					Variable V = getStmtVariable(variableNode);
 					Immediate localVariable = local(V[0]);
 					int i = localVariable in C ? C[localVariable] : 0;
-					replaceLeftVariableVersion(newFlowGraph, variableNode, childNode, i);
+					newFlowGraph = replaceLeftVariableVersion(newFlowGraph, variableNode, childNode, i);
 					S[localVariable] = localVariable in S ? push(i, S[localVariable]) : push(i, emptyStack());  // Push new item or initialize empty stack
 					C[localVariable] = i + 1;
 				};
@@ -43,7 +43,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dom
 }
 
 public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNode, Node childNode, int versionIndex) {
-	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != childNode) };
+	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != variableNode) };
 
 	Variable V = getStmtVariable(variableNode);
 	String variableOriginalName = getVariableName(V);
@@ -52,10 +52,12 @@ public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNo
 	
 	stmtNode(assignStmt) = variableNode;
 	assign(_, rightHandSide) = assignStmt;
-	newAssignStmt = assign(V, rightHandSide);
-	variableNode[0] = newAssignStmt;
+	Node newAssingStmt = stmtNode(assign(V, rightHandSide));
 
-	return filteredFlowGraph + <variableNode, childNode>;;
+	FlowGraph newPredecessorNodes = { <origin, newAssingStmt> | <origin, destination> <- flowGraph, (destination == variableNode) };
+	FlowGraph newDestinations = { <newAssingStmt, destination> | <origin, destination> <- flowGraph, (origin == variableNode) };
+
+	return filteredFlowGraph + newPredecessorNodes + newDestinations;
 }
 
 public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Immediate variableToRename, Node variableNode, int versionVersion) {
