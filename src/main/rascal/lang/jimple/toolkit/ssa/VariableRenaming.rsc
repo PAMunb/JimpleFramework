@@ -35,17 +35,34 @@ public FlowGraph replace(FlowGraph flowGraph, tuple[Node, Node] X, map[Immediate
 			
 			if(isLeftHandSideVariable(variableNode)) {
 				Variable V = getStmtVariable(variableNode);
-				Immediate localVariable = local(V[0]);
-				int i = localVariable in C ? C[localVariable] : 0;
+				Immediate localVariableImmediate = local(V[0]);
+				int i = localVariableImmediate in C ? C[localVariableImmediate] : 0;
 				newFlowGraph = replaceLeftVariableVersion(newFlowGraph, variableNode, i);
-				S[localVariable] = localVariable in S ? push(i, S[localVariable]) : push(i, emptyStack());  // Push new item or initialize empty stack
-				C[localVariable] = i + 1;
+				S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
+				C[localVariableImmediate] = i + 1;
 			};
 		}
 	};
 	
 	<_, destination> = X;
 	list[tuple[Node, Node]] blockChildren = [<parent, child> | <parent, child> <- flowGraph, parent == destination];
+	
+	for(tuple[Node, Node] successorTuple <- blockChildren) {
+		for(Node sucessorNode <- successorTuple) {
+			if(isPhiFunctionAssigment(sucessorNode)){
+				// stmtNode(phiFunction(localVariable("v1")))
+				
+				stmtNode(phiFunctionVariables) = sucessorNode;
+				phiFunction(phiFunctionVariable, variableVersionList) = phiFunctionVariables;
+				Immediate localVariableImmediate = local(phiFunctionVariable[0]);
+				just(versionIndex) = peek(S[localVariableImmediate]);
+				// TODO: Build variable version name, tem método pra isso
+				
+				temp2 = "bla";
+			};
+		};
+	};
+	
 	for(child <- blockChildren) {
 		newFlowGraph = replace(newFlowGraph, child, S, C);
 	};
@@ -58,7 +75,7 @@ public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNo
 
 	Variable V = getStmtVariable(variableNode);
 	String variableOriginalName = getVariableName(V);
-	String newVersionName = variableOriginalName + "_version-" + toString(versionIndex);
+	String newVersionName = buildVersionName(variableOriginalName, versionIndex);
 	V[0] = newVersionName;
 	
 	stmtNode(assignStmt) = variableNode;
@@ -75,7 +92,7 @@ public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Immediate vari
 	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != variableNode) };
 
 	String variableOriginalName = getImmediateName(variableToRename);
-	String newVersionName = variableOriginalName + "_version-" + toString(versionVersion);
+	String newVersionName = buildVersionName(variableOriginalName, versionVersion);
 	
 	stmtNode(assignStmt) = variableNode;
 	assign(leftHandSide, _) = assignStmt;
@@ -85,6 +102,10 @@ public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Immediate vari
 	FlowGraph newDestinations = { <newAssignStmt, destination> | <origin, destination> <- flowGraph, (origin == variableNode) };
 		
 	return filteredFlowGraph + newPredecessorNodes + newDestinations;
+}
+
+public str buildVersionName(str variableOriginalName, int versionIndex) {
+	return variableOriginalName + "_version-" + toString(versionVersion);
 }
 
 public String getVariableName(Variable variable) {
@@ -122,17 +143,31 @@ public list[Immediate] getRightHandSideImmediates(Node variableNode) {
 	return [];
 }
 
-public bool isOrdinaryAssignment(Node variableNode) {
+public bool ignoreNode(Node variableNode) {
 	switch(variableNode) {
-		case entryNode(): return false;
-		case skipNode(): return false;
-		case exitNode(): return false;
+		case entryNode(): return true;
+		case skipNode(): return true;
+		case exitNode(): return true;
+		default: return false;
 	}
+}
 
-	stmtNode(assignStatement) = variableNode;
-	
-	switch(assignStatement) {
+public bool isOrdinaryAssignment(Node variableNode) {
+	if(ignoreNode(variableNode)) return false;
+
+	stmtNode(statement) = variableNode;
+	switch(statement) {
 		case assign(_, _): return true; 
+		default: return false;
+	}
+}
+
+public bool isPhiFunctionAssigment(Node variableNode) {
+	if(ignoreNode(variableNode)) return false;
+	
+	stmtNode(statement) = variableNode;
+	switch(statement) {
+		case phiFunction(_, _): return true; 
 		default: return false;
 	}
 }
