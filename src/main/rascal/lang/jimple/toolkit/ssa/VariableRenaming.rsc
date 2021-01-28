@@ -12,11 +12,11 @@ import lang::jimple::util::Stack;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 
-public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]] blockTree) {
-	map[Immediate, Stack[int]] S = ();
-	map[Immediate, int] C = ();
+map[Immediate, Stack[int]] S = ();
+map[Immediate, int] C = ();
 
-	map[Node, list[Node]] newBlockTree = replace(blockTree, entryNode(), S, C);
+public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]] blockTree) {
+	map[Node, list[Node]] newBlockTree = replace(blockTree, entryNode());
 
 	FlowGraph newFlowGraph = {};
 
@@ -27,7 +27,7 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]
 	return newFlowGraph;
 }
 
-public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X, map[Immediate, Stack[int]] S, map[Immediate, int] C) {
+public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	if((X == exitNode())) return blockTree;
 	
 	if(isOrdinaryAssignment(X)) {
@@ -72,27 +72,22 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X, ma
 		};
 	}
 
-	/*
-	<_, destination> = X;
-	list[tuple[Node, Node]] blockChildren = [<parent, child> | <parent, child> <- flowGraph, parent == destination];
-	*/
-
 	for(successor <- blockTree[X]) {
 		int j = indexOf(blockTree[X], successor);
 		
 		if(isPhiFunctionAssigment(successor)){
-			blockTree = replacePhiFunctionVersion(blockTree, successor, S);
+			blockTree = replacePhiFunctionVersion(blockTree, successor);
 		};
 	};
 
 	for(child <- blockTree[X]) {
-		blockTree = replace(blockTree, child, S, C);
+		blockTree = replace(blockTree, child);
 	};
 
 	return blockTree;
 }
 
-public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode, map[Immediate, Stack[int]] S) {
+public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
 	stmtNode(phiFunctionVariables) = variableNode;
 	phiFunction(phiFunctionVariable, variableVersionList) = phiFunctionVariables;
 	variableName = phiFunctionVariable[0];

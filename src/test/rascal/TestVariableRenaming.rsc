@@ -5,6 +5,7 @@ import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 import lang::jimple::toolkit::ssa::DominanceTree;
 import lang::jimple::toolkit::ssa::PhiFunctionInsertion;
+import lang::jimple::toolkit::ssa::DominanceFrontier;
 import lang::jimple::toolkit::ssa::VariableRenaming;
 
 test bool testLeftHandSideImmediatesRename() {
@@ -117,10 +118,13 @@ test bool testPhiFunctionArgumentsRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
 
+	/* Falta alterar as variáveis mais internas de estruturas de if, return, etc */
+	
 	return false;
 }

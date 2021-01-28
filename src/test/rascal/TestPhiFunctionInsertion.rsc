@@ -39,20 +39,18 @@ test bool testPhiFunctionInsertion() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
 
-  	map[&T, set[&T]] dominanceFrontier = (
-	  stmtNode(s6): { stmtNode(gotoStmt("print")) },
-	  stmtNode(s3): { stmtNode(gotoStmt("print")) }
-	);
-
+	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
+	
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	return result == {
-		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1")))>,
-		<stmtNode(phiFunction(localVariable("v1"))), stmtNode(gotoStmt("print"))>,
+		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1"), []))>,
+		<stmtNode(phiFunction(localVariable("v1"), [])), stmtNode(gotoStmt("print"))>,
 		<entryNode(), stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false)))))>,
 		<stmtNode(returnStmt(local("v2"))) ,exitNode()>,
 		<stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false))))),stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:"))>,
-		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1))))), stmtNode(phiFunction(localVariable("v1")))>,
+		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1))))), stmtNode(phiFunction(localVariable("v1"), []))>,
 		<stmtNode(gotoStmt("print")),stmtNode(returnStmt(local("v2")))>,
 		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
 		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>
