@@ -1,6 +1,7 @@
 module lang::jimple::toolkit::ssa::VariableRenaming
 
 import Set;
+import Map;
 import Relation;
 import analysis::graphs::Graph;
 import Node;
@@ -11,68 +12,98 @@ import lang::jimple::util::Stack;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 
-public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
+public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, set[Node]] blockTree) {
 	map[Immediate, Stack[int]] S = (); 
 	map[Immediate, int] C = ();
 
-	tuple[Node, Node] entryNodeBlock = head([ <origin, destination> | <origin, destination> <- flowGraph, origin == entryNode() ]);
-
-	FlowGraph newFlowGraph = replace(flowGraph, entryNodeBlock, S, C);
+	map[Node, set[Node]] newBlockTree = replace(blockTree, entryNode(), S, C);
+	
+	FlowGraph newFlowGraph = {};
+	
+	for(fatherNode <- newBlockTree) {
+		newFlowGraph = newFlowGraph + { <fatherNode, nodeChild> | nodeChild <- newBlockTree[fatherNode]};
+	};
 
 	return newFlowGraph;
 }
 
-public FlowGraph replace(FlowGraph flowGraph, tuple[Node, Node] X, map[Immediate, Stack[int]] S, map[Immediate, int] C) {
-	FlowGraph newFlowGraph = { graphNode | graphNode <- flowGraph };
+public map[Node, set[Node]] replace(map[Node, set[Node]] blockTree, Node X, map[Immediate, Stack[int]] S, map[Immediate, int] C) {		
+	map[Node, set[Node]] newBlockTree = blockTree;
 	
-	for(variableNode <- X) {
-		if(isOrdinaryAssignment(variableNode)) {
-			for(rightHandSideImmediate <- getRightHandSideImmediates(variableNode)) {
-				int variableVersion = rightHandSideImmediate in S ? peek(S[rightHandSideImmediate]) : 0;
-				if(variableVersion == 0) S[rightHandSideImmediate] =  push(0, emptyStack()); // Initialize empty stack
-				newFlowGraph = replaceRightVariableVersion(newFlowGraph, rightHandSideImmediate, variableNode, variableVersion);
-			};
-			
-			if(isLeftHandSideVariable(variableNode)) {
-				Variable V = getStmtVariable(variableNode);
-				Immediate localVariableImmediate = local(V[0]);
-				int i = localVariableImmediate in C ? C[localVariableImmediate] : 0;
-				newFlowGraph = replaceLeftVariableVersion(newFlowGraph, variableNode, i);
-				S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
-				C[localVariableImmediate] = i + 1;
-			};
-		}
-	};
+	if(isOrdinaryAssignment(X)) {
+		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
+			int variableVersion = rightHandSideImmediate in S ? peek(S[rightHandSideImmediate]) : 0;
+			if(variableVersion == 0) S[rightHandSideImmediate] =  push(0, emptyStack()); // Initialize empty stack
+			newBlockTree = replaceRightVariableVersion(blockTree, rightHandSideImmediate, X, variableVersion);
+		};
+		
+		if(isLeftHandSideVariable(X)) {
+			Variable V = getStmtVariable(X);
+			Immediate localVariableImmediate = local(V[0]);
+			int i = localVariableImmediate in C ? C[localVariableImmediate] : 0;
+			newBlockTree = replaceLeftVariableVersion(blockTree, X, i);
+			S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
+			C[localVariableImmediate] = i + 1;
+		};
+	}
 	
+	/*
 	<_, destination> = X;
 	list[tuple[Node, Node]] blockChildren = [<parent, child> | <parent, child> <- flowGraph, parent == destination];
+	*/
 	
+	/*
 	for(tuple[Node, Node] successorTuple <- blockChildren) {
-		for(Node sucessorNode <- successorTuple) {
-			if(isPhiFunctionAssigment(sucessorNode)){
-				// stmtNode(phiFunction(localVariable("v1")))
-				
-				stmtNode(phiFunctionVariables) = sucessorNode;
-				phiFunction(phiFunctionVariable, variableVersionList) = phiFunctionVariables;
-				Immediate localVariableImmediate = local(phiFunctionVariable[0]);
-				just(versionIndex) = peek(S[localVariableImmediate]);
-				// TODO: Build variable version name, tem método pra isso
-				
-				temp2 = "bla";
-			};
+		<leftHandSide, rightHandSide> = successorTuple;
+		
+		if(isPhiFunctionAssigment(rightHandSide)){
+			sucessorNode = rightHandSide;
+			stmtNode(phiFunctionVariables) = sucessorNode;
+			phiFunction(phiFunctionVariable, variableVersionList) = phiFunctionVariables;
+			variableName = phiFunctionVariable[0];
+			Immediate localVariableImmediate = local(variableName);
+			versionIndex = peek(S[localVariableImmediate])[0];
+			
+			str newVariableName = buildVersionName(variableName, versionIndex);
+		
+			list[Variable] newVariableList = variableVersionList + [localVariable(newVariableName)];
+			tuple[Node, Node] renamedTuple = <leftHandSide, stmtNode(phiFunction(phiFunctionVariable, newVariableList))>;
+			
+			FlowGraph filteredFlowGraph = { graphRelation | graphRelation <- flowGraph, graphRelation != successorTuple };
+			
+			newFlowGraph = filteredFlowGraph + renamedTuple;
 		};
+		
+		if(isPhiFunctionAssigment(leftHandSide)){
+			sucessorNode = leftHandSide;
+			stmtNode(phiFunctionVariables) = sucessorNode;
+			phiFunction(phiFunctionVariable, variableVersionList) = phiFunctionVariables;
+			variableName = phiFunctionVariable[0];
+			Immediate localVariableImmediate = local(variableName);
+			versionIndex = peek(S[localVariableImmediate])[0];
+			
+			str newVariableName = buildVersionName(variableName, versionIndex);
+		
+			list[Variable] newVariableList = variableVersionList + [localVariable(newVariableName)];
+			tuple[Node, Node] renamedTuple = <stmtNode(phiFunction(phiFunctionVariable, newVariableList)), rightHandSide>;
+			
+			FlowGraph filteredFlowGraph = { graphRelation | graphRelation <- flowGraph, graphRelation != successorTuple };
+			
+			newFlowGraph = filteredFlowGraph + renamedTuple;
+		};		
 	};
+	*/
 	
-	for(child <- blockChildren) {
-		newFlowGraph = replace(newFlowGraph, child, S, C);
+	if((X == exitNode())) return newBlockTree;
+	
+	for(child <- blockTree[X]) {
+		newBlockTree = replace(newBlockTree, child, S, C);
 	};
 
-	return newFlowGraph;
+	return newBlockTree;
 }
 
-public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNode, int versionIndex) {
-	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != variableNode) };
-
+public map[Node, set[Node]] replaceLeftVariableVersion(map[Node, set[Node]] blockTree, Node variableNode, int versionIndex) {
 	Variable V = getStmtVariable(variableNode);
 	String variableOriginalName = getVariableName(V);
 	String newVersionName = buildVersionName(variableOriginalName, versionIndex);
@@ -80,32 +111,40 @@ public FlowGraph replaceLeftVariableVersion(FlowGraph flowGraph, Node variableNo
 	
 	stmtNode(assignStmt) = variableNode;
 	assign(_, rightHandSide) = assignStmt;
-	Node newAssingStmt = stmtNode(assign(V, rightHandSide));
+	Node newAssignStmt = stmtNode(assign(V, rightHandSide));
 
-	FlowGraph newPredecessorNodes = { <origin, newAssingStmt> | <origin, destination> <- flowGraph, (destination == variableNode) };
-	FlowGraph newDestinations = { <newAssingStmt, destination> | <origin, destination> <- flowGraph, (origin == variableNode) };
-
-	return filteredFlowGraph + newPredecessorNodes + newDestinations;
+	for(key <- blockTree) {
+		if(variableNode in blockTree[key]) {
+			blockTree[key] = blockTree[key] - variableNode + {newAssignStmt};
+		};
+	};
+	
+	blockTree[newAssignStmt] = blockTree[variableNode];
+	
+	return delete(blockTree, variableNode);
 }
 
-public FlowGraph replaceRightVariableVersion(FlowGraph flowGraph, Immediate variableToRename, Node variableNode, int versionVersion) {
-	FlowGraph filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, (origin != variableNode) && (destination != variableNode) };
-
+public map[Node, set[Node]] replaceRightVariableVersion(map[Node, set[Node]] blockTree, Immediate variableToRename, Node variableNode, int versionVersion) {
 	String variableOriginalName = getImmediateName(variableToRename);
 	String newVersionName = buildVersionName(variableOriginalName, versionVersion);
 	
 	stmtNode(assignStmt) = variableNode;
 	assign(leftHandSide, _) = assignStmt;
 	Node newAssignStmt = stmtNode(assign(leftHandSide, immediate(local(newVersionName))));
-
-	FlowGraph newPredecessorNodes = { <origin, newAssignStmt> | <origin, destination> <- flowGraph, (destination == variableNode) };
-	FlowGraph newDestinations = { <newAssignStmt, destination> | <origin, destination> <- flowGraph, (origin == variableNode) };
-		
-	return filteredFlowGraph + newPredecessorNodes + newDestinations;
+	
+	for(key <- blockTree) {
+		if(variableNode in blockTree[key]) {
+			blockTree[key] = blockTree[key] - variableNode + {newAssignStmt};
+		};
+	};
+	
+	blockTree[newAssignStmt] = blockTree[variableNode];
+	
+	return delete(blockTree, variableNode);
 }
 
 public str buildVersionName(str variableOriginalName, int versionIndex) {
-	return variableOriginalName + "_version-" + toString(versionVersion);
+	return variableOriginalName + "_version-" + toString(versionIndex);
 }
 
 public String getVariableName(Variable variable) {

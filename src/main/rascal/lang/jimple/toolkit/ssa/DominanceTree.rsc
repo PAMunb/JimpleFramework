@@ -45,3 +45,13 @@ public Node findIdom(map[&T, set[&T]] dominanceTree, Node child) {
 
 	return idom;
 }
+
+public map[Node, set[Node]] createFlowGraphBlockTree(FlowGraph flowGraph) {
+	blockTree = ( origin: {} | <origin, _> <- flowGraph);
+
+	for(<origin, destination> <- flowGraph) {
+		blockTree[origin] = blockTree[origin] + {destination};
+	};
+	
+	return blockTree;
+}
