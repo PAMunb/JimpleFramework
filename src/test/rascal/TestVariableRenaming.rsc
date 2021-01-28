@@ -17,7 +17,7 @@ test bool testLeftHandSideImmediatesRename() {
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
-	map[Node, set[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
+	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
 
 	FlowGraph result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
 
@@ -27,7 +27,6 @@ test bool testLeftHandSideImmediatesRename() {
 	  <stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(booleanValue(true))))), exitNode()>
 	};
 }
-
 
 test bool testRightHandSideImmediatesRename() {
 	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
@@ -39,7 +38,7 @@ test bool testRightHandSideImmediatesRename() {
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
-	map[Node, set[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
+	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
 
 	FlowGraph result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
 
@@ -47,6 +46,55 @@ test bool testRightHandSideImmediatesRename() {
 	  <entryNode(),stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false)))))>,
 	  <stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false))))), stmtNode(assign(localVariable("v1"), immediate(local("v0_version-0"))))>,
 	  <stmtNode(assign(localVariable("v1"), immediate(local("v0_version-0")))), exitNode()>
+	};
+}
+
+test bool testRightHandMultipleImmediatesRename() {
+	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
+	Statement s2 = assign(localVariable("v0"), immediate(local("v0")));
+	Statement s3 = assign(localVariable("v0"), immediate(local("v0")));
+
+	list[Statement] stmts = [s1, s2];
+
+  	methodStatments = methodBody([], stmts, []);
+  	flowGraph = forwardFlowGraph(methodStatments);
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
+	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
+
+	FlowGraph result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
+
+	return result == {
+	  <entryNode(),
+	      stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(booleanValue(false)))))>,
+	  <stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(booleanValue(false))))),
+	      stmtNode(assign(localVariable("v0_version-1"),immediate(local("v0_version-0"))))>,
+	  <stmtNode(assign(localVariable("v0_version-1"),immediate(local("v0_version-0")))),
+	      exitNode()>
+	};
+}
+
+test bool testLeftHandMultipleImmediatesRename() {
+	Statement s1 = assign(localVariable("v0"), immediate(iValue(booleanValue(false))));
+	Statement s2 = assign(localVariable("v0"), immediate(iValue(booleanValue(true))));
+
+	list[Statement] stmts = [s1, s2];
+
+  	methodStatments = methodBody([], stmts, []);
+  	flowGraph = forwardFlowGraph(methodStatments);
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
+	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
+
+	FlowGraph result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
+
+	return result == {
+	  <entryNode(),
+	    stmtNode(assign(localVariable("v0_version-0"), immediate(iValue(booleanValue(false)))))>,
+	  <stmtNode(assign(localVariable("v0_version-0"), immediate(iValue(booleanValue(false))))),
+	    stmtNode(assign( localVariable("v0_version-1"), immediate(iValue(booleanValue(true)))))>,
+	  <stmtNode(assign(localVariable("v0_version-1"), immediate(iValue(booleanValue(true))))),
+	    exitNode()>
 	};
 }
 
@@ -68,8 +116,9 @@ test bool testPhiFunctionArgumentsRename() {
 
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
-	map[Node, set[Node]] blockTree = createFlowGraphBlockTree(flowGraph);
+	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
 
