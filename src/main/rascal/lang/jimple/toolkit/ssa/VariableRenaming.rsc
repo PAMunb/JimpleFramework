@@ -30,6 +30,8 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]
 public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	if((X == exitNode())) return blockTree;
 	
+	Node oldNode = X;
+	
 	if(isOrdinaryAssignment(X)) {
 		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
 			int variableVersion = rightHandSideImmediate in S ? peekIntValue(S[rightHandSideImmediate]) : 0;
@@ -83,8 +85,18 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	for(child <- blockTree[X]) {
 		blockTree = replace(blockTree, child);
 	};
+	
+	if(!ignoreNode(oldNode)) S = popOldNode(oldNode);
 
 	return blockTree;
+}
+
+public Stack[int] popOldNode(Node oldNode) {
+	Variable V = getStmtVariable(oldNode);
+	Immediate localVariableImmediate = local(V[0]);
+	newStackTuple = pop(S[localVariableImmediate]);
+			
+	return newStackTuple[1];
 }
 
 public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {

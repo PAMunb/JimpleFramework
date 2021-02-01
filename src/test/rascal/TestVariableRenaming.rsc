@@ -124,7 +124,10 @@ test bool testPhiFunctionArgumentsRename() {
 
 	result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
 
-	/* Falta alterar as variáveis mais internas de estruturas de if, return, etc */
+	/*
+		Falta alterar as variáveis mais internas de estruturas de if, return, etc.
+		Talvez de pra fazer isso fazendo uma entreda recursiva até achar o nome da variavel pra arrumar
+	*/
 	
 	return false;
 }
