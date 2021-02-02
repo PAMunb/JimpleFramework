@@ -74,6 +74,29 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		};
 	}
 
+
+	// Testar melhor essa função que renomeia outros statements
+	if(!isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
+		stmtNode(statement) = X;
+		Immediate oldImmediate = locateImmediateUse(statement);
+		local(variableName) = oldImmediate;
+		int versionIndex = peekIntValue(S[oldImmediate]);
+		
+		str newVariableName = buildVersionName(variableName, versionIndex);
+		
+		Node renamedStatement = stmtNode(replaceImmediateUse(statement, local(newVariableName)));
+		
+		for(key <- blockTree) {
+			if(X in blockTree[key]) {
+				blockTree[key] = blockTree[key] - [X] + [renamedStatement];
+			};
+		};
+		
+		blockTree[renamedStatement] = blockTree[X];
+		blockTree = delete(blockTree, X);
+		X = renamedStatement;
+	};
+
 	for(successor <- blockTree[X]) {
 		int j = indexOf(blockTree[X], successor);
 		
@@ -86,17 +109,86 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		blockTree = replace(blockTree, child);
 	};
 	
-	if(!ignoreNode(oldNode)) S = popOldNode(oldNode);
+	if(!ignoreNode(oldNode) && isVariable(oldNode)) popOldNode(oldNode);
 
 	return blockTree;
+}
+
+public Immediate locateImmediateUse(Statement statement) {	
+	for(stmtArgument <- statement) {
+		if(!isSkipableStatement(stmtArgument)) {
+			return locateImmediateUse(stmtArgument);
+		};
+	};
+}
+
+public Immediate locateImmediateUse(Expression expression) {
+	for(stmtArgument <- expression) {
+		if(!isSkipableStatement(stmtArgument)) {
+			return locateImmediateUse(stmtArgument);
+		};
+	};
+}
+
+public Immediate locateImmediateUse(Immediate immediate) {
+	return immediate;
+}
+
+public Statement replaceImmediateUse(Statement statement, Immediate newImmediate) {
+	int i = 0;
+	
+	for(stmtArgument <- statement) {
+		if(isSkipableStatement(stmtArgument)) {
+			statement[i] = stmtArgument;
+		} else {
+			statement[i] = replaceImmediateUse(stmtArgument, newImmediate);
+		};
+		
+		i = i + 1;
+	};
+	
+	return statement;
+}
+
+public Expression replaceImmediateUse(Expression expression, Immediate newImmediate) {
+	int i = 0;
+	
+	for(stmtArgument <- expression) {
+		if(isSkipableStatement(stmtArgument)) {
+			expression[i] = stmtArgument;
+		} else {
+			expression[i] = replaceImmediateUse(stmtArgument, newImmediate);
+		};
+		
+		i = i + 1;
+	};
+	
+	return expression;
+}
+
+public Immediate replaceImmediateUse(Immediate immediate, Immediate newImmediate) {
+	return newImmediate;
+}
+
+public bool isSkipableStatement(stmtArgument) {
+	switch(stmtArgument) {
+		case str stringArgument: return true;
+		case gotoStmt(_): return true;
+		case iValue(_): return true;
+		case caughtException(): return true;
+	};
+	
+	return false;
 }
 
 public Stack[int] popOldNode(Node oldNode) {
 	Variable V = getStmtVariable(oldNode);
 	Immediate localVariableImmediate = local(V[0]);
-	newStackTuple = pop(S[localVariableImmediate]);
+	newStackTuple = pop(S[localVariableImmediate])[1];
+	
+	S[localVariableImmediate] = newStackTuple;
 			
-	return newStackTuple[1];
+	return newStackTuple;
 }
 
 public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
@@ -190,6 +282,7 @@ public bool ignoreNode(Node variableNode) {
 		case entryNode(): return true;
 		case skipNode(): return true;
 		case exitNode(): return true;
+		case stmtNode(gotoStmt(_)): return true;
 		default: return false;
 	}
 }
