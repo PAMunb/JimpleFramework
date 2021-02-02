@@ -45,9 +45,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 			};
 		
 			blockTree[newAssignStmt] = blockTree[X];
-		
 			blockTree = delete(blockTree, X);
-		
 			X = newAssignStmt;
 		};
 
@@ -64,9 +62,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 			};
 		
 			blockTree[newAssignStmt] = blockTree[X];
-		
 			blockTree = delete(blockTree, X);
-		
 			X = newAssignStmt;
 			
 			S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
@@ -78,13 +74,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	// Testar melhor essa função que renomeia outros statements
 	if(!isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
 		stmtNode(statement) = X;
-		Immediate oldImmediate = locateImmediateUse(statement);
-		local(variableName) = oldImmediate;
-		int versionIndex = peekIntValue(S[oldImmediate]);
-		
-		str newVariableName = buildVersionName(variableName, versionIndex);
-		
-		Node renamedStatement = stmtNode(replaceImmediateUse(statement, local(newVariableName)));
+		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
 		
 		for(key <- blockTree) {
 			if(X in blockTree[key]) {
@@ -114,34 +104,14 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	return blockTree;
 }
 
-public Immediate locateImmediateUse(Statement statement) {	
-	for(stmtArgument <- statement) {
-		if(!isSkipableStatement(stmtArgument)) {
-			return locateImmediateUse(stmtArgument);
-		};
-	};
-}
-
-public Immediate locateImmediateUse(Expression expression) {
-	for(stmtArgument <- expression) {
-		if(!isSkipableStatement(stmtArgument)) {
-			return locateImmediateUse(stmtArgument);
-		};
-	};
-}
-
-public Immediate locateImmediateUse(Immediate immediate) {
-	return immediate;
-}
-
-public Statement replaceImmediateUse(Statement statement, Immediate newImmediate) {
+public Statement replaceImmediateUse(Statement statement) {
 	int i = 0;
 	
 	for(stmtArgument <- statement) {
 		if(isSkipableStatement(stmtArgument)) {
 			statement[i] = stmtArgument;
 		} else {
-			statement[i] = replaceImmediateUse(stmtArgument, newImmediate);
+			statement[i] = replaceImmediateUse(stmtArgument);
 		};
 		
 		i = i + 1;
@@ -150,14 +120,14 @@ public Statement replaceImmediateUse(Statement statement, Immediate newImmediate
 	return statement;
 }
 
-public Expression replaceImmediateUse(Expression expression, Immediate newImmediate) {
+public Expression replaceImmediateUse(Expression expression) {
 	int i = 0;
 	
 	for(stmtArgument <- expression) {
 		if(isSkipableStatement(stmtArgument)) {
 			expression[i] = stmtArgument;
 		} else {
-			expression[i] = replaceImmediateUse(stmtArgument, newImmediate);
+			expression[i] = replaceImmediateUse(stmtArgument);
 		};
 		
 		i = i + 1;
@@ -166,8 +136,12 @@ public Expression replaceImmediateUse(Expression expression, Immediate newImmedi
 	return expression;
 }
 
-public Immediate replaceImmediateUse(Immediate immediate, Immediate newImmediate) {
-	return newImmediate;
+public Immediate replaceImmediateUse(Immediate immediate) {
+	local(variableName) = immediate;
+	int versionIndex = peekIntValue(S[immediate]);
+	str newVariableName = buildVersionName(variableName, versionIndex);
+	
+	return local(newVariableName);
 }
 
 public bool isSkipableStatement(stmtArgument) {
