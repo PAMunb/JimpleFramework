@@ -111,7 +111,7 @@ test bool testPhiFunctionArgumentsRename() {
 	Statement s7 = gotoStmt("print");
 
 	Statement s8 = label("print");
-	Statement s9 = returnStmt(local("v2"));
+	Statement s9 = returnStmt(local("v1"));
 
 	list[Statement] stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
 
@@ -123,11 +123,17 @@ test bool testPhiFunctionArgumentsRename() {
 	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
-
-	/*
-		Falta alterar as variáveis mais internas de estruturas de if, return, etc.
-		Talvez de pra fazer isso fazendo uma entreda recursiva até achar o nome da variavel pra arrumar
-	*/
 	
-	return false;
+	// Tem que mudar o left hand side da phi function tb, ou tem que mudar a inserção do phi function pra ter assign
+	return result == {
+	  <entryNode(), stmtNode(assign(localVariable("v0_version-0"), immediate(iValue(booleanValue(false)))))>,
+	  <stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(booleanValue(false))))), stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:"))>,
+	  <stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(intValue(2)))))>,
+	  <stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1_version-1"), immediate(iValue(intValue(1)))))>,
+	  <stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")]))>,
+	  <stmtNode(assign(localVariable("v1_version-1"),immediate(iValue(intValue(1))))), stmtNode(phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")]))>,
+	  <stmtNode(phiFunction(localVariable("v1"),[localVariable("v1_version-0"), localVariable("v1_version-1")])), stmtNode(gotoStmt("print"))>,
+	  <stmtNode(gotoStmt("print")), stmtNode(returnStmt(local("v1_version-0")))>,
+	  <stmtNode(returnStmt(local("v1_version-0"))), exitNode()>
+	};
 }

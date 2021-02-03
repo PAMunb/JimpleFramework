@@ -7,6 +7,7 @@ import analysis::graphs::Graph;
 import Node;
 import List;
 import Type;
+import String;
 import util::Math;
 import lang::jimple::util::Stack;
 import lang::jimple::toolkit::FlowGraph;
@@ -14,6 +15,7 @@ import lang::jimple::core::Syntax;
 
 map[Immediate, Stack[int]] S = ();
 map[Immediate, int] C = ();
+set[Node] RENAMED_NODES = {};
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]] blockTree) {
 	map[Node, list[Node]] newBlockTree = replace(blockTree, entryNode());
@@ -32,20 +34,22 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	
 	Node oldNode = X;
 	
+	// Testar melhor essa função que renomeia outros statements
+	if(!isRenamed(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
+		stmtNode(statement) = X;
+		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
+		
+		blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, renamedStatement);
+		X = renamedStatement;
+	};
+	
 	if(isOrdinaryAssignment(X)) {
 		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
 			int variableVersion = rightHandSideImmediate in S ? peekIntValue(S[rightHandSideImmediate]) : 0;
 			if(variableVersion == 0 && !(rightHandSideImmediate in S)) S[rightHandSideImmediate] = push(0, emptyStack()); // Initialize empty stack
 			newAssignStmt = replaceRightVariableVersion(blockTree, rightHandSideImmediate, X, variableVersion);
-		
-			for(key <- blockTree) {
-				if(X in blockTree[key]) {
-					blockTree[key] = blockTree[key] - [X] + [newAssignStmt];
-				};
-			};
-		
-			blockTree[newAssignStmt] = blockTree[X];
-			blockTree = delete(blockTree, X);
+
+			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
 			X = newAssignStmt;
 		};
 
@@ -55,37 +59,13 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 			int i = localVariableImmediate in C ? C[localVariableImmediate] : 0;
 			newAssignStmt = replaceLeftVariableVersion(blockTree, X, i);
 			
-			for(key <- blockTree) {
-				if(X in blockTree[key]) {
-					blockTree[key] = blockTree[key] - [X] + [newAssignStmt];
-				};
-			};
-		
-			blockTree[newAssignStmt] = blockTree[X];
-			blockTree = delete(blockTree, X);
+			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
 			X = newAssignStmt;
 			
 			S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
 			C[localVariableImmediate] = i + 1;
 		};
 	}
-
-
-	// Testar melhor essa função que renomeia outros statements
-	if(!isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
-		stmtNode(statement) = X;
-		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
-		
-		for(key <- blockTree) {
-			if(X in blockTree[key]) {
-				blockTree[key] = blockTree[key] - [X] + [renamedStatement];
-			};
-		};
-		
-		blockTree[renamedStatement] = blockTree[X];
-		blockTree = delete(blockTree, X);
-		X = renamedStatement;
-	};
 
 	for(successor <- blockTree[X]) {
 		int j = indexOf(blockTree[X], successor);
@@ -100,6 +80,20 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	};
 	
 	if(!ignoreNode(oldNode) && isVariable(oldNode)) popOldNode(oldNode);
+
+	return blockTree;
+}
+
+public map[Node, list[Node]] replaceBlockTreeWithRenamedBlock(map[Node, list[Node]] blockTree, Node oldNode, Node newRenamedNode) {
+	for(key <- blockTree) {
+		if(oldNode in blockTree[key]) {
+			blockTree[key] = blockTree[key] - [oldNode] + [newRenamedNode];
+		};
+	};
+
+	blockTree[newRenamedNode] = blockTree[oldNode];
+	blockTree = delete(blockTree, oldNode);
+	RENAMED_NODES = RENAMED_NODES + {newRenamedNode};
 
 	return blockTree;
 }
@@ -137,11 +131,15 @@ public Expression replaceImmediateUse(Expression expression) {
 }
 
 public Immediate replaceImmediateUse(Immediate immediate) {
-	local(variableName) = immediate;
+	local(variableName) = immediate;	
 	int versionIndex = peekIntValue(S[immediate]);
 	str newVariableName = buildVersionName(variableName, versionIndex);
-	
+
 	return local(newVariableName);
+}
+
+public bool isRenamed(Node stmtNode) {
+	return stmtNode in RENAMED_NODES;
 }
 
 public bool isSkipableStatement(stmtArgument) {
