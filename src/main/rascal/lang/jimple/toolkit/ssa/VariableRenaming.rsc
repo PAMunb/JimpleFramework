@@ -31,17 +31,17 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]
 
 public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	if((X == exitNode())) return blockTree;
-	
+
 	Node oldNode = X;
-	
+
 	if(!isRenamed(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
 		stmtNode(statement) = X;
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
-		
+
 		blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, renamedStatement);
 		X = renamedStatement;
 	};
-	
+
 	if(isOrdinaryAssignment(X)) {
 		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
 			int variableVersion = rightHandSideImmediate in S ? peekIntValue(S[rightHandSideImmediate]) : 0;
@@ -57,10 +57,10 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 			Immediate localVariableImmediate = local(V[0]);
 			int i = localVariableImmediate in C ? C[localVariableImmediate] : 0;
 			newAssignStmt = replaceLeftVariableVersion(blockTree, X, i);
-			
+
 			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
 			X = newAssignStmt;
-			
+
 			S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
 			C[localVariableImmediate] = i + 1;
 		};
@@ -68,7 +68,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 
 	for(successor <- blockTree[X]) {
 		int j = indexOf(blockTree[X], successor);
-		
+
 		if(isPhiFunctionAssigment(successor)){
 			blockTree = replacePhiFunctionVersion(blockTree, successor);
 		};
@@ -77,7 +77,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	for(child <- blockTree[X]) {
 		blockTree = replace(blockTree, child);
 	};
-	
+
 	if(!ignoreNode(oldNode) && isVariable(oldNode)) popOldNode(oldNode);
 
 	return blockTree;
@@ -99,38 +99,38 @@ public map[Node, list[Node]] replaceBlockTreeWithRenamedBlock(map[Node, list[Nod
 
 public Statement replaceImmediateUse(Statement statement) {
 	int i = 0;
-	
+
 	for(stmtArgument <- statement) {
 		if(isSkipableStatement(stmtArgument)) {
 			statement[i] = stmtArgument;
 		} else {
 			statement[i] = replaceImmediateUse(stmtArgument);
 		};
-		
+
 		i = i + 1;
 	};
-	
+
 	return statement;
 }
 
 public Expression replaceImmediateUse(Expression expression) {
 	int i = 0;
-	
+
 	for(stmtArgument <- expression) {
 		if(isSkipableStatement(stmtArgument)) {
 			expression[i] = stmtArgument;
 		} else {
 			expression[i] = replaceImmediateUse(stmtArgument);
 		};
-		
+
 		i = i + 1;
 	};
-	
+
 	return expression;
 }
 
 public Immediate replaceImmediateUse(Immediate immediate) {
-	local(variableName) = immediate;	
+	local(variableName) = immediate;
 	int versionIndex = peekIntValue(S[immediate]);
 	str newVariableName = buildVersionName(variableName, versionIndex);
 
@@ -148,7 +148,7 @@ public bool isSkipableStatement(stmtArgument) {
 		case iValue(_): return true;
 		case caughtException(): return true;
 	};
-	
+
 	return false;
 }
 
@@ -156,9 +156,9 @@ public Stack[int] popOldNode(Node oldNode) {
 	Variable V = getStmtVariable(oldNode);
 	Immediate localVariableImmediate = local(V[0]);
 	newStackTuple = pop(S[localVariableImmediate])[1];
-	
+
 	S[localVariableImmediate] = newStackTuple;
-			
+
 	return newStackTuple;
 }
 
@@ -287,10 +287,6 @@ public Variable getStmtVariable(Node graphNode) {
 	switch(variableArg) {
 		case Variable variable: return variable;
 	}
-}
-
-public lrel[Node, Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {
-	return [<fatherNode, childStmt> | <fatherNode, childStmt> <- flowGraph, isSameVariable(fatherNode, variable)];;
 }
 
 public bool isVariable(Node graphNode) {
