@@ -34,7 +34,6 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 	
 	Node oldNode = X;
 	
-	// Testar melhor essa função que renomeia outros statements
 	if(!isRenamed(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
 		stmtNode(statement) = X;
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));

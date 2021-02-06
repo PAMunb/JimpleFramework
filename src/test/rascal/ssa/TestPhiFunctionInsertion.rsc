@@ -45,14 +45,31 @@ test bool testPhiFunctionInsertion() {
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	return result == {
-		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1"), []))>,
-		<stmtNode(phiFunction(localVariable("v1"), [])), stmtNode(gotoStmt("print"))>,
-		<entryNode(), stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false)))))>,
-		<stmtNode(returnStmt(local("v2"))) ,exitNode()>,
-		<stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false))))),stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:"))>,
-		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1))))), stmtNode(phiFunction(localVariable("v1"), []))>,
-		<stmtNode(gotoStmt("print")),stmtNode(returnStmt(local("v2")))>,
-		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
-		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")), stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>
+		<entryNode(),
+			stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false)))))>,
+			
+		<stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false))))),
+			stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:"))>,
+		
+		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")),
+			stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
+
+		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))),
+			stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [])))>,
+		
+		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")),
+			stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>,
+		
+		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1))))),
+			stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [])))>,
+
+		<stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), []))),
+			stmtNode(gotoStmt("print"))>,
+		
+		<stmtNode(gotoStmt("print")),
+			stmtNode(returnStmt(local("v2")))>,
+		
+		<stmtNode(returnStmt(local("v2"))),
+			exitNode()>
 	};
 }
