@@ -312,32 +312,48 @@ public class Decompiler {
 			return new ArrayList<>(stack.peek().merge());
 		}
 
-		private void addInstruction(Statement s) {
-			stack.peek().addInstruction(s);
+		private void notifyGotoStmt(String label) {
+			stack.peek().notifyGotoStmt(label);
 		}
 		
-		private void pushOperand(Operand o) {
-			stack.peek().push(o);
-		}
-		
-		private Operand pop() {
-			return stack.peek().pop();
-		}
-		
-		private int sizeOfOperandStack() {
-			return stack.peek().sizeOfOperandStack();
-		}
 		private void notifyReturn() {
-			stack.peek().clearOperandStack();
+			for(Environment env: stack.peek().environments()) {
+				env.operands.clear();
+			}
+		}
+
+		private void nextBranch() {
+			stack.peek().nextBranch();
+		}
+		
+		private boolean isBranch() {
+			return stack.peek().isBranch();
+		}
+		
+		private boolean readyToMerge(String label) {
+			return stack.peek().readyToMerge(label);
 		}
 		
 		@Override
 		public void visitLabel(Label label) {
-			addInstruction(Statement.label(label.toString()));
 			if (catchClauses.containsKey(label.toString())) {
-				CatchClause c = catchClauses.get(label.toString());
-				pushOperand(new Operand(c.exception, Immediate.caughtException()));
-				referencedLabels.add(label.toString());
+				for(Environment env: stack.peek().environments()) {
+					CatchClause c = catchClauses.get(label.toString());
+					env.operands.push(new Operand(c.exception, Immediate.caughtException()));
+					referencedLabels.add(label.toString());
+				}
+			}
+			
+			if(isBranch() && stack.peek().matchMergePoint(label.toString())) {
+				for(Environment env: stack.peek().environments()) {
+					env.instructions.add(Statement.label(label.toString()));
+				}
+				nextBranch();
+			}
+			else if(readyToMerge(label.toString()) && stack.size() > 1) {
+				List<Statement> stmts = new ArrayList<>(stack.pop().merge());
+				
+				stack.peek().environments().get(0).instructions.addAll(stmts);
 			}
 		}
 
@@ -391,7 +407,9 @@ public class Decompiler {
 			Immediate rhs = newIntValueImmediate(increment);
 			Expression expression = newPlusExpression(lhs, rhs);
 
-			addInstruction(assignmentStmt(Variable.localVariable(var), expression));
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(assignmentStmt(Variable.localVariable(var), expression));
+			}
 
 			super.visitIincInsn(idx, increment);
 		}
@@ -867,130 +885,141 @@ public class Decompiler {
 
 			List<Immediate> args = new ArrayList<>();
 
-			for (int i = 0; i < argTypes.size(); i++) {
-				args.add(0, pop().immediate);
+			for(Environment env: stack.peek().environments()) {
+				for (int i = 0; i < argTypes.size(); i++) {
+					args.add(0, env.operands.pop().immediate);
+				}
+				InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
+
+				env.instructions.add(Statement.invokeStmt(exp));
 			}
-
-			InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
-
-			addInstruction(Statement.invokeStmt(exp));
 			super.visitInvokeDynamicInsn(name, descriptor, bsmh, bootstrapMethodArguments);
 		}
 
 		@Override
 		public void visitLdcInsn(Object value) {
-			pushOperand(new Operand(toJimpleTypedValue(value)));
+			for(Environment env: stack.peek().environments()) {
+				env.operands.push(new Operand(toJimpleTypedValue(value)));
+			}
 
 			super.visitLdcInsn(value);
 		}
 
 		@Override
 		public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-			Immediate key = pop().immediate;
+			for(Environment env: stack.peek().environments()) {
+				Immediate key = env.operands.pop().immediate;
 
-			List<CaseStmt> caseStmts = new ArrayList<>();
+				List<CaseStmt> caseStmts = new ArrayList<>();
 
-			for (int i = 0; i < keys.length; i++) {
-				caseStmts.add(CaseStmt.caseOption(keys[i], labels[i].toString()));
+				for (int i = 0; i < keys.length; i++) {
+					caseStmts.add(CaseStmt.caseOption(keys[i], labels[i].toString()));
+				}
+
+				if (dflt != null) {
+					caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
+				}
+				env.instructions.add(Statement.lookupSwitch(key, caseStmts));
 			}
-
-			if (dflt != null) {
-				caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
-			}
-
-			addInstruction(Statement.lookupSwitch(key, caseStmts));
 			super.visitLookupSwitchInsn(dflt, keys, labels);
 		}
 
 		@Override
 		public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-			Immediate key = pop().immediate;
-			List<CaseStmt> caseStmts = new ArrayList<>();
+			for(Environment env: stack.peek().environments()) {
+				Immediate key = env.operands.pop().immediate;
+				List<CaseStmt> caseStmts = new ArrayList<>();
 
-			for (Label label : labels) {
-				caseStmts.add(CaseStmt.caseOption(label.getOffset(), label.toString()));
-			}
+				for (Label label : labels) {
+					caseStmts.add(CaseStmt.caseOption(label.getOffset(), label.toString()));
+				}
 
-			if (dflt != null) {
-				caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
+				if (dflt != null) {
+					caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
+				}
+				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts));
 			}
-			addInstruction(Statement.tableSwitch(key, min, max, caseStmts));
 			super.visitTableSwitchInsn(min, max, dflt, labels);
 		}
 
 		@Override
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
-				addInstruction(Statement.gotoStmt(label.toString()));
+				for(Environment env: stack.peek().environments()) {
+					env.instructions.add(Statement.gotoStmt(label.toString()));
+				}
+				notifyGotoStmt(label.toString()); // TODO: investigate this decision here.
 			} else if (opcode == Opcodes.JSR) {
 				throw RuntimeExceptionFactory.illegalArgument(vf.string("unsupported instruction JSR" + opcode), null,
 						null);
 			} else {
-				Expression exp = null;
-				Immediate first = pop().immediate;
-				Immediate second = Immediate.iValue(Value.intValue(0));
-				switch (opcode) {
-				case Opcodes.IFEQ:
-					exp = Expression.cmpeq(first, second);
-					break;
-				case Opcodes.IFNE:
-					exp = Expression.cmpne(first, second);
-					break;
-				case Opcodes.IFLT:
-					exp = Expression.cmplt(first, second);
-					break;
-				case Opcodes.IFLE:
-					exp = Expression.cmple(first, second);
-					break;
-				case Opcodes.IFGT:
-					exp = Expression.cmpgt(first, second);
-					break;
-				case Opcodes.IFGE:
-					exp = Expression.cmpge(first, second);
-					break;
-				case Opcodes.IF_ICMPEQ:
-					second = pop().immediate;
-					exp = Expression.cmpeq(second, first);
-					break;
-				case Opcodes.IF_ICMPNE:
-					second = pop().immediate;
-					exp = Expression.cmpne(second, first);
-					break;
-				case Opcodes.IF_ICMPLT:
-					second = pop().immediate;
-					exp = Expression.cmplt(second, first);
-					break;
-				case Opcodes.IF_ICMPGE:
-					second = pop().immediate;
-					exp = Expression.cmpge(second, first);
-					break;
-				case Opcodes.IF_ICMPGT:
-					second = pop().immediate;
-					exp = Expression.cmpgt(second, first);
-					break;
-				case Opcodes.IF_ICMPLE:
-					second = pop().immediate;
-					exp = Expression.cmple(second, first);
-					break;
-				case Opcodes.IF_ACMPEQ:
-					second = pop().immediate;
-					exp = Expression.cmpeq(second, first);
-					break;
-				case Opcodes.IF_ACMPNE:
-					second = pop().immediate;
-					exp = Expression.cmpne(second, first);
-					break;
-				case Opcodes.IFNULL:
-					exp = Expression.isNull(first);
-					break;
-				case Opcodes.IFNONNULL:
-					exp = Expression.isNotNull(first);
-					break;
-				default:
-					throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null,
-							null);
+				for(Environment env: stack.peek().environments()) {
+					Expression exp = null;
+					Immediate first = env.operands.pop().immediate;
+					Immediate second = Immediate.iValue(Value.intValue(0));
+					switch (opcode) {
+						case Opcodes.IFEQ:
+							exp = Expression.cmpeq(first, second);
+							break;
+						case Opcodes.IFNE:
+							exp = Expression.cmpne(first, second);
+							break;
+						case Opcodes.IFLT:
+							exp = Expression.cmplt(first, second);
+							break;
+						case Opcodes.IFLE:
+							exp = Expression.cmple(first, second);
+							break;
+						case Opcodes.IFGT:
+							exp = Expression.cmpgt(first, second);
+							break;
+						case Opcodes.IFGE:
+							exp = Expression.cmpge(first, second);
+							break;
+						case Opcodes.IF_ICMPEQ:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmpeq(second, first);
+							break;
+						case Opcodes.IF_ICMPNE:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmpne(second, first);
+							break;
+						case Opcodes.IF_ICMPLT:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmplt(second, first);
+							break;
+						case Opcodes.IF_ICMPGE:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmpge(second, first);
+							break;
+						case Opcodes.IF_ICMPGT:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmpgt(second, first);
+							break;
+						case Opcodes.IF_ICMPLE:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmple(second, first);
+							break;
+						case Opcodes.IF_ACMPEQ:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmpeq(second, first);
+							break;
+						case Opcodes.IF_ACMPNE:
+							second = env.operands.pop().immediate;
+							exp = Expression.cmpne(second, first);
+							break;
+						case Opcodes.IFNULL:
+							exp = Expression.isNull(first);
+							break;
+						case Opcodes.IFNONNULL:
+							exp = Expression.isNotNull(first);
+							break;
+						default:
+							throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null,
+									null);
+					}
+					stack.push(new BranchInstructionFlow(exp, label.toString()));
 				}
-				addInstruction(Statement.ifStmt(exp, label.toString()));
 			}
 			referencedLabels.add(label.toString());
 			super.visitJumpInsn(opcode, label);
@@ -1003,27 +1032,30 @@ public class Decompiler {
 		private void invokeMethodIns(String owner, String name, String descriptor, boolean isStatic,
 				InvokeExpressionFactory factory) {
 			MethodSignature signature = methodSignature(owner.replace("/", "."), name, descriptor);
-			List<Immediate> args = new ArrayList<>();
 
-			for (int i = 0; i < signature.formals.size(); i++) {
-				args.add(0, pop().immediate);
-			}
+			for(Environment env: stack.peek().environments()) {
+				List<Immediate> args = new ArrayList<>();
 
-			InvokeExp exp = null;
+				for (int i = 0; i < signature.formals.size(); i++) {
+					args.add(0, env.operands.pop().immediate);
+				}
 
-			if (!isStatic) {
-				String reference = ((Immediate.c_local) pop().immediate).localName;
-				exp = factory.createInvokeExpression(reference, signature, args);
-			} else {
-				exp = factory.createInvokeExpression(null, signature, args);
-			}
+				InvokeExp exp = null;
 
-			if (signature.returnType.equals(Type.TVoid())) {
-				addInstruction(Statement.invokeStmt(exp));
-			} else {
-				LocalVariableDeclaration local = createLocal(signature.returnType);
-				addInstruction(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
-				pushOperand(new Operand(local));
+				if (!isStatic) {
+					String reference = ((Immediate.c_local) env.operands.pop().immediate).localName;
+					exp = factory.createInvokeExpression(reference, signature, args);
+				} else {
+					exp = factory.createInvokeExpression(null, signature, args);
+				}
+
+				if (signature.returnType.equals(Type.TVoid())) {
+					env.instructions.add(Statement.invokeStmt(exp));
+				} else {
+					LocalVariableDeclaration local = createLocal(signature.returnType);
+					env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+					env.operands.push(new Operand(local));
+				}
 			}
 		}
 
@@ -1052,7 +1084,9 @@ public class Decompiler {
 		 */
 		private void loadIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
-			pushOperand(new Operand(local));
+			for(Environment env: stack.peek().environments()) {
+				env.operands.push(new Operand(local));
+			}
 		}
 
 		/*
@@ -1060,8 +1094,10 @@ public class Decompiler {
 		 */
 		private void storeIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
-			Immediate immediate = pop().immediate;
-			addInstruction(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
+			for (Environment env : stack.peek().environments()) {
+				Immediate immediate = env.operands.pop().immediate;
+				env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
+			}
 		}
 
 		/*
@@ -1071,142 +1107,176 @@ public class Decompiler {
 		 */
 		private void retIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
-			addInstruction(Statement.retStmt(Immediate.local(local.local)));
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(Statement.retStmt(Immediate.local(local.local)));
+			}
 		}
 
 		private void newInstanceIns(Type type) {
 			LocalVariableDeclaration newLocal = createLocal(type);
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newInstance(type)));
-			pushOperand(new Operand(newLocal));
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newInstance(type)));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private void aNewArrayIns(Type type) {
-			Operand operand = pop();
-			LocalVariableDeclaration newLocal = createLocal(Type.TArray(type));
-			c_iValue value = (Immediate.c_iValue) operand.immediate;
+			for(Environment env: stack.peek().environments()) {
+				Operand operand = env.operands.pop();
+				LocalVariableDeclaration newLocal = createLocal(Type.TArray(type));
+				c_iValue value = (Immediate.c_iValue) operand.immediate;
 
-			assert (value.v instanceof Value.c_intValue);
+				assert (value.v instanceof Value.c_intValue);
 
-			Integer size = ((Value.c_intValue) value.v).iv;
+				Integer size = ((Value.c_intValue) value.v).iv;
 
-			List<ArrayDescriptor> dims = new ArrayList<>();
-			dims.add(ArrayDescriptor.fixedSize(size));
+				List<ArrayDescriptor> dims = new ArrayList<>();
+				dims.add(ArrayDescriptor.fixedSize(size));
 
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newArray(type, dims)));
-			pushOperand(new Operand(newLocal));
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newArray(type, dims)));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		/*
 		 * Add a nop instruction
 		 */
 		private void nopIns() {
-			addInstruction(Statement.nop());
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(Statement.nop());
+			}
 		}
 
 		/*
 		 * Load a null value into the top of the operand stack.
 		 */
 		private void acconstNullIns() {
-			pushOperand(new Operand(Type.TNull(), Immediate.iValue(Value.nullValue())));
+			for(Environment env: stack.peek().environments()) {
+				env.operands.push(new Operand(Type.TNull(), Immediate.iValue(Value.nullValue())));
+			}
 		}
 
 		/*
 		 * Load an int const into the top of the operand stack.
 		 */
 		private void loadIntConstIns(int value, String descriptor) {
-			pushOperand(new Operand(type(descriptor), Immediate.iValue(Value.intValue(value))));
+			for(Environment env: stack.peek().environments()) {
+				env.operands.push(new Operand(type(descriptor), Immediate.iValue(Value.intValue(value))));
+			}
 		}
 
 		/*
 		 * Load a float const into the top of the operand stack.
 		 */
 		private void loadRealConstIns(float value, String descriptor) {
-			pushOperand(new Operand(type(descriptor), Immediate.iValue(Value.floatValue(value))));
+			for (Environment env : stack.peek().environments()) {
+				env.operands.push(new Operand(type(descriptor), Immediate.iValue(Value.floatValue(value))));
+			}
 		}
 
 		/*
 		 * Neg instruction (INEG, LNEG, FNEG, DNEG)
 		 */
 		private void negIns(Type type) {
-			Operand operand = pop();
+			for(Environment env: stack.peek().environments()) {
+				Operand operand = env.operands.pop();
 
-			LocalVariableDeclaration newLocal = createLocal(type);
+				LocalVariableDeclaration newLocal = createLocal(type);
 
-			Expression expression = Expression.neg(operand.immediate);
+				Expression expression = Expression.neg(operand.immediate);
 
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local), expression));
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
 
-			pushOperand(new Operand(newLocal));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		/*
 		 * Instructions supporting binarya operations.
 		 */
 		private void binOperatorIns(Type type, BinExpressionFactory factory) {
-			Operand rhs = pop();
-			Operand lhs = pop();
+			for(Environment env: stack.peek().environments()) {
+				Operand rhs = env.operands.pop();
+				Operand lhs = env.operands.pop();
 
-			LocalVariableDeclaration newLocal = createLocal(type);
+				LocalVariableDeclaration newLocal = createLocal(type);
 
-			Expression expression = factory.createExpression(lhs.immediate, rhs.immediate);
+				Expression expression = factory.createExpression(lhs.immediate, rhs.immediate);
 
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local), expression));
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
 
-			pushOperand(new Operand(newLocal));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private void simpleCastIns(Type targetType) {
-			Operand operand = pop();
-			LocalVariableDeclaration newLocal = createLocal(targetType);
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local),
-					Expression.cast(targetType, operand.immediate)));
-			pushOperand(new Operand(newLocal));
+			for(Environment env: stack.peek().environments()) {
+				Operand operand = env.operands.pop();
+				LocalVariableDeclaration newLocal = createLocal(targetType);
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
+						Expression.cast(targetType, operand.immediate)));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private void instanceOfIns(Type type) {
-			Operand operand = pop();
-			LocalVariableDeclaration newLocal = createLocal(Type.TBoolean());
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local),
-					Expression.instanceOf(type, operand.immediate)));
-			pushOperand(new Operand(newLocal));
+			for(Environment env: stack.peek().environments()) {
+				Operand operand = env.operands.pop();
+				LocalVariableDeclaration newLocal = createLocal(Type.TBoolean());
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
+						Expression.instanceOf(type, operand.immediate)));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private void returnIns() {
-			Operand operand = pop();
-			addInstruction(Statement.returnStmt(operand.immediate));
-			// TODO: perhaps we should call an exit monitor here.
-			notifyReturn();
+			for(Environment env: stack.peek().environments()) {
+				Operand operand = env.operands.pop();
+				env.instructions.add(Statement.returnStmt(operand.immediate));
+				// TODO: perhaps we should call an exit monitor here.
+				notifyReturn();
+			}
 		}
 
 		private void returnVoidIns() {
-			addInstruction(Statement.returnEmptyStmt());
-			// TODO: perhaps we should call an exit monitor here.
-			notifyReturn();
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(Statement.returnEmptyStmt());
+				// TODO: perhaps we should call an exit monitor here.
+				notifyReturn();
+			}
 		}
 
 		private void arrayLengthIns() {
-			Operand arrayRef = pop();
-			LocalVariableDeclaration newLocal = createLocal("I");
-			addInstruction(
-					assignmentStmt(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate)));
-			pushOperand(new Operand(newLocal));
+			for(Environment env: stack.peek().environments()) {
+				Operand arrayRef = env.operands.pop();
+				LocalVariableDeclaration newLocal = createLocal("I");
+				env.instructions.add(
+						assignmentStmt(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate)));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private void throwIns() {
-			Operand reference = pop();
-			addInstruction(Statement.throwStmt(reference.immediate));
-			notifyReturn();
-			pushOperand(reference);
+			for(Environment env: stack.peek().environments()) {
+				Operand reference = env.operands.pop();
+				env.instructions.add(Statement.throwStmt(reference.immediate));
+				notifyReturn();
+				env.operands.push(reference);
+			}
 		}
 
 		private void monitorEnterIns() {
-			Operand reference = pop();
-			addInstruction(Statement.enterMonitor(reference.immediate));
+			for(Environment env: stack.peek().environments()) {
+				Operand reference = env.operands.pop();
+				env.instructions.add(Statement.enterMonitor(reference.immediate));
+			}
 		}
 
 		private void monitorExitIns() {
-			Operand reference = pop();
-			addInstruction(Statement.exitMonitor(reference.immediate));
+			for(Environment env: stack.peek().environments()) {
+				Operand reference = env.operands.pop();
+				env.instructions.add(Statement.exitMonitor(reference.immediate));
+			}
 		}
 
 		/*
@@ -1215,21 +1285,23 @@ public class Decompiler {
 		 * the stack.
 		 */
 		private void arraySubscriptIns() {
-			Operand idx = pop();
-			Operand ref = pop();
+			for(Environment env: stack.peek().environments()) {
+				Operand idx = env.operands.pop();
+				Operand ref = env.operands.pop();
 
-			Type baseType = ref.type;
+				Type baseType = ref.type;
 
-			if (baseType instanceof Type.c_TArray) {
-				baseType = ((Type.c_TArray) baseType).baseType;
+				if (baseType instanceof Type.c_TArray) {
+					baseType = ((Type.c_TArray) baseType).baseType;
+				}
+
+				LocalVariableDeclaration newLocal = createLocal(baseType);
+
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
+						newArraySubscript(((Immediate.c_local) ref.immediate).localName, idx.immediate)));
+
+				env.operands.push(new Operand(newLocal));
 			}
-
-			LocalVariableDeclaration newLocal = createLocal(baseType);
-
-			addInstruction(assignmentStmt(Variable.localVariable(newLocal.local),
-					newArraySubscript(((Immediate.c_local) ref.immediate).localName, idx.immediate)));
-
-			pushOperand(new Operand(newLocal));
 		}
 
 		/*
@@ -1241,20 +1313,24 @@ public class Decompiler {
 		 * After popping value, idx, and array, no value is introduced into the stack.
 		 */
 		private void storeIntoArrayIns() {
-			Immediate value = pop().immediate;
-			Immediate idx = pop().immediate;
-			Immediate arrayRef = pop().immediate;
+			for(Environment env: stack.peek().environments()) {
+				Immediate value = env.operands.pop().immediate;
+				Immediate idx = env.operands.pop().immediate;
+				Immediate arrayRef = env.operands.pop().immediate;
 
-			Variable var = Variable.arrayRef(((Immediate.c_local) arrayRef).localName, idx);
+				Variable var = Variable.arrayRef(((Immediate.c_local) arrayRef).localName, idx);
 
-			addInstruction(assignmentStmt(var, Expression.immediate(value)));
+				env.instructions.add(assignmentStmt(var, Expression.immediate(value)));
+			}
 		}
 
 		/*
 		 * Removes an operand from the stack.
 		 */
 		private void popIns() {
-			pop();
+			for(Environment env: stack.peek().environments()) {
+				env.operands.pop();
+			}
 		}
 
 		/*
@@ -1262,10 +1338,12 @@ public class Decompiler {
 		 * the first operand is either a long or a double, it removes just one operand.
 		 */
 		private void pop2Ins() {
-			Operand value = pop();
+			for(Environment env: stack.peek().environments()) {
+				Operand value = env.operands.pop();
 
-			if (allCategory1(value.type)) {
-				pop();
+				if (allCategory1(value.type)) {
+					env.operands.pop();
+				}
 			}
 		}
 
@@ -1273,24 +1351,28 @@ public class Decompiler {
 		 * Duplicate the top operand stack value
 		 */
 		private void dupIns() {
-			Operand value = pop();
+			for(Environment env: stack.peek().environments()) {
+				Operand value = env.operands.pop();
 
-			pushOperand(value);
-			pushOperand(value);
+				env.operands.push(value);
+				env.operands.push(value);
+			}
 		}
 
 		/*
 		 * Duplicate the top operand stack value and insert the copy two values down.
 		 */
 		private void dupX1Ins() {
-			assert sizeOfOperandStack() >= 2;
+			for(Environment env: stack.peek().environments()) {
+				assert env.operands.size() >= 2;
 
-			Operand value1 = pop();
-			Operand value2 = pop();
+				Operand value1 = env.operands.pop();
+				Operand value2 = env.operands.pop();
 
-			pushOperand(value1);
-			pushOperand(value2);
-			pushOperand(value1);
+				env.operands.push(value1);
+				env.operands.push(value2);
+				env.operands.push(value1);
+			}
 		}
 
 		/*
@@ -1298,22 +1380,24 @@ public class Decompiler {
 		 * down.
 		 */
 		private void dupX2Ins() {
-			assert sizeOfOperandStack() >= 2;
+			for(Environment env: stack.peek().environments()) {
+				assert env.operands.size() >= 2;
 
-			Operand value1 = pop();
+				Operand value1 = env.operands.pop();
 
-			if (allCategory1(value1.type)) {
-				Operand value2 = pop();
-				Operand value3 = pop();
-				pushOperand(value1);
-				pushOperand(value3);
-				pushOperand(value2);
-				pushOperand(value1);
-			} else {
-				Operand value2 = pop();
-				pushOperand(value1);
-				pushOperand(value2);
-				pushOperand(value1);
+				if (allCategory1(value1.type)) {
+					Operand value2 = env.operands.pop();
+					Operand value3 = env.operands.pop();
+					env.operands.push(value1);
+					env.operands.push(value3);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				} else {
+					Operand value2 = env.operands.pop();
+					env.operands.push(value1);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				}
 			}
 		}
 
@@ -1323,20 +1407,22 @@ public class Decompiler {
 		 * it duplicates just the first value.
 		 */
 		private void dup2Ins() {
-			assert sizeOfOperandStack() >= 2;
+			for(Environment env: stack.peek().environments()) {
+				assert env.operands.size() >= 2;
 
-			Operand value1 = pop();
-			Operand value2 = pop();
+				Operand value1 = env.operands.pop();
+				Operand value2 = env.operands.pop();
 
-			if (allCategory1(value1.type, value2.type)) {
-				pushOperand(value2);
-				pushOperand(value1);
-				pushOperand(value2);
-				pushOperand(value1);
-			} else {
-				pushOperand(value2);
-				pushOperand(value1);
-				pushOperand(value1);
+				if (allCategory1(value1.type, value2.type)) {
+					env.operands.push(value2);
+					env.operands.push(value1);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				} else {
+					env.operands.push(value2);
+					env.operands.push(value1);
+					env.operands.push(value1);
+				}
 			}
 		}
 
@@ -1345,23 +1431,25 @@ public class Decompiler {
 		 * values down, depending on the type category of the values.
 		 */
 		private void dup2X1Ins() {
-			assert sizeOfOperandStack() >= 3;
+			for(Environment env: stack.peek().environments()) {
+				assert env.operands.size() >= 3;
 
-			Operand value1 = pop();
-			Operand value2 = pop();
-			Operand value3 = pop();
+				Operand value1 = env.operands.pop();
+				Operand value2 = env.operands.pop();
+				Operand value3 = env.operands.pop();
 
-			if (allCategory1(value1.type, value2.type, value3.type)) {
-				pushOperand(value2);
-				pushOperand(value1);
-				pushOperand(value3);
-				pushOperand(value2);
-				pushOperand(value1);
-			} else if ((allCategory2(value1.type)) && allCategory1(value2.type)) {
-				pushOperand(value3);
-				pushOperand(value1);
-				pushOperand(value2);
-				pushOperand(value1);
+				if (allCategory1(value1.type, value2.type, value3.type)) {
+					env.operands.push(value2);
+					env.operands.push(value1);
+					env.operands.push(value3);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				} else if ((allCategory2(value1.type)) && allCategory1(value2.type)) {
+					env.operands.push(value3);
+					env.operands.push(value1);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				}
 			}
 		}
 
@@ -1370,51 +1458,54 @@ public class Decompiler {
 		 * four values down
 		 */
 		private void dup2X2Ins() {
-			assert sizeOfOperandStack() >= 4;
+			for(Environment env: stack.peek().environments()) {
+				assert env.operands.size() >= 4;
 
-			Operand value1 = pop();
-			Operand value2 = pop();
-			Operand value3 = pop();
-			Operand value4 = pop();
+				Operand value1 = env.operands.pop();
+				Operand value2 = env.operands.pop();
+				Operand value3 = env.operands.pop();
+				Operand value4 = env.operands.pop();
 
-			if (allCategory1(value1.type, value2.type, value3.type, value4.type)) {
-				pushOperand(value2);
-				pushOperand(value1);
-				pushOperand(value4);
-				pushOperand(value3);
-				pushOperand(value2);
-				pushOperand(value1);
-			} else if ((allCategory2(value1.type)) && allCategory1(value2.type, value3.type)) {
-				pushOperand(value4);
-				pushOperand(value1);
-				pushOperand(value3);
-				pushOperand(value2);
-				pushOperand(value1);
-			} else if (allCategory1(value1.type, value2.type) && (allCategory2(value3.type))) {
-				pushOperand(value4);
-				pushOperand(value2);
-				pushOperand(value1);
-				pushOperand(value3);
-				pushOperand(value2);
-				pushOperand(value1);
-			} else if ((!allCategory2(value1.type, value2.type))) {
-				pushOperand(value4);
-				pushOperand(value3);
-				pushOperand(value1);
-				pushOperand(value2);
-				pushOperand(value1);
+				if (allCategory1(value1.type, value2.type, value3.type, value4.type)) {
+					env.operands.push(value2);
+					env.operands.push(value1);
+					env.operands.push(value4);
+					env.operands.push(value3);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				} else if ((allCategory2(value1.type)) && allCategory1(value2.type, value3.type)) {
+					env.operands.push(value4);
+					env.operands.push(value1);
+					env.operands.push(value3);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				} else if (allCategory1(value1.type, value2.type) && (allCategory2(value3.type))) {
+					env.operands.push(value4);
+					env.operands.push(value2);
+					env.operands.push(value1);
+					env.operands.push(value3);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				} else if ((!allCategory2(value1.type, value2.type))) {
+					env.operands.push(value4);
+					env.operands.push(value3);
+					env.operands.push(value1);
+					env.operands.push(value2);
+					env.operands.push(value1);
+				}
 			}
-
 		}
 
 		private void swapIns() {
-			assert sizeOfOperandStack() >= 2;
+			for(Environment env: stack.peek().environments()) {
+				assert env.operands.size() >= 2;
 
-			Operand value1 = pop();
-			Operand value2 = pop();
+				Operand value1 = env.operands.pop();
+				Operand value2 = env.operands.pop();
 
-			pushOperand(value1);
-			pushOperand(value2);
+				env.operands.push(value1);
+				env.operands.push(value2);
+			}
 		}
 
 		/*
@@ -1431,27 +1522,35 @@ public class Decompiler {
 			Type fieldType = type(descriptor);
 			Expression fieldRef = Expression.fieldRef(owner.replace("/", "."), fieldType, field);
 
-			addInstruction(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
 
-			pushOperand(new Operand(newLocal));
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private void putStaticIns(String owner, String field, String descriptor) {
-			Operand value = pop();
 			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
-			addInstruction(assignmentStmt(Variable.staticFieldRef(signature), Expression.immediate(value.immediate)));
+
+			for(Environment env: stack.peek().environments()) {
+				Operand value = env.operands.pop();
+				env.instructions.add(assignmentStmt(Variable.staticFieldRef(signature), Expression.immediate(value.immediate)));
+			}
 		}
 
 		private void putFieldIns(String owner, String field, String descriptor) {
-			Operand value = pop();
-			Operand operand = pop();
-
-			String reference = ((Immediate.c_local) operand.immediate).localName;
-
 			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
 
-			addInstruction(
-					assignmentStmt(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate)));
+			for(Environment env: stack.peek().environments()) {
+				Operand value = env.operands.pop();
+				Operand operand = env.operands.pop();
+
+				String reference = ((Immediate.c_local) operand.immediate).localName;
+
+
+				env.instructions.add(
+						assignmentStmt(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate)));
+			}
 		}
 
 		/*
@@ -1465,18 +1564,22 @@ public class Decompiler {
 		 * @param descriptor use to compute the field's type.
 		 */
 		private void getFieldIns(String owner, String field, String descriptor) {
-			Immediate instance = pop().immediate;
-
 			LocalVariableDeclaration newLocal = createLocal(descriptor);
 
 			Type fieldType = type(descriptor);
 
-			Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner, fieldType,
-					field);
+			for(Environment env: stack.peek().environments()) {
 
-			addInstruction(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
+				Immediate instance = env.operands.pop().immediate;
 
-			pushOperand(new Operand(newLocal));
+
+				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner, fieldType,
+						field);
+
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
+
+				env.operands.push(new Operand(newLocal));
+			}
 		}
 
 		private LocalVariableDeclaration createLocal(String descriptor) {
@@ -1509,7 +1612,9 @@ public class Decompiler {
 		}
 
 		private void pushConstantValue(Type type, Immediate immediate) {
-			pushOperand(new Operand(type, immediate));
+			for(Environment env: stack.peek().environments()) {
+				env.operands.push(new Operand(type, immediate));
+			}
 		}
 
 		private void createNewArrayIns(int aType) {
@@ -1561,17 +1666,16 @@ public class Decompiler {
 					idx++;
 				}
 			}
-			if (!staticMethod) {
-				addInstruction(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType)); // init
-																															// the
-																															// implicit
-																															// parameter
-			}
-			int idx = 0;
-			for (Type t : formals) {
-				addInstruction(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-						LOCAL_PARAMETER_PREFIX + idx, t));
-				idx++;
+			for(Environment env: stack.peek().environments()) {
+				if (!staticMethod) {
+					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));
+				}
+				int idx = 0;
+				for (Type t : formals) {
+					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
+							LOCAL_PARAMETER_PREFIX + idx, t));
+					idx++;
+				}
 			}
 		}
 

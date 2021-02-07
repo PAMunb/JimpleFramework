@@ -137,17 +137,17 @@ public class IntOps {
 //    System.out.println(result);
 //  }
 
-  public void lessOrEqualsThan() {
-    int a = 5;
-    int b = 5;
-    boolean result = (a <= b);
-    System.out.println(result);
-  }
+//  public void lessOrEqualsThan() {
+//    int a = 5;
+//    int b = 5;
+//    boolean result = (a <= b);
+//    System.out.println(result);
+//  }
   
   public void ternaryExpression() {
 	int a = 5;
 	int b = 5;
-	int result = (a == b) ? 1 : 0; 
+	int result = (a == b) ? 1 : 0;
 	System.out.println(result);
   }
 }

@@ -35,6 +35,24 @@ public class TestDecompiler {
 	}
 	
 	@Test 
+	public void decompileClassWithSimpleLambdaExpression() {
+		try {
+			File classFile = new File("./target/test-classes/samples/SimpleLambdaExpression.class"); 
+			assertNotNull(classFile);
+			
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			
+			assertNotNull(c);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+	
+	@Test 
 	public void decompileInterface() {
 		try {
 			File classFile = new File("./target/test-classes/samples/InterfaceSample.class"); 

@@ -1,16 +1,16 @@
 package lang.jimple.internal;
 
 import java.util.Collection;
+import java.util.List;
 
 import lang.jimple.internal.generated.Statement;
 
 public interface InstructionFlow {
-	
-	public void push(Operand operand);
-	public Operand pop();
-	public void addInstruction(Statement stmt);
-	public void clearOperandStack();
-	public int sizeOfOperandStack();
-	public Collection<Statement> merge();
-
+	Collection<Statement> merge();
+	boolean matchMergePoint(String label);
+	List<Environment> environments();
+	void nextBranch();
+	void notifyGotoStmt(String label);
+	boolean isBranch();
+	boolean readyToMerge(String label);
 }

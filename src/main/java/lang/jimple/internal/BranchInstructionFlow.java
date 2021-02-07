@@ -9,75 +9,88 @@ import lang.jimple.internal.generated.Statement;
 
 public class BranchInstructionFlow implements InstructionFlow {
 
-	private Expression condition; 
-	private String target; 
-	private InstructionFlow left;
-	private InstructionFlow right; 
-	private BranchState status; 
+	private Environment left;
+	private Environment right;
+
+	private Expression condition;
+
+	private String targetStatement;
+	private String mergeStatement;
+
+	private BranchState status;
 	
 	enum BranchState {
 		LEFT,
 		RIGHT,
-		ReadyToMerge;
+		ReadyToMerge
 	}
 	
 	public BranchInstructionFlow(Expression condition, String target) {
 		this.condition = condition;
-		this.target = target; 
-		left = new SingleInstructionFlow();
-		right = new SingleInstructionFlow();
+		this.targetStatement = target;
+		left = new Environment();
+		right = new Environment();
 		status = BranchState.LEFT;
 	}
-	
-	public void push(Operand operand) {
-		switch(status) {
-		 case LEFT: left.push(operand); break;
-		 case RIGHT: right.push(operand); break;
-		 case ReadyToMerge: left.push(operand); right.push(operand);
-		}
-	}
-	
-	public Operand pop() {
-		switch(status) {
-		 case LEFT: return left.pop();
-		 case RIGHT: return right.pop();
-		 case ReadyToMerge: return null;
-		}
-		return null;
-	}
-	
-	public void addInstruction(Statement stmt) {
-		switch(status) {
-		 case LEFT: left.addInstruction(stmt); break;
-		 case RIGHT: right.addInstruction(stmt); break;
-		 case ReadyToMerge: left.addInstruction(stmt); right.addInstruction(stmt);
-		}
-	}
-	
-	public void clearOperandStack() {
-		left.clearOperandStack();
-		right.clearOperandStack();
-	}
 
-	@Override
-	public int sizeOfOperandStack() {
-		switch(status) {
-		 case LEFT: return left.sizeOfOperandStack();
-		 case RIGHT: return right.sizeOfOperandStack();
-		 case ReadyToMerge: return left.sizeOfOperandStack() + right.sizeOfOperandStack();
-		}
-		return 0; 
-	}
 
 	@Override
 	public Collection<Statement> merge() {
 		List<Statement> res = new ArrayList<>();
 		
-		res.add(Statement.ifStmt(condition, target));
-		res.addAll(left.merge());
-		res.addAll(right.merge());
+		res.add(Statement.ifStmt(condition, targetStatement));
+		res.addAll(left.instructions);
+		res.addAll(right.instructions);
 		
 		return res; 
 	}
 
+	@Override
+	public boolean matchMergePoint(String label) {
+		if(status.equals(BranchState.LEFT)) {
+			return this.targetStatement.equals(label);
+		}
+		else if(status.equals(BranchState.RIGHT)) {
+			return this.mergeStatement.equals(label);
+		}
+		return false;
+	}
+
+	@Override
+	public List<Environment> environments() {
+		List<Environment> res = new ArrayList<>();
+		switch(status) {
+			case LEFT: res.add(left); break;
+			case RIGHT: res.add(right); break;
+			case ReadyToMerge: res.add(left); res.add(right);
+		}
+		return res;
+	}
+
+	@Override
+	public void notifyGotoStmt(String label) {
+		if(status.equals(BranchState.LEFT)) {
+			mergeStatement = label;
+		}
+	}
+
+	@Override
+	public void nextBranch() {
+		switch(status) {
+		 case LEFT: status = BranchState.RIGHT; break;
+		 case RIGHT: status = BranchState.ReadyToMerge; break;
+		 case ReadyToMerge: //
+		}
+	}
+	
+	@Override
+	public boolean isBranch() {
+		return true;
+	}
+
+	@Override
+	public boolean readyToMerge(String label) {
+		this.targetStatement = label;
+		return status.equals(BranchState.ReadyToMerge);
+	}
 }

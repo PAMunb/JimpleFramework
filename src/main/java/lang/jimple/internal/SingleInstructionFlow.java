@@ -9,38 +9,43 @@ import lang.jimple.internal.generated.Statement;
 
 public class SingleInstructionFlow implements InstructionFlow {
 	
-	Stack<Operand> operands;
-	List<Statement> instructions; 
+	Environment environment;
 
 	public SingleInstructionFlow() {
-		operands = new Stack<>();
-		instructions = new ArrayList<>();
-	}
-	
-	public void push(Operand operand) {
-		operands.push(operand);
-	}
-	
-	public Operand pop() {
-		return operands.pop();
-	}
-	
-	public void addInstruction(Statement stmt) {
-		instructions.add(stmt);
-	}
-	
-	public void clearOperandStack() {
-		operands.clear();
+		environment = new Environment();
 	}
 
 	@Override
-	public int sizeOfOperandStack() {
-		return operands.size();
+	public List<Environment> environments() {
+		List<Environment> res = new ArrayList<>();
+		res.add(environment);
+		return res;
+	}
+
+	@Override
+	public void nextBranch() { }
+
+	@Override
+	public void notifyGotoStmt(String label) { }
+
+	@Override
+	public boolean isBranch() {
+		return false;
+	}
+
+	@Override
+	public boolean readyToMerge(String label) {
+		return true;
 	}
 
 	@Override
 	public Collection<Statement> merge() {
-		return new ArrayList<>(instructions); 
+		return new ArrayList<>(environment.instructions);
+	}
+
+	@Override
+	public boolean matchMergePoint(String label) {
+		return true;
 	}
 
 }
