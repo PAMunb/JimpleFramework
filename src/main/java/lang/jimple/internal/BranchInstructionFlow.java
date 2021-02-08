@@ -18,6 +18,8 @@ public class BranchInstructionFlow implements InstructionFlow {
 	private String mergeStatement;
 
 	private BranchState status;
+
+	private Statement gotoMergeStmt;
 	
 	enum BranchState {
 		LEFT,
@@ -40,6 +42,11 @@ public class BranchInstructionFlow implements InstructionFlow {
 		
 		res.add(Statement.ifStmt(condition, targetStatement));
 		res.addAll(left.instructions);
+
+		if(gotoMergeStmt != null) {
+			res.add(gotoMergeStmt);
+		}
+
 		res.addAll(right.instructions);
 		
 		return res; 
@@ -68,9 +75,17 @@ public class BranchInstructionFlow implements InstructionFlow {
 	}
 
 	@Override
-	public void notifyGotoStmt(String label) {
+	public void notifyGotoStmt(Statement stmt, String label) {
 		if(status.equals(BranchState.LEFT)) {
 			mergeStatement = label;
+			gotoMergeStmt = stmt;
+		}
+		else if(status.equals(BranchState.RIGHT)) {
+			right.instructions.add(stmt);
+		}
+		else if(status.equals(BranchState.ReadyToMerge)) {
+			left.instructions.add(stmt);
+			right.instructions.add(stmt);
 		}
 	}
 

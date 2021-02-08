@@ -26,7 +26,9 @@ public class SingleInstructionFlow implements InstructionFlow {
 	public void nextBranch() { }
 
 	@Override
-	public void notifyGotoStmt(String label) { }
+	public void notifyGotoStmt(Statement stmt, String label) {
+		environment.instructions.add(stmt);
+	}
 
 	@Override
 	public boolean isBranch() {

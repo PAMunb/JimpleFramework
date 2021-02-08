@@ -10,7 +10,7 @@ public interface InstructionFlow {
 	boolean matchMergePoint(String label);
 	List<Environment> environments();
 	void nextBranch();
-	void notifyGotoStmt(String label);
+	void notifyGotoStmt(Statement stmt, String label);
 	boolean isBranch();
 	boolean readyToMerge(String label);
 }

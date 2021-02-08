@@ -312,8 +312,8 @@ public class Decompiler {
 			return new ArrayList<>(stack.peek().merge());
 		}
 
-		private void notifyGotoStmt(String label) {
-			stack.peek().notifyGotoStmt(label);
+		private void notifyGotoStmt(Statement stmt, String label) {
+			stack.peek().notifyGotoStmt(stmt, label);
 		}
 		
 		private void notifyReturn() {
@@ -343,16 +343,14 @@ public class Decompiler {
 					referencedLabels.add(label.toString());
 				}
 			}
-			
+			for(Environment env: stack.peek().environments()) {
+				env.instructions.add(Statement.label(label.toString()));
+			}
 			if(isBranch() && stack.peek().matchMergePoint(label.toString())) {
-				for(Environment env: stack.peek().environments()) {
-					env.instructions.add(Statement.label(label.toString()));
-				}
 				nextBranch();
 			}
 			else if(readyToMerge(label.toString()) && stack.size() > 1) {
 				List<Statement> stmts = new ArrayList<>(stack.pop().merge());
-				
 				stack.peek().environments().get(0).instructions.addAll(stmts);
 			}
 		}
@@ -945,10 +943,7 @@ public class Decompiler {
 		@Override
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
-				for(Environment env: stack.peek().environments()) {
-					env.instructions.add(Statement.gotoStmt(label.toString()));
-				}
-				notifyGotoStmt(label.toString()); // TODO: investigate this decision here.
+				notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
 			} else if (opcode == Opcodes.JSR) {
 				throw RuntimeExceptionFactory.illegalArgument(vf.string("unsupported instruction JSR" + opcode), null,
 						null);
