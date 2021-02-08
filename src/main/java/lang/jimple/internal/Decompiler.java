@@ -210,11 +210,11 @@ public class Decompiler {
 			mn.instructions.accept(insVisitor);
 
 			// TODO: we commented this line because we want to
-			// solve this issue using a Jimple transformation.
-			// we will keep the commented implementation here just while
-			// we review the new strategy.
+			//  solve this issue using a Jimple transformation.
+			//  we will keep the commented implementation here just while
+			//  we review the new strategy.
 			//
-			// insVisitor.clearUnusedLabelInstructions();
+			//  insVisitor.clearUnusedLabelInstructions();
 
 			stmts = insVisitor.instructions();
 
@@ -343,15 +343,20 @@ public class Decompiler {
 					referencedLabels.add(label.toString());
 				}
 			}
-			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.label(label.toString()));
-			}
+
 			if(isBranch() && stack.peek().matchMergePoint(label.toString())) {
 				nextBranch();
 			}
 			else if(readyToMerge(label.toString()) && stack.size() > 1) {
 				List<Statement> stmts = new ArrayList<>(stack.pop().merge());
 				stack.peek().environments().get(0).instructions.addAll(stmts);
+				stack.peek().environments().get(0).instructions.add(Statement.label(label.toString()));
+				referencedLabels.add(label.toString());
+			}
+			else {
+				for(Environment env: stack.peek().environments()) {
+					env.instructions.add(Statement.label(label.toString()));
+				}
 			}
 		}
 
