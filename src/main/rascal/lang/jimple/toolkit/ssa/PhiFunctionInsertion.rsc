@@ -91,7 +91,7 @@ public bool isSameVariable(Node graphNode, Variable variable) {
 
 public FlowGraph insertPhiFunction(FlowGraph flowGraph, Node childNode, Variable variable) {
 	fatherNodes = predecessors(flowGraph, childNode);
-	phiFunctionStmt = stmtNode(phiFunction(variable, []));
+	phiFunctionStmt = stmtNode(assign(variable, phiFunction(variable, [])));
 	
 	phiFunctionRelations = { <fatherNode, phiFunctionStmt> | fatherNode <- fatherNodes };
 	filteredFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph, !(origin in fatherNodes) || !(childNode == destination) };

@@ -93,7 +93,6 @@ data Statement
   | invokeStmt(InvokeExp invokeExpression)
   | gotoStmt(Label target)
   | nop()
-  | phiFunction(Variable variable, list[Variable] definitions)
   ;        
  
  data CaseStmt 
@@ -136,6 +135,7 @@ data Expression
   | lengthOf(Immediate immediate)
   | neg(Immediate immediate) 
   | immediate(Immediate immediate)
+  | phiFunction(Variable variable, list[Variable] definitions)
   ;
   
 data ArrayDescriptor 
