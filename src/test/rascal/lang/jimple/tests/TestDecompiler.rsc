@@ -1,10 +1,12 @@
-module TestDecompiler
+module lang::jimple::tests::TestDecompiler
 
 import lang::jimple::core::Syntax;
 import lang::jimple::core::Context;
 import lang::jimple::decompiler::Decompiler; 
 import lang::jimple::decompiler::jimplify::ProcessLabels; 
 import lang::jimple::toolkit::PrettyPrinter; 
+import lang::jimple::util::JPrettyPrinter; 
+
 
 import List; 
 import Set;
@@ -16,6 +18,7 @@ import lang::jimple::util::IO;
 loc classLocation = |project://JimpleFramework/target/test-classes/samples/AbstractClassSample.class|;  
 loc interfaceLocation = |project://JimpleFramework/target/test-classes/samples/InterfaceSample.class|;
 loc whileLocation = |project://JimpleFramework/target/test-classes/samples/WhileStmtSample.class|;
+loc longValueLocation = |project://JimpleFramework/target/test-classes/samples/AdditionalLongValueSample.class|;
 
 loc path = |project://JimpleFramework/target/test-classes/samples/operators|;
 
@@ -23,6 +26,17 @@ loc path = |project://JimpleFramework/target/test-classes/samples/operators|;
     ClassOrInterfaceDeclaration c = decompile(classLocation);
     switch(c) {
       case classDecl(_, _, _, _, _, _): return true;  
+      default: return false; 
+    }
+ }
+ 
+ test bool longValueSampleClass() {
+    ClassOrInterfaceDeclaration c = decompile(longValueLocation);
+    switch(c) {
+      case classDecl(_, _, _, _, _, _): { 
+        println(prettyPrint(c));
+        return true;
+      }  
       default: return false; 
     }
  }

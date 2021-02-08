@@ -14,9 +14,10 @@ module lang::jimple::core::Context
 
 import lang::jimple::core::Syntax; 
 import lang::jimple::decompiler::Decompiler; 
-import lang::jimple::decompiler::jimplify::ProcessLabels; 
+import lang::jimple::decompiler::jimplify::ProcessLabels;
+import lang::jimple::decompiler::jimplify::ConstantPropagator;
 import lang::jimple::util::Converters;
-import  lang::jimple::util::IO;
+import lang::jimple::util::IO;
 
 import List; 
 import String; 
@@ -81,21 +82,20 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 	if(verbose) {
 		println(errors); 
 	}
-	
+		
 	ClassTable ct  = (n : Class(jimplify(classDecl(n, ms, s, is, fs, mss)), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
+	ct = ct + (n : Class(jimplify(interfaceDecl(n, ms, is, fs, mss)), ApplicationClass()) | Success(interfaceDecl(n, ms, is, fs, mss)) <- classes);
 	
 	MethodTable mt = ();
-		
+
 	top-down visit(ct) {
-    	case classDecl(TObject(cn), _, _, _, _, mss): {            
-            mt = mt + (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- mss);    
-        }    
+    	case classDecl(TObject(cn), _, _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints);   
+        case interfaceDecl(TObject(cn), _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints); 
    	}  
-		
 	return ExecutionContext(ct, mt);
 }
 
-private CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
+private CID jimplify(CID c) = jimplify([processJimpleLabels, processConstantPropagator], c); 
 
 private CID jimplify(list[CID (CID)] fs, CID c) { 
   switch(fs) {
@@ -103,6 +103,10 @@ private CID jimplify(list[CID (CID)] fs, CID c) {
     default: return c; 
   }
 } 
+
+private map[Name, DeclaredMethod] toMethodsTable(Name cn, list[Method] methods, list[str] entryPoints) {
+	return (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- methods);
+}
 
 /*
  * This is our current execution framework. 

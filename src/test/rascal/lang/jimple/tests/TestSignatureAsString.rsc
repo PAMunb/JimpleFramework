@@ -1,4 +1,4 @@
-module TestSignatureAsString
+module lang::jimple::tests::TestSignatureAsString
 
 import lang::jimple::core::Syntax; 
 import lang::jimple::util::Converters;

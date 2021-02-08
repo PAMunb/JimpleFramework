@@ -1,4 +1,4 @@
-module TestLiveVariable
+module lang::jimple::tests::TestLiveVariable
 
 import lang::jimple::core::Syntax;
 import lang::jimple::toolkit::FlowGraph;
