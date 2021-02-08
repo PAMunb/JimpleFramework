@@ -1,4 +1,4 @@
-module TestDominanceTree
+module ssa::TestDominanceTree
 
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceTree;

@@ -1,4 +1,4 @@
-module TestPhiFunctionInsertion
+module ssa::TestPhiFunctionInsertion
 
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceFrontier;

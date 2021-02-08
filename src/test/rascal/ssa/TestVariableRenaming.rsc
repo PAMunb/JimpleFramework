@@ -1,4 +1,4 @@
-module TestVariableRenaming
+module ssa::TestVariableRenaming
 
 import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;

@@ -1,4 +1,4 @@
-module TestDominanceFrontier
+module ssa::TestDominanceFrontier
 
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceFrontier;
