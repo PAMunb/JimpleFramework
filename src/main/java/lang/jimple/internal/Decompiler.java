@@ -894,7 +894,13 @@ public class Decompiler {
 				}
 				InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
 
-				env.instructions.add(Statement.invokeStmt(exp));
+				if (methodType.equals(Type.TVoid())) {
+					env.instructions.add(Statement.invokeStmt(exp));
+				} else {
+					LocalVariableDeclaration local = createLocal(methodType);
+					env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+					env.operands.push(new Operand(local));
+				}
 			}
 			super.visitInvokeDynamicInsn(name, descriptor, bsmh, bootstrapMethodArguments);
 		}

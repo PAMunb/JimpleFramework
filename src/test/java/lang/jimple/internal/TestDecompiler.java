@@ -14,8 +14,6 @@ import io.usethesource.vallang.IValueFactory;
 import io.usethesource.vallang.impl.persistent.ValueFactory;
 
 public class TestDecompiler {
-
-
 	@Test 
 	public void decompileClassWithFields() {
 		try {
