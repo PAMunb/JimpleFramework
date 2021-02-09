@@ -178,7 +178,7 @@ public class TestDecompiler {
 		}
 	}
 	
-	@Ignore
+	@Test
 	public void decompileSwitchCaseSample() {
 		try {
 			File classFile = new File("./target/test-classes/samples/SwitchCaseSample.class"); 			
@@ -196,7 +196,7 @@ public class TestDecompiler {
 		}
 	}
 	
-	@Ignore
+	@Test
 	public void decompileControlStatements() {
 		try {
 			File classFile = new File("./target/test-classes/samples/ControlStatements.class"); 			

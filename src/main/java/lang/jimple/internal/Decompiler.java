@@ -935,17 +935,15 @@ public class Decompiler {
 
 		@Override
 		public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
+			List<CaseStmt> caseStmts = new ArrayList<>();
+			for (Label label : labels) {
+				caseStmts.add(CaseStmt.caseOption(label.getOffset(), label.toString()));
+			}
+			if (dflt != null) {
+				caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
+			}
 			for(Environment env: stack.peek().environments()) {
 				Immediate key = env.operands.pop().immediate;
-				List<CaseStmt> caseStmts = new ArrayList<>();
-
-				for (Label label : labels) {
-					caseStmts.add(CaseStmt.caseOption(label.getOffset(), label.toString()));
-				}
-
-				if (dflt != null) {
-					caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
-				}
 				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts));
 			}
 			super.visitTableSwitchInsn(min, max, dflt, labels);
