@@ -9,29 +9,29 @@ import IO;
 import List;
 import Relation;
 
-// This is a context-insensitive subset-based points-to analysis
-//Inputs: 
-//CallGraph (Entrypoint?)
-//Jimple IR for all methods.
-//Process: 
-//As for Lhotak thesis, we have to do thesis steps below;
-//1 - Build Pointer Assignment Graph
-//2 - Simplify of Pointer Assignment Graph
-//3 - Propagation of points-to set (turns candidates LoadEdge and StoreEdge into real ConcreteFieldNode)
-//3.1 - Use Iterative algorithm or 
-//3.2 - Use Worklist algorithm 
-//Outpus: 
-//1 - Points-to set output (graph) and 
-//2 - Helper functions over points-to set.
+//	This is a context-insensitive subset-based points-to analysis
+//	Inputs: 
+//	CallGraph (Entrypoint?)
+//	Jimple IR for all methods.
+//	Process: 
+//	As for Lhotak thesis, we have to do thesis steps below;
+//		1 - Build Pointer Assignment Graph
+//		2 - Simplify of Pointer Assignment Graph
+//		3 - Propagation of points-to set (turns candidates LoadEdge and StoreEdge into real ConcreteFieldNode)
+//			3.1 - Use Iterative algorithm or 
+//			3.2 - Use Worklist algorithm 
+//	Outpus: 
+//		1 - Points-to set output (graph) and 
+//		2 - Helper functions over points-to set.
 
 
-//Types of node on graph
+//	Types of node on graph
 data PointerAssignmentNodeType = AllocationNode(str color, str methodSig, str name, Expression exp)
 								| VariableNode(str color, str methodSig, str name, Type \type)
 								| FieldRefNode(str color, str methodSig, str name)
 								| ConcreteFieldNode(str color, str methodSig, str name);
 
-//Types of edges on graph (some way to map NodeType -> NodeType)
+//	Types of edges on graph (some way to map NodeType -> NodeType)
 data PointerAssignmentEdgeType = AllocationEdge()
 								| AssignmentEdge()
 								| StoreEdge()
@@ -41,10 +41,12 @@ data PointerAssignmentEdgeType = AllocationEdge()
 //	Try using a labeled graph for mapping node types (nodes)  and edge types (labels).
 //	OBS: it is not possible to do a transitive clojure with labeled graph
 alias PointerAssignGraph = LGraph[PointerAssignmentNodeType , PointerAssignmentEdgeType];
- 
+
+// Model for pointsTo Set interface.
 data AllocationSite = allocsite(str methodSig, str name, Expression exp);
 alias PointsToSet = map[str, set[AllocationSite]];
 
+// Interative algorithm for pointsto propagation
 public PointsToSet propagatesPointsToGraph(PointerAssignGraph pag) {
 	PointsToSet pSet = ();	
 	// Propagate Allocation Edge
