@@ -28,6 +28,7 @@ public str prettyPrint(Value::stringValue(String sv)) = "\"<sv>\"";
 public str prettyPrint(Value::booleanValue(bool bl)) = "<bl>";
 public str prettyPrint(Value::classValue(str name)) = name;
 public str prettyPrint(Value::methodValue(Type returnType, list[Type] formals)) = "TODO";
+public str prettyPrint(Value::methodHandle(MethodSignature methodSig)) = "TODO";
 public str prettyPrint(Value::fieldHandle(FieldSignature fieldSig)) = "TODO";
 public str prettyPrint(Value::nullValue()) = "null";
 
@@ -183,22 +184,29 @@ public str prettyPrint(list[Immediate] args) {
 	  return text;
 }
 
-public str prettyPrint(InvokeExp invoke) {
-	  switch(invoke) {
-	    case specialInvoke(local, sig, args):
-	    	return "specialinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
-	    case virtualInvoke(local, sig, args):
-	    	return "virtualinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
-	    case interfaceInvoke(local, sig, args):
-	    	return "interfaceinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
-	    case staticMethodInvoke(sig,  args):
-	    	return "staticinvoke \<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
-	    case dynamicInvoke(bsmSig, bsmArgs, sig, args):
-	    	return "dynamicinvoke TODO";
-	    default: return "error";    
-	  }
-	}
 
+public str prettyPrint(specialInvoke(local, sig, args)) =
+  "specialinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
+   
+public str prettyPrint(virtualInvoke(local, sig, args)) =
+  "virtualinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
+  
+public str prettyPrint(interfaceInvoke(local, sig, args)) =
+  "interfaceinvoke <local>.\<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
+  
+public str prettyPrint(staticMethodInvoke(sig, args)) = 
+  "staticinvoke \<<prettyPrint(sig)>\>(<prettyPrint(args)>)";
+  
+public str prettyPrint(dynamicInvoke(bsmSig, bsmArgs, sig, args)) = 
+  "dynamicinvoke <dynamicPrettyPrint(sig)>(<prettyPrint(args)>) \<<prettyPrint(bsmSig)>\>(<prettyPrint(bsmArgs)>)";
+
+
+/*
+  Due to problems in accessing fields of abstract parameters this was done: NoSuchField("methodName")
+*/
+str dynamicPrettyPrint(MethodSignature::methodSignature(_, Type returnType, Name methodName, list[Type] formals)) =
+  "\"<methodName>\" \<<prettyPrint(returnType)> (<prettyPrint(formals,"")>)\>";
+    
 /* 
 	Functions for printing ClassOrInterfaceDeclaration and its
 	related upper parts.
