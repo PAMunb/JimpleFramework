@@ -12,7 +12,7 @@ import lang::jimple::toolkit::ssa::DominanceFrontier;
 import lang::jimple::toolkit::ssa::VariableRenaming;
 
 test bool testSimpleExceptionDeclaration() {
-	loc simpleExceptionPath = |project://JimpleFramework/src/test/rascal/ssa/classfiles/Fibonacci.class|;
+	loc simpleExceptionPath = |project://JimpleFramework/src/test/rascal/ssa/classfiles/SimpleException.class|;
 	ClassOrInterfaceDeclaration simpleExceptionDeclaration = decompile(simpleExceptionPath);
 	return false;
 }
