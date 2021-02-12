@@ -47,7 +47,9 @@ public class BranchInstructionFlow implements InstructionFlow {
 			res.add(gotoMergeStmt);
 		}
 
+		res.add(Statement.label(targetStatement));
 		res.addAll(right.instructions);
+		res.add(Statement.label(mergeStatement));
 		
 		return res; 
 	}
@@ -105,7 +107,7 @@ public class BranchInstructionFlow implements InstructionFlow {
 
 	@Override
 	public boolean readyToMerge(String label) {
-		this.targetStatement = label;
+		// this.targetStatement = label;
 		return status.equals(BranchState.ReadyToMerge);
 	}
 }
