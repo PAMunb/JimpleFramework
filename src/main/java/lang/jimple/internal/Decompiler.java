@@ -289,6 +289,8 @@ public class Decompiler {
 		HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables;
 		int locals;
 
+		Set<String> visitedLabels = new HashSet<>();
+
 		// we use this set to keep track of the referenced labels.
 		// afterwards we can remove labeled instructions that are
 		// not refered to in the bytecode.
@@ -336,6 +338,7 @@ public class Decompiler {
 		
 		@Override
 		public void visitLabel(Label label) {
+			visitedLabels.add(label.toString());
 			if (catchClauses.containsKey(label.toString())) {
 				for(Environment env: stack.peek().environments()) {
 					CatchClause c = catchClauses.get(label.toString());
@@ -1022,7 +1025,12 @@ public class Decompiler {
 							throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null,
 									null);
 					}
-					stack.push(new BranchInstructionFlow(exp, label.toString()));
+					if(visitedLabels.contains(label.toString())) {
+						env.instructions.add(Statement.ifStmt(exp, label.toString()));
+					}
+					else {
+						stack.push(new BranchInstructionFlow(exp, label.toString()));
+					}
 				}
 			}
 			referencedLabels.add(label.toString());
