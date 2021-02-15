@@ -44,9 +44,12 @@ test bool testRightHandSideImmediatesRename() {
 	FlowGraph result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
 
 	return result == {
-	  <entryNode(),stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false)))))>,
-	  <stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false))))), stmtNode(assign(localVariable("v1"), immediate(local("v0_version-0"))))>,
-	  <stmtNode(assign(localVariable("v1"), immediate(local("v0_version-0")))), exitNode()>
+	  <entryNode(),
+	    stmtNode(assign( localVariable("v0_version-0"), immediate(iValue(booleanValue(false)))))>,
+	  <stmtNode(assign(localVariable("v0_version-0"), immediate(iValue(booleanValue(false))))),
+	    stmtNode(assign(localVariable("v1_version-0"), immediate(local("v0_version-0"))))>,
+	  <stmtNode(assign(localVariable("v1_version-0"), immediate(local("v0_version-0")))),
+	    exitNode()>
 	};
 }
 
@@ -126,14 +129,31 @@ test bool testPhiFunctionArgumentsRename() {
 	
 	// Tem que mudar o left hand side da phi function tb, ou tem que mudar a inserção do phi function pra ter assign
 	return result == {
-	  <entryNode(), stmtNode(assign(localVariable("v0_version-0"), immediate(iValue(booleanValue(false)))))>,
-	  <stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(booleanValue(false))))), stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:"))>,
-	  <stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(intValue(2)))))>,
-	  <stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:")), stmtNode(assign(localVariable("v1_version-1"), immediate(iValue(intValue(1)))))>,
-	  <stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(intValue(2))))), stmtNode(phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")]))>,
-	  <stmtNode(assign(localVariable("v1_version-1"),immediate(iValue(intValue(1))))), stmtNode(phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")]))>,
-	  <stmtNode(phiFunction(localVariable("v1"),[localVariable("v1_version-0"), localVariable("v1_version-1")])), stmtNode(gotoStmt("print"))>,
-	  <stmtNode(gotoStmt("print")), stmtNode(returnStmt(local("v1_version-0")))>,
-	  <stmtNode(returnStmt(local("v1_version-0"))), exitNode()>
+		<entryNode(), 
+		  stmtNode(assign(localVariable("v0_version-0"), immediate(iValue(booleanValue(false)))))>,
+		
+		<stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(booleanValue(false))))),
+		  stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:"))>,
+		
+		<stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:")),
+		  stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(intValue(2)))))>,
+		  
+		<stmtNode(ifStmt(cmp(local("v0_version-0"), iValue(booleanValue(false))), "label1:")),
+		  stmtNode(assign(localVariable("v1_version-1"), immediate(iValue(intValue(1)))))>,
+		  
+		<stmtNode(assign(localVariable("v1_version-0"), immediate(iValue(intValue(2))))),
+		  stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")])))>,
+		  
+		<stmtNode(assign(localVariable("v1_version-1"),immediate(iValue(intValue(1))))),
+		  stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")])))>,
+		  
+		<stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [localVariable("v1_version-0"), localVariable("v1_version-1")]))),
+		  stmtNode(gotoStmt("print"))>,
+		  
+		<stmtNode(gotoStmt("print")),
+		  stmtNode(returnStmt(local("v1_version-0")))>,
+		
+		<stmtNode(returnStmt(local("v1_version-0"))),
+		  exitNode()>
 	};
 }

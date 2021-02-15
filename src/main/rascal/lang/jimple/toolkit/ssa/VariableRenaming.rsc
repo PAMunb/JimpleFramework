@@ -15,7 +15,7 @@ import lang::jimple::core::Syntax;
 
 map[Immediate, Stack[int]] S = ();
 map[Immediate, int] C = ();
-set[Node] RENAMED_NODES = {};
+set[Node] REPLACED_NODES = {};
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]] blockTree) {
 	map[Node, list[Node]] newBlockTree = replace(blockTree, entryNode());
@@ -34,7 +34,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 
 	Node oldNode = X;
 
-	if(!isRenamed(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
+	if(!isReplaced(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
 		stmtNode(statement) = X;
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
 
@@ -42,7 +42,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		X = renamedStatement;
 	};
 
-	if(isOrdinaryAssignment(X)) {
+	if(isOrdinaryAssignment(X) && !isRenamed(X)) {
 		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
 			int variableVersion = rightHandSideImmediate in S ? peekIntValue(S[rightHandSideImmediate]) : 0;
 			if(variableVersion == 0 && !(rightHandSideImmediate in S)) S[rightHandSideImmediate] = push(0, emptyStack()); // Initialize empty stack
@@ -78,7 +78,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		blockTree = replace(blockTree, child);
 	};
 
-	if(!ignoreNode(oldNode) && isVariable(oldNode)) popOldNode(oldNode);
+	if(!ignoreNode(oldNode) && isVariable(oldNode) && !isRenamed(X)) popOldNode(oldNode);
 
 	return blockTree;
 }
@@ -92,7 +92,7 @@ public map[Node, list[Node]] replaceBlockTreeWithRenamedBlock(map[Node, list[Nod
 
 	blockTree[newRenamedNode] = blockTree[oldNode];
 	blockTree = delete(blockTree, oldNode);
-	RENAMED_NODES = RENAMED_NODES + {newRenamedNode};
+	REPLACED_NODES = REPLACED_NODES + {newRenamedNode};
 
 	return blockTree;
 }
@@ -137,8 +137,8 @@ public Immediate replaceImmediateUse(Immediate immediate) {
 	return local(newVariableName);
 }
 
-public bool isRenamed(Node stmtNode) {
-	return stmtNode in RENAMED_NODES;
+public bool isReplaced(Node stmtNode) {
+	return stmtNode in REPLACED_NODES;
 }
 
 public bool isSkipableStatement(stmtArgument) {
@@ -163,8 +163,9 @@ public Stack[int] popOldNode(Node oldNode) {
 }
 
 public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
-	stmtNode(phiFunctionVariables) = variableNode;
-	phiFunction(phiFunctionVariable, variableVersionList) = phiFunctionVariables;
+	stmtNode(assignStatement) = variableNode;
+	assign(assignVariable, assignPhiFunction) = assignStatement;
+	phiFunction(phiFunctionVariable, variableVersionList) = assignPhiFunction;
 	variableName = phiFunctionVariable[0];
 	Immediate localVariableImmediate = local(variableName);
 	versionIndex = peek(S[localVariableImmediate])[0];
@@ -172,7 +173,7 @@ public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blo
 	str newVariableName = buildVersionName(variableName, versionIndex);
 
 	list[Variable] newVariableList = variableVersionList + [localVariable(newVariableName)];
-	Node renamedPhiFunction = stmtNode(phiFunction(phiFunctionVariable, newVariableList));
+	Node renamedPhiFunction = stmtNode(assign(assignVariable, phiFunction(phiFunctionVariable, newVariableList)));
 
 	for(key <- blockTree) {
 		if(variableNode in blockTree[key]) {
@@ -207,6 +208,16 @@ public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immedia
 	Node newAssignStmt = stmtNode(assign(leftHandSide, immediate(local(newVersionName))));
 
 	return newAssignStmt;
+}
+
+public bool isRenamed(Node assignNode) {
+	if(ignoreNode(assignNode)) return false; 
+
+	stmtNode(assignStmt) = assignNode;
+	assign(variableStmt, _) = assignStmt;
+	localVariable(name) = variableStmt;
+	
+	return contains(name, "version");
 }
 
 public str buildVersionName(str variableOriginalName, int versionIndex) {
@@ -271,8 +282,11 @@ public bool isOrdinaryAssignment(Node variableNode) {
 public bool isPhiFunctionAssigment(Node variableNode) {
 	if(ignoreNode(variableNode)) return false;
 
-	stmtNode(statement) = variableNode;
-	switch(statement) {
+	stmtNode(assignStatement) = variableNode;
+	if(size(assignStatement[..]) != 2) return false;
+	
+	possiblePhiFunction = assignStatement[1];
+	switch(possiblePhiFunction) {
 		case phiFunction(_, _): return true;
 		default: return false;
 	}
@@ -280,9 +294,7 @@ public bool isPhiFunctionAssigment(Node variableNode) {
 
 public Variable getStmtVariable(Node graphNode) {
 	stmtNode(assignStatement) = graphNode;
-	temp = typeOf(assignStatement);
 	variableArg = assignStatement[0];
-	temp2 = typeOf(variableArg);
 
 	switch(variableArg) {
 		case Variable variable: return variable;
