@@ -1106,6 +1106,7 @@ public class Decompiler {
 		 */
 		private void storeIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
+
 			for (Environment env : stack.peek().environments()) {
 				Immediate immediate = env.operands.pop().immediate;
 				env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));

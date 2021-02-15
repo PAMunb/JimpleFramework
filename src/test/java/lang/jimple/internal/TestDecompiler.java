@@ -14,7 +14,26 @@ import io.usethesource.vallang.IValueFactory;
 import io.usethesource.vallang.impl.persistent.ValueFactory;
 
 public class TestDecompiler {
-	@Test 
+	@Test
+	public void decompileClassWithIfStatement() {
+		try {
+			File classFile = new File("./target/test-classes/samples/IfStatement.class");
+			assertNotNull(classFile);
+
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+
+			assertNotNull(c);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+
+	@Test
 	public void decompileClassWithFields() {
 		try {
 			File classFile = new File("./target/test-classes/samples/ClassWithFields.class"); 

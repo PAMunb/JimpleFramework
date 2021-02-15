@@ -49,7 +49,10 @@ public class BranchInstructionFlow implements InstructionFlow {
 
 		res.add(Statement.label(targetStatement));
 		res.addAll(right.instructions);
-		res.add(Statement.label(mergeStatement));
+
+		if(mergeStatement != null) {
+			res.add(Statement.label(mergeStatement));
+		}
 		
 		return res; 
 	}
@@ -71,7 +74,14 @@ public class BranchInstructionFlow implements InstructionFlow {
 		switch(status) {
 			case LEFT: res.add(left); break;
 			case RIGHT: res.add(right); break;
-			case ReadyToMerge: res.add(left); res.add(right);
+			case ReadyToMerge:
+				if(mergeStatement != null) {
+					res.add(left);
+					res.add(right);
+				}
+				else {
+					res.add(left);
+				}
 		}
 		return res;
 	}
@@ -94,7 +104,15 @@ public class BranchInstructionFlow implements InstructionFlow {
 	@Override
 	public void nextBranch() {
 		switch(status) {
-		 case LEFT: status = BranchState.RIGHT; break;
+		 case LEFT:
+		    if(mergeStatement != null) {
+				status = BranchState.RIGHT;
+			}
+		    else {
+		    	left.instructions.add(Statement.label(targetStatement));
+		    	status = BranchState.ReadyToMerge;
+			}
+		    break;
 		 case RIGHT: status = BranchState.ReadyToMerge; break;
 		 case ReadyToMerge: //
 		}
@@ -107,7 +125,6 @@ public class BranchInstructionFlow implements InstructionFlow {
 
 	@Override
 	public boolean readyToMerge(String label) {
-		// this.targetStatement = label;
 		return status.equals(BranchState.ReadyToMerge);
 	}
 }
