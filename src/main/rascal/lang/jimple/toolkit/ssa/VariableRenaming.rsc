@@ -265,6 +265,9 @@ public bool ignoreNode(Node variableNode) {
 		case skipNode(): return true;
 		case exitNode(): return true;
 		case stmtNode(gotoStmt(_)): return true;
+		case stmtNode(identity(_, _, _)):  return true;
+		case stmtNode(invokeStmt(_)): return true;
+		case stmtNode(returnEmptyStmt()): return true;
 		default: return false;
 	}
 }
