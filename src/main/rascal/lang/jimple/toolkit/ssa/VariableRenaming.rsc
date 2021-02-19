@@ -44,8 +44,9 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 
 	if(isOrdinaryAssignment(X) && !isRenamed(X)) {
 		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
-			int variableVersion = rightHandSideImmediate in S ? peekIntValue(S[rightHandSideImmediate]) : 0;
-			if(variableVersion == 0 && !(rightHandSideImmediate in S)) S[rightHandSideImmediate] = push(0, emptyStack()); // Initialize empty stack
+			int variableVersion = getVariableVersionStacked(rightHandSideImmediate);
+			stackVariableVersion(rightHandSideImmediate, variableVersion);
+
 			newAssignStmt = replaceRightVariableVersion(blockTree, rightHandSideImmediate, X, variableVersion);
 
 			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
@@ -61,7 +62,7 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
 			X = newAssignStmt;
 
-			S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
+			stackVariableVersion(localVariableImmediate, i);
 			iterateAssignmentQuantity(localVariableImmediate);
 		};
 	}
@@ -137,7 +138,7 @@ public Immediate replaceImmediateUse(Immediate immediate) {
 
 	// Por algum motivo a key tá dando mismatch aqui, mesmo sendo "igual"
 
-	int versionIndex = peekIntValue(S[immediate]);
+	int versionIndex = getVariableVersionStacked(immediate);
 	str newVariableName = buildVersionName(variableName, versionIndex);
 
 	return local(newVariableName);
@@ -174,7 +175,7 @@ public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blo
 	phiFunction(phiFunctionVariable, variableVersionList) = assignPhiFunction;
 	variableName = phiFunctionVariable[0];
 	Immediate localVariableImmediate = local(variableName);
-	versionIndex = peek(S[localVariableImmediate])[0];
+	versionIndex = getVariableVersionStacked(localVariableImmediate);
 
 	str newVariableName = buildVersionName(variableName, versionIndex);
 
@@ -410,4 +411,21 @@ public int iterateAssignmentQuantity(Immediate immediate) {
 	C[name] = C[name] + 1;
 
 	return C[name];
+}
+
+public str stackVariableVersion(Immediate immediate, int renameIndex) {
+	str name = returnLocalImmediateName(immediate);
+
+	S[immediate] = immediate in S ? push(renameIndex, S[immediate]) : push(0, emptyStack());
+
+	return name;
+}
+
+public int getVariableVersionStacked(Immediate immediate) {
+	str name = returnLocalImmediateName(immediate);
+
+	if(immediate in S) return peekIntValue(S[immediate]);
+
+	S[immediate] = push(0, emptyStack());
+	return 0;
 }
