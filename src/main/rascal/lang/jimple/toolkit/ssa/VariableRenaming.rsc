@@ -13,7 +13,7 @@ import lang::jimple::util::Stack;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 
-map[Immediate, Stack[int]] S = ();
+map[str, Stack[int]] S = ();
 map[str, int] C = ();
 set[Node] REPLACED_NODES = {};
 
@@ -162,9 +162,10 @@ public bool isSkipableStatement(stmtArgument) {
 public Stack[int] popOldNode(Node oldNode) {
 	Variable V = getStmtVariable(oldNode);
 	Immediate localVariableImmediate = local(V[0]);
-	newStackTuple = pop(S[localVariableImmediate])[1];
 
-	S[localVariableImmediate] = newStackTuple;
+	str name = returnLocalImmediateName(localVariableImmediate);
+	newStackTuple = pop(S[name])[1];
+	S[name] = newStackTuple;
 
 	return newStackTuple;
 }
@@ -416,7 +417,7 @@ public int iterateAssignmentQuantity(Immediate immediate) {
 public str stackVariableVersion(Immediate immediate, int renameIndex) {
 	str name = returnLocalImmediateName(immediate);
 
-	S[immediate] = immediate in S ? push(renameIndex, S[immediate]) : push(0, emptyStack());
+	S[name] = name in S ? push(renameIndex, S[name]) : push(0, emptyStack());
 
 	return name;
 }
@@ -424,8 +425,8 @@ public str stackVariableVersion(Immediate immediate, int renameIndex) {
 public int getVariableVersionStacked(Immediate immediate) {
 	str name = returnLocalImmediateName(immediate);
 
-	if(immediate in S) return peekIntValue(S[immediate]);
+	if(name in S) return peekIntValue(S[name]);
 
-	S[immediate] = push(0, emptyStack());
+	S[name] = push(0, emptyStack());
 	return 0;
 }
