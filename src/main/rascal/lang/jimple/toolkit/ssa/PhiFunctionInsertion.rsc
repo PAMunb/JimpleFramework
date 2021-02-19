@@ -83,6 +83,8 @@ public bool isSameVariable(Node graphNode, Variable variable) {
 	if (size(graphNode[..]) == 0) return false;
 	
 	stmtNode(assignStatement) = graphNode;
+	if (size(assignStatement[..]) == 0) return false;
+	
 	variableArg = assignStatement[0];
 	typeOfVariableArg = typeOf(variableArg);
 	
