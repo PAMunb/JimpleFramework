@@ -22,6 +22,7 @@ public map[Node, set[Node]] calculateDominanceFrontier(Node origin, Node destina
 	while(temp != findIdom(dominanceTree, destination)) {
 		originDominanceFrontierValue = if(dominanceFrontier[temp]?) dominanceFrontier[temp]; else {};
 		dominanceFrontier[temp] = originDominanceFrontierValue + {destination};
+		
 		temp = findIdom(dominanceTree, temp);
 	};
 

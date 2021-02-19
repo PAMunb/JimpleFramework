@@ -14,7 +14,7 @@ import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 
 map[Immediate, Stack[int]] S = ();
-map[Immediate, int] C = ();
+map[str, int] C = ();
 set[Node] REPLACED_NODES = {};
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]] blockTree) {
@@ -55,14 +55,14 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		if(isLeftHandSideVariable(X)) {
 			Variable V = getStmtVariable(X);
 			Immediate localVariableImmediate = local(V[0]);
-			int i = localVariableImmediate in C ? C[localVariableImmediate] : 0;
+			int i = returnAssignmentQuantity(localVariableImmediate);
 			newAssignStmt = replaceLeftVariableVersion(blockTree, X, i);
 
 			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
 			X = newAssignStmt;
 
 			S[localVariableImmediate] = localVariableImmediate in S ? push(i, S[localVariableImmediate]) : push(i, emptyStack());  // Push new item or initialize empty stack
-			C[localVariableImmediate] = i + 1;
+			iterateAssignmentQuantity(localVariableImmediate);
 		};
 	}
 
@@ -130,7 +130,13 @@ public Expression replaceImmediateUse(Expression expression) {
 }
 
 public Immediate replaceImmediateUse(Immediate immediate) {
-	local(variableName) = immediate;
+	variableName = returnLocalImmediateName(immediate);
+	temp1 = typeOf(immediate);
+	temp2 = typeOf(S);
+	temp3 = immediate in S;
+
+	// Por algum motivo a key tá dando mismatch aqui, mesmo sendo "igual"
+
 	int versionIndex = peekIntValue(S[immediate]);
 	str newVariableName = buildVersionName(variableName, versionIndex);
 
@@ -192,8 +198,7 @@ public Node replaceLeftVariableVersion(map[Node, list[Node]] blockTree, Node var
 	String newVersionName = buildVersionName(variableOriginalName, versionIndex);
 	V[0] = newVersionName;
 
-	stmtNode(assignStmt) = variableNode;
-	assign(_, rightHandSide) = assignStmt;
+	rightHandSide = returnRightHandSideExpression(variableNode);
 	Node newAssignStmt = stmtNode(assign(V, rightHandSide));
 
 	return newAssignStmt;
@@ -203,21 +208,20 @@ public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immedia
 	String variableOriginalName = getImmediateName(variableToRename);
 	String newVersionName = buildVersionName(variableOriginalName, versionVersion);
 
-	stmtNode(assignStmt) = variableNode;
-	assign(leftHandSide, _) = assignStmt;
+	leftHandSide = returnLeftHandSideVariable(variableNode);
 	Node newAssignStmt = stmtNode(assign(leftHandSide, immediate(local(newVersionName))));
 
 	return newAssignStmt;
 }
 
 public bool isRenamed(Node assignNode) {
-	if(ignoreNode(assignNode)) return false; 
+	if(ignoreNode(assignNode)) return false;
 
 	stmtNode(assignStmt) = assignNode;
-	assign(variableStmt, _) = assignStmt;
-	localVariable(name) = variableStmt;
-	
-	return contains(name, "version");
+
+	switch(assignNode) {
+		case stmtNode(assign(localVariable(name), _)) : return contains(name, "version");
+	}
 }
 
 public str buildVersionName(str variableOriginalName, int versionIndex) {
@@ -237,16 +241,14 @@ public String getImmediateName(Immediate immediate) {
 }
 
 public bool isLeftHandSideVariable(Node variableNode) {
-	stmtNode(assignStatement) = variableNode;
-	assign(leftHandSide, _) = assignStatement;
+	leftHandSide = returnLeftHandSideVariable(variableNode);
 	typeOfVariableArg = typeOf(leftHandSide);
 
 	return size(typeOfVariableArg[..]) != 0 && typeOfVariableArg.name == "Variable";
 }
 
 public list[Immediate] getRightHandSideImmediates(Node variableNode) {
-	stmtNode(assignStatement) = variableNode;
-	assign(_, rightHandSide) = assignStatement;
+	rightHandSide = returnRightHandSideExpression(variableNode);
 	typeOfVariableArg = typeOf(rightHandSide);
 
 	if(typeOfVariableArg.name != "Expression") return [];
@@ -287,7 +289,7 @@ public bool isPhiFunctionAssigment(Node variableNode) {
 
 	stmtNode(assignStatement) = variableNode;
 	if(size(assignStatement[..]) != 2) return false;
-	
+
 	possiblePhiFunction = assignStatement[1];
 	switch(possiblePhiFunction) {
 		case phiFunction(_, _): return true;
@@ -373,4 +375,39 @@ public list[Immediate] getExpressionImmediates(Expression expression) {
 	  case immediate(Immediate immediate): return [immediate];
 	  default: return [];
 	}
+}
+
+public Variable returnLeftHandSideVariable(Node stmtNode) {
+	switch(stmtNode) {
+		case stmtNode(assign(leftHandSide, _)): return leftHandSide;
+	}
+}
+
+public Expression returnRightHandSideExpression(Node stmtNode) {
+	switch(stmtNode) {
+		case stmtNode(assign(_, rightHandSide)): return rightHandSide;
+	}
+}
+
+public str returnLocalImmediateName(Immediate immediate) {
+	switch(immediate) {
+		case local(name): return name;
+	}
+}
+
+public int returnAssignmentQuantity(Immediate immediate) {
+	str name = returnLocalImmediateName(immediate);
+
+	if(name in C) return C[name];
+
+	C[name] = 0;
+	return C[name];
+}
+
+public int iterateAssignmentQuantity(Immediate immediate) {
+	str name = returnLocalImmediateName(immediate);
+
+	C[name] = C[name] + 1;
+
+	return C[name];
 }
