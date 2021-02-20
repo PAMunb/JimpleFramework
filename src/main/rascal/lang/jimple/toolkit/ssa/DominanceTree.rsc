@@ -46,11 +46,24 @@ public Node findIdom(map[&T, set[&T]] dominanceTree, Node child) {
 	return idom;
 }
 
-public map[Node, list[Node]] createFlowGraphBlockTree(FlowGraph flowGraph) {
+public map[Node, list[Node]] createAdjacenciesMatrix(FlowGraph flowGraph) {
 	blockTree = ( origin: [] | <origin, _> <- flowGraph);
 
 	for(<origin, destination> <- flowGraph) {
 		blockTree[origin] = blockTree[origin] + [destination];
+	};
+
+	return blockTree;
+}
+
+public map[Node, list[Node]] createIdomTree(map[&T, set[&T]] dominanceTree) {
+	blockTree = ( treeKey: [] | treeKey <- dominanceTree);
+
+	for(treeKey <- dominanceTree) {
+		idom = findIdom(dominanceTree, treeKey);
+		
+		if(treeKey != entryNode())
+			blockTree[idom] = blockTree[idom] + [treeKey];
 	};
 
 	return blockTree;

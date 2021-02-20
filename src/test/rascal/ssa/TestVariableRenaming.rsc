@@ -123,9 +123,8 @@ test bool testPhiFunctionArgumentsRename() {
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
 	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
-	map[Node, list[Node]] blockTree = createFlowGraphBlockTree(phiFunctionFlowGraph);
 
-	result = applyVariableRenaming(phiFunctionFlowGraph, blockTree);
+	result = applyVariableRenaming(phiFunctionFlowGraph);
 	
 	return result == {
 	  <entryNode(),

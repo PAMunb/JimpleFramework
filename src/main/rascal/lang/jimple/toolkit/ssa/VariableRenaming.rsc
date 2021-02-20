@@ -3,34 +3,45 @@ module lang::jimple::toolkit::ssa::VariableRenaming
 import Set;
 import Map;
 import Relation;
-import analysis::graphs::Graph;
 import Node;
 import List;
 import Type;
 import String;
 import util::Math;
+
+import analysis::graphs::Graph;
+
 import lang::jimple::util::Stack;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
+import lang::jimple::toolkit::ssa::DominanceTree;
+
 
 map[str, Stack[int]] S = ();
 map[str, int] C = ();
 set[Node] REPLACED_NODES = {};
+map[Node, Node] NODE_REPLACMENT = ();
 
-public FlowGraph applyVariableRenaming(FlowGraph flowGraph, map[Node, list[Node]] blockTree) {
-	map[Node, list[Node]] newBlockTree = replace(blockTree, entryNode());
+map[Node, list[Node]] IDOM_TREE = ();
+map[Node, list[Node]] ADJACENCIES_MATRIX = ();
+
+public FlowGraph applyVariableRenaming(FlowGraph flowGraph) {
+	ADJACENCIES_MATRIX = createAdjacenciesMatrix(flowGraph);
+	IDOM_TREE = createIdomTree( createDominanceTree(flowGraph));	
+	
+	map[Node, list[Node]] newBlockTree = replace(entryNode());
 
 	FlowGraph newFlowGraph = {};
 
 	for(fatherNode <- newBlockTree) {
-		newFlowGraph = newFlowGraph + { <fatherNode, nodeChild> | nodeChild <- newBlockTree[fatherNode]};
+		newFlowGraph = newFlowGraph + { <fatherNode, nodeChild> | nodeChild <- ADJACENCIES_MATRIX[fatherNode]};
 	};
 
 	return newFlowGraph;
 }
 
-public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
-	if((X == exitNode())) return blockTree;
+public map[Node, list[Node]] replace(Node X) {
+	if((X == exitNode())) return ADJACENCIES_MATRIX;
 
 	Node oldNode = X;
 
@@ -38,28 +49,33 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		stmtNode(statement) = X;
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
 
-		blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, renamedStatement);
+		renameNodeOcurrecies(X, renamedStatement);
+		
 		X = renamedStatement;
 	};
 
 	if(isOrdinaryAssignment(X) && !isRenamed(X)) {
-		for(rightHandSideImmediate <- getRightHandSideImmediates(X)) {
+		list[Immediate] nodeImmediates = getRightHandSideImmediates(X);
+		for(rightHandSideImmediate <- nodeImmediates) {
 			int variableVersion = getVariableVersionStacked(rightHandSideImmediate);
 			stackVariableVersion(rightHandSideImmediate, variableVersion);
 
 			newAssignStmt = replaceRightVariableVersion(blockTree, rightHandSideImmediate, X, variableVersion);
 
-			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
+			renameNodeOcurrecies(X, newAssignStmt);
+			
 			X = newAssignStmt;
 		};
 
 		if(isLeftHandSideVariable(X)) {
 			Variable V = getStmtVariable(X);
 			Immediate localVariableImmediate = local(V[0]);
-			int i = returnAssignmentQuantity(localVariableImmediate);
-			newAssignStmt = replaceLeftVariableVersion(blockTree, X, i);
 
-			blockTree = replaceBlockTreeWithRenamedBlock(blockTree, X, newAssignStmt);
+			int i = returnAssignmentQuantity(localVariableImmediate);
+			newAssignStmt = replaceLeftVariableVersion(ADJACENCIES_MATRIX, X, i);
+
+			renameNodeOcurrecies(X, newAssignStmt);
+			
 			X = newAssignStmt;
 
 			stackVariableVersion(localVariableImmediate, i);
@@ -67,24 +83,34 @@ public map[Node, list[Node]] replace(map[Node, list[Node]] blockTree, Node X) {
 		};
 	}
 
-	for(successor <- blockTree[X]) {
-		int j = indexOf(blockTree[X], successor);
+	for(successor <- ADJACENCIES_MATRIX[X]) {
+		// int j = indexOf(blockTree[X], successor);
 
 		if(isPhiFunctionAssigment(successor)){
-			blockTree = replacePhiFunctionVersion(blockTree, successor);
+			oldPhiFunctionStmt = successor;
+			newPhiFunctionStmt = replacePhiFunctionVersion(ADJACENCIES_MATRIX, successor);
+			
+			renameNodeOcurrecies(oldPhiFunctionStmt, newPhiFunctionStmt);
 		};
 	};
 
-	for(child <- blockTree[X]) {
-		blockTree = replace(blockTree, child);
+	for(child <- IDOM_TREE[X]) {
+		nodeToRename = NODE_REPLACMENT[child]? ? NODE_REPLACMENT[child] : child;
+		replace(nodeToRename);
 	};
 
 	if(!ignoreNode(oldNode) && isVariable(oldNode) && !isRenamed(X)) popOldNode(oldNode);
 
-	return blockTree;
+	return ADJACENCIES_MATRIX;
 }
 
-public map[Node, list[Node]] replaceBlockTreeWithRenamedBlock(map[Node, list[Node]] blockTree, Node oldNode, Node newRenamedNode) {
+public void renameNodeOcurrecies(Node oldStmt, Node newStmt) {
+	ADJACENCIES_MATRIX = replaceNodeOcurrenciesInTrees(ADJACENCIES_MATRIX, oldStmt, newStmt);
+	IDOM_TREE = replaceNodeOcurrenciesInTrees(IDOM_TREE, oldStmt, newStmt);
+	NODE_REPLACMENT[oldStmt] = newStmt;
+}
+
+public map[Node, list[Node]] replaceNodeOcurrenciesInTrees(map[Node, list[Node]] blockTree, Node oldNode, Node newRenamedNode) {
 	for(key <- blockTree) {
 		if(oldNode in blockTree[key]) {
 			blockTree[key] = blockTree[key] - [oldNode] + [newRenamedNode];
@@ -132,11 +158,6 @@ public Expression replaceImmediateUse(Expression expression) {
 
 public Immediate replaceImmediateUse(Immediate immediate) {
 	variableName = returnLocalImmediateName(immediate);
-	temp1 = typeOf(immediate);
-	temp2 = typeOf(S);
-	temp3 = immediate in S;
-
-	// Por algum motivo a key tá dando mismatch aqui, mesmo sendo "igual"
 
 	int versionIndex = getVariableVersionStacked(immediate);
 	str newVariableName = buildVersionName(variableName, versionIndex);
@@ -170,7 +191,7 @@ public Stack[int] popOldNode(Node oldNode) {
 	return newStackTuple;
 }
 
-public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
+public Node replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
 	stmtNode(assignStatement) = variableNode;
 	assign(assignVariable, assignPhiFunction) = assignStatement;
 	phiFunction(phiFunctionVariable, variableVersionList) = assignPhiFunction;
@@ -183,15 +204,7 @@ public map[Node, list[Node]] replacePhiFunctionVersion(map[Node, list[Node]] blo
 	list[Variable] newVariableList = variableVersionList + [localVariable(newVariableName)];
 	Node renamedPhiFunction = stmtNode(assign(assignVariable, phiFunction(phiFunctionVariable, newVariableList)));
 
-	for(key <- blockTree) {
-		if(variableNode in blockTree[key]) {
-			blockTree[key] = blockTree[key] - [variableNode] + [renamedPhiFunction];
-		};
-	};
-
-	blockTree[renamedPhiFunction] = blockTree[variableNode];
-
-	return delete(blockTree, variableNode);
+	return renamedPhiFunction;
 }
 
 public Node replaceLeftVariableVersion(map[Node, list[Node]] blockTree, Node variableNode, int versionIndex) {
