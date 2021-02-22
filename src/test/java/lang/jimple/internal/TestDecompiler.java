@@ -124,6 +124,7 @@ public class TestDecompiler {
 		}
 	}
 	
+	@Ignore
 	@Test 
 	public void decompileSlf4JMDCClass() {
 		try {
