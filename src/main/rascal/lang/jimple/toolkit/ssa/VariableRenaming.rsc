@@ -22,13 +22,18 @@ map[str, int] C = ();
 set[Node] REPLACED_NODES = {};
 map[Node, Node] NODE_REPLACMENT = ();
 
-map[Node, list[Node]] IDOM_TREE = ();
-map[Node, list[Node]] ADJACENCIES_MATRIX = ();
+map[Node, list[Node]] IDOM_TREE;
+map[Node, list[Node]] ADJACENCIES_MATRIX;
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph) {
+	S = ();
+	C = ();
+	REPLACED_NODES = {};
+	NODE_REPLACMENT = ();
+
 	ADJACENCIES_MATRIX = createAdjacenciesMatrix(flowGraph);
-	IDOM_TREE = createIdomTree( createDominanceTree(flowGraph));	
-	
+	IDOM_TREE = createIdomTree(createDominanceTree(flowGraph));
+
 	map[Node, list[Node]] newBlockTree = replace(entryNode());
 
 	FlowGraph newFlowGraph = {};
@@ -50,20 +55,21 @@ public map[Node, list[Node]] replace(Node X) {
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
 
 		renameNodeOcurrecies(X, renamedStatement);
-		
+
 		X = renamedStatement;
 	};
 
 	if(isOrdinaryAssignment(X) && !isRenamed(X)) {
-		list[Immediate] nodeImmediates = getRightHandSideImmediates(X);
-		for(rightHandSideImmediate <- nodeImmediates) {
+		list[Immediate] rightHandNodeImmediates = getRightHandSideImmediates(X);
+
+		for(rightHandSideImmediate <- rightHandNodeImmediates) {
 			int variableVersion = getVariableVersionStacked(rightHandSideImmediate);
 			stackVariableVersion(rightHandSideImmediate, variableVersion);
 
-			newAssignStmt = replaceRightVariableVersion(blockTree, rightHandSideImmediate, X, variableVersion);
+			newAssignStmt = replaceRightVariableVersion(ADJACENCIES_MATRIX, rightHandSideImmediate, X, variableVersion);
 
 			renameNodeOcurrecies(X, newAssignStmt);
-			
+
 			X = newAssignStmt;
 		};
 
@@ -75,7 +81,7 @@ public map[Node, list[Node]] replace(Node X) {
 			newAssignStmt = replaceLeftVariableVersion(ADJACENCIES_MATRIX, X, i);
 
 			renameNodeOcurrecies(X, newAssignStmt);
-			
+
 			X = newAssignStmt;
 
 			stackVariableVersion(localVariableImmediate, i);
@@ -89,7 +95,7 @@ public map[Node, list[Node]] replace(Node X) {
 		if(isPhiFunctionAssigment(successor)){
 			oldPhiFunctionStmt = successor;
 			newPhiFunctionStmt = replacePhiFunctionVersion(ADJACENCIES_MATRIX, successor);
-			
+
 			renameNodeOcurrecies(oldPhiFunctionStmt, newPhiFunctionStmt);
 		};
 	};
@@ -269,9 +275,10 @@ public list[Immediate] getRightHandSideImmediates(Node variableNode) {
 	if(typeOfVariableArg.name != "Expression") return [];
 
 	list[Immediate] immediates = getExpressionImmediates(rightHandSide);
-	int variablesCount = size([ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""]);
+	list[Immediate] localVariableImmediates = [ immediate | immediate <- immediates, getVariableImmediateName(immediate) != ""];
+	int variablesCount = size(localVariableImmediates);
 
-	if(variablesCount != 0) return immediates;
+	if(variablesCount != 0) return localVariableImmediates;
 
 	return [];
 }
@@ -363,28 +370,28 @@ public list[Immediate] getExpressionImmediates(Expression expression) {
 	  case stringSubscript(String string, local(name)): return [local(name)];
 	  case localFieldRef(Name local, Name className, Type fieldType, Name fieldName): return [];
 	  case fieldRef(Name className, Type fieldType, Name fieldName): return [];
-	  case and(local(lhs_name), local(rhs_name)): return [lhs_name, rhs_name];
-	  case or(local(lhs_name), local(rhs_name)): return [lhs_name, rhs_name];
-	  case xor(local(lhs_name), local(rhs_name)): return [lhs_name, rhs_name];
-	  case reminder(local(lhs_name), local(rhs_name)): return [lhs_name, rhs_name];
-	  case isNull(local(name)): return [local(name)];
-	  case isNotNull(local(name)): return [local(name)];
-	  case cmp(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmpg(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmpl(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmpeq(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmpne(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmpgt(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmpge(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmplt(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case cmple(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case shl(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case shr(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case ushr(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case plus(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case minus(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case mult(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
-	  case div(local(lhs_name), local(rhs_name)): return [local(lhs_name), local(rhs_name)];
+	  case and(lhs, rhs): return [lhs, rhs];
+	  case or(lhs, rhs): return [lhs, rhs];
+	  case xor(lhs, rhs): return [lhs, rhs];
+	  case reminder(lhs, rhs): return [lhs, rhs];
+	  case isNull(variable): return [variable];
+	  case isNotNull(variable): return [variable];
+	  case cmp(lhs, rhs): return [lhs, rhs];
+	  case cmpg(lhs, rhs): return [lhs, rhs];
+	  case cmpl(lhs, rhs): return [lhs, rhs];
+	  case cmpeq(lhs, rhs): return [lhs, rhs];
+	  case cmpne(lhs, rhs): return [lhs, rhs];
+	  case cmpgt(lhs, rhs): return [lhs, rhs];
+	  case cmpge(lhs, rhs): return [lhs, rhs];
+	  case cmplt(lhs, rhs): return [lhs, rhs];
+	  case cmple(lhs, rhs): return [lhs, rhs];
+	  case shl(lhs, rhs): return [lhs, rhs];
+	  case shr(lhs, rhs): return [lhs, rhs];
+	  case ushr(lhs, rhs): return [lhs, rhs];
+	  case plus(lhs, rhs): return [lhs, rhs];
+	  case minus(lhs, rhs): return [lhs, rhs];
+	  case mult(lhs, rhs): return [lhs, rhs];
+	  case div(lhs, rhs): return [lhs, rhs];
 	  case lengthOf(local(name)): return [local(name)];
 	  case neg(local(name)): return [local(name)];
 	  case immediate(local(name)): return [local(name)];
