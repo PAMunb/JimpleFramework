@@ -131,19 +131,29 @@ public map[Node, list[Node]] replaceNodeOcurrenciesInTrees(map[Node, list[Node]]
 }
 
 public Statement replaceImmediateUse(Statement statement) {
-	int i = 0;
-
-	for(stmtArgument <- statement) {
-		if(isSkipableStatement(stmtArgument)) {
-			statement[i] = stmtArgument;
-		} else {
-			statement[i] = replaceImmediateUse(stmtArgument);
-		};
-
-		i = i + 1;
+	switch(statement) {
+		case invokeStmt(specialInvoke(Name localName, MethodSignature signature, list[Immediate] methodArgs)):
+			return invokeStmt(specialInvoke(returnLastVariableVersion(localName), signature, methodArgs));
+		case virtualInvoke(specialInvoke(Name localName, MethodSignature signature, list[Immediate] methodArgs)):
+			return virtualInvoke(specialInvoke(returnLastVariableVersion(localName), signature, methodArgs));
+		case interfaceInvoke(specialInvoke(Name localName, MethodSignature signature, list[Immediate] methodArgs)):
+			return interfaceInvoke(specialInvoke(returnLastVariableVersion(localName), signature, methodArgs));
+		default: return addEnclosingStmt(statement, replaceImmediateUse(statement[0]));
 	};
+}
 
+public Statement addEnclosingStmt(Statement statement, Expression expression) {
+	statement[0] = expression;
 	return statement;
+}
+
+public Statement addEnclosingStmt(Statement statement, Immediate immediate) {
+	statement[0] = immediate;
+	return statement;
+}
+
+public Immediate replaceImmediateUse(Immediate immediate) {
+	return local(returnLastVariableVersion(immediate[0]));
 }
 
 public Expression replaceImmediateUse(Expression expression) {
@@ -162,13 +172,14 @@ public Expression replaceImmediateUse(Expression expression) {
 	return expression;
 }
 
-public Immediate replaceImmediateUse(Immediate immediate) {
+public Name returnLastVariableVersion(str name) {
+	Immediate immediate = local(name);
 	variableName = returnLocalImmediateName(immediate);
 
 	int versionIndex = getVariableVersionStacked(immediate);
 	str newVariableName = buildVersionName(variableName, versionIndex);
 
-	return local(newVariableName);
+	return newVariableName;
 }
 
 public bool isReplaced(Node stmtNode) {
@@ -262,10 +273,10 @@ public String getImmediateName(Immediate immediate) {
 }
 
 public bool isLeftHandSideVariable(Node variableNode) {
-	leftHandSide = returnLeftHandSideVariable(variableNode);
-	typeOfVariableArg = typeOf(leftHandSide);
-
-	return size(typeOfVariableArg[..]) != 0 && typeOfVariableArg.name == "Variable";
+	switch(variableNode) {
+		case stmtNode(assign(localVariable(_), _)): return true;
+		default: return false;
+	}
 }
 
 public list[Immediate] getRightHandSideImmediates(Node variableNode) {
@@ -290,7 +301,6 @@ public bool ignoreNode(Node variableNode) {
 		case exitNode(): return true;
 		case stmtNode(gotoStmt(_)): return true;
 		case stmtNode(identity(_, _, _)):  return true;
-		case stmtNode(invokeStmt(_)): return true;
 		case stmtNode(returnEmptyStmt()): return true;
 		default: return false;
 	}
