@@ -20,7 +20,7 @@ import lang::jimple::toolkit::ssa::DominanceTree;
 map[str, Stack[int]] S = ();
 map[str, int] C = ();
 set[Node] REPLACED_NODES = {};
-map[Node, Node] NODE_REPLACMENT = ();
+map[Node, Node] LAST_VERSION_REPLACED = ();
 
 map[Node, list[Node]] IDOM_TREE;
 map[Node, list[Node]] ADJACENCIES_MATRIX;
@@ -28,11 +28,11 @@ map[Node, list[Node]] ADJACENCIES_MATRIX;
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph) {
 	S = ();
 	C = ();
-	REPLACED_NODES = {};
-	NODE_REPLACMENT = ();
+	REPLACED_NODES = {}; // Keep tracking of all nodes replaced in one execution
+	LAST_VERSION_REPLACED = (); // Keep tracking of the new version of a given node
 
-	ADJACENCIES_MATRIX = createAdjacenciesMatrix(flowGraph);
-	IDOM_TREE = createIdomTree(createDominanceTree(flowGraph));
+	ADJACENCIES_MATRIX = createAdjacenciesMatrix(flowGraph); // Mainly used to rebuild the renamed flow graph
+	IDOM_TREE = createIdomTree(createDominanceTree(flowGraph)); // Used to traverse the flow graph
 
 	map[Node, list[Node]] newBlockTree = replace(entryNode());
 
@@ -50,6 +50,7 @@ public map[Node, list[Node]] replace(Node X) {
 
 	Node oldNode = X;
 
+	// Deal with all nodes that aren't assigments bug uses a variable in some way
 	if(!isReplaced(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
 		stmtNode(statement) = X;
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
@@ -59,6 +60,7 @@ public map[Node, list[Node]] replace(Node X) {
 		X = renamedStatement;
 	};
 
+	// Deal will all nodes that are an assigment
 	if(isOrdinaryAssignment(X) && !isRenamed(X)) {
 		list[Immediate] rightHandNodeImmediates = getRightHandSideImmediates(X);
 
@@ -90,8 +92,6 @@ public map[Node, list[Node]] replace(Node X) {
 	}
 
 	for(successor <- ADJACENCIES_MATRIX[X]) {
-		// int j = indexOf(blockTree[X], successor);
-
 		if(isPhiFunctionAssigment(successor)){
 			oldPhiFunctionStmt = successor;
 			newPhiFunctionStmt = replacePhiFunctionVersion(ADJACENCIES_MATRIX, successor);
@@ -101,11 +101,12 @@ public map[Node, list[Node]] replace(Node X) {
 	};
 
 	for(child <- IDOM_TREE[X]) {
-		nodeToRename = NODE_REPLACMENT[child]? ? NODE_REPLACMENT[child] : child;
+		nodeToRename = LAST_VERSION_REPLACED[child]? ? LAST_VERSION_REPLACED[child] : child;
 		replace(nodeToRename);
 	};
 
-	if(!ignoreNode(oldNode) && isVariable(oldNode) && !isRenamed(X)) popOldNode(oldNode);
+	if(!ignoreNode(oldNode) && isVariable(oldNode) && !isRenamed(X))
+		popOldNode(oldNode);
 
 	return ADJACENCIES_MATRIX;
 }
@@ -113,7 +114,7 @@ public map[Node, list[Node]] replace(Node X) {
 public void renameNodeOcurrecies(Node oldStmt, Node newStmt) {
 	ADJACENCIES_MATRIX = replaceNodeOcurrenciesInTrees(ADJACENCIES_MATRIX, oldStmt, newStmt);
 	IDOM_TREE = replaceNodeOcurrenciesInTrees(IDOM_TREE, oldStmt, newStmt);
-	NODE_REPLACMENT[oldStmt] = newStmt;
+	LAST_VERSION_REPLACED[oldStmt] = newStmt;
 }
 
 public map[Node, list[Node]] replaceNodeOcurrenciesInTrees(map[Node, list[Node]] blockTree, Node oldNode, Node newRenamedNode) {
@@ -218,8 +219,10 @@ public Node replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node vari
 
 public Node replaceLeftVariableVersion(map[Node, list[Node]] blockTree, Node variableNode, int versionIndex) {
 	switch(variableNode) {
-		case stmtNode(assign(localVariable(localName), rhs)): return stmtNode(assign(localVariable(buildVersionName(localName, versionIndex)), rhs));
-		case stmtNode(assign(arrayRef(arrayName, localImm), rhs)): return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), localImm), rhs));
+		case stmtNode(assign(localVariable(localName), rhs)):
+			return stmtNode(assign(localVariable(buildVersionName(localName, versionIndex)), rhs));
+		case stmtNode(assign(arrayRef(arrayName, localImm), rhs)):
+			return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), localImm), rhs));
 	};
 }
 
