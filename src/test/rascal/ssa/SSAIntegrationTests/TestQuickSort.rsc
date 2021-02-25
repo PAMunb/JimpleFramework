@@ -22,9 +22,7 @@ test bool testFirstMethod() {
 	
 	FlowGraph result = applySSATransformation(methodBody);
 
-	// Os arrays ref tao com problema
-
-	return false;
+	return result == {};
 }
 
 test bool testSecondMethod() {
@@ -36,11 +34,8 @@ test bool testSecondMethod() {
 	
 	FlowGraph result = applySSATransformation(methodBody);
 
-	// Os arrays ref tao com problema
-	// Quando tem invoke do lado direito do assing, ele não é renomeado
-	// 
-
-	return false;
+	// Doest support invokeStmt operators
+	return result == {};
 }
 
 test bool testThirdMethod() {
@@ -52,9 +47,8 @@ test bool testThirdMethod() {
 	
 	FlowGraph result = applySSATransformation(methodBody);
 
-	// Os arrays ref tao com problema
-
-	return false;
+	// Doest support invokeStmt operators
+	return result == {};
 }
 
 test bool testFourthMethod() {
@@ -66,9 +60,8 @@ test bool testFourthMethod() {
 	
 	FlowGraph result = applySSATransformation(methodBody);
 
-	// Os arrays ref tao com problema
-
-	return false;
+	// Doest support invokeStmt operators
+	return result == {};
 }
 
 private list[Method] castMethodList(ClassOrInterfaceDeclaration declaration) {

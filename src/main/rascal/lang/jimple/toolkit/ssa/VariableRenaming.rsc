@@ -131,26 +131,7 @@ public map[Node, list[Node]] replaceNodeOcurrenciesInTrees(map[Node, list[Node]]
 }
 
 public Statement replaceImmediateUse(Statement statement) {
-	switch(statement) {
-		case invokeStmt(specialInvoke(Name localName, MethodSignature signature, list[Immediate] methodArgs)):
-			return invokeStmt(specialInvoke(returnLastVariableVersion(localName), signature, renameMethodArgs(methodArgs)));
-		case invokeStmt(virtualInvoke(Name localName, MethodSignature signature, list[Immediate] methodArgs)):
-			return invokeStmt(virtualInvoke(returnLastVariableVersion(localName), signature, renameMethodArgs(methodArgs)));
-		case invokeStmt(interfaceInvoke(Name localName, MethodSignature signature, list[Immediate] methodArgs)):
-			return invokeStmt(interfaceInvoke(returnLastVariableVersion(localName), signature, renameMethodArgs(methodArgs)));
-		default: return addEnclosingStmt(statement, replaceImmediateUse(statement[0]));
-	};
-}
-
-public list[Immediate] renameMethodArgs(listImmediates) {
-	return [ local(returnLastVariableVersion(listImmediate[0])) | listImmediate <- listImmediates, isLocalImmediate(listImmediate)];
-}
-
-public bool isLocalImmediate(Immediate immediate){
-	switch(immediate) {
-		case local(_): return true;
-		default: return false;
-	};
+	return return addEnclosingStmt(statement, replaceImmediateUse(statement[0]));
 }
 
 public Statement addEnclosingStmt(Statement statement, Expression expression) {
@@ -247,16 +228,9 @@ public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immedia
 	String newVersionName = buildVersionName(variableOriginalName, versionVersion);
 
 	leftHandSide = returnLeftHandSideVariable(variableNode);
-	Node newAssignStmt = stmtNode(assign(leftHandSide, renameRightHandSide(variableNode, newVersionName)));
+	Node newAssignStmt = stmtNode(assign(leftHandSide, immediate(local(newVersionName))));
 
 	return newAssignStmt;
-}
-
-public Expression renameRightHandSide(Node variableNode, str newVersionName) {
-	switch(variableNode) {
-		// case stmtNode(assign(lhs, invokeExp(virtualInvoke(name, signature, args)))): return invokeExp(virtualInvoke(newVersionName, signature, args));
-		default: return immediate(local(newVersionName));
-	}
 }
 
 public bool isRenamed(Node assignNode) {
@@ -392,9 +366,6 @@ public list[Immediate] getExpressionImmediates(Expression expression) {
 	  case cast(Type toType, local(name)): return [];
 	  case instanceOf(Type baseType, local(name)): return [local(name)];
 	  case invokeExp(_): return [];
-	  // case invokeExp(specialInvoke(name, _, _)): return [local(name)];
-	  // case invokeExp(virtualInvoke(name, _, _)): return [local(name)];
-	  // case invokeExp(interfaceInvoke(name, _, _)): return [local(name)];
 	  case arraySubscript(Name name, local(name)): return [local(name)];
 	  case stringSubscript(String string, local(name)): return [local(name)];
 	  case localFieldRef(Name local, Name className, Type fieldType, Name fieldName): return [];
