@@ -81,21 +81,13 @@ public map[Node, list[Node]] replace(Node X) {
 
 			renameNodeOcurrecies(X, newAssignStmt);
 
-			X = newAssignStmt;
-
 			stackVariableVersion(localVariableImmediate, i);
 			iterateAssignmentQuantity(localVariableImmediate);
-		};
+			findAndAddPhiFunctionArgs(oldNode, newAssignStmt);
+
+			X = newAssignStmt;
+		};		
 	}
-
-	for(successor <- ADJACENCIES_MATRIX[X]) {
-		if(isPhiFunctionAssigment(successor)){
-			oldPhiFunctionStmt = successor;
-			newPhiFunctionStmt = replacePhiFunctionVersion(ADJACENCIES_MATRIX, successor);
-
-			renameNodeOcurrecies(oldPhiFunctionStmt, newPhiFunctionStmt);
-		};
-	};
 
 	for(child <- IDOM_TREE[X]) {
 		nodeToRename = LAST_VERSION_REPLACED[child]? ? LAST_VERSION_REPLACED[child] : child;
@@ -107,6 +99,41 @@ public map[Node, list[Node]] replace(Node X) {
 
 	return ADJACENCIES_MATRIX;
 }
+
+public void findAndAddPhiFunctionArgs(Node oldNode, Node newNode) {
+	Variable variable = getStmtVariable(oldNode);
+	variableName = variable[0];
+	dfsPhiFunctionLookup(newNode, newNode, variableName);
+}
+
+public void dfsPhiFunctionLookup(Node originalNode, Node entryNode, str variableName) {
+	if(!(entryNode in ADJACENCIES_MATRIX)) return;
+
+	for(child <- ADJACENCIES_MATRIX[entryNode]) {
+		if(child == originalNode) return;
+	
+		if(matchPhiFunction(child, variableName)) {
+		
+			oldPhiFunctionStmt = child;
+			newPhiFunctionStmt = replacePhiFunctionVersion(ADJACENCIES_MATRIX, child);
+			renameNodeOcurrecies(oldPhiFunctionStmt, newPhiFunctionStmt);
+		
+			return;	
+		};
+		
+		dfsPhiFunctionLookup(originalNode, child, variableName);
+	};
+	
+	return;
+}
+
+public bool matchPhiFunction(Node variableNode, str variableName) {
+	switch(variableNode){
+		case stmtNode(assign(_, phiFunction(localVariable(name), _))): return name == variableName; 
+		default: return false;
+	};
+}
+
 
 public void renameNodeOcurrecies(Node oldStmt, Node newStmt) {
 	ADJACENCIES_MATRIX = replaceNodeOcurrenciesInTrees(ADJACENCIES_MATRIX, oldStmt, newStmt);

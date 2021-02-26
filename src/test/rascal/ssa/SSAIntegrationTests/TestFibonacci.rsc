@@ -23,28 +23,66 @@ test bool testFibonacciMethod() {
 	FlowGraph result = applySSATransformation(methodBody);
 
 	return result == {
-	  <entryNode(), stmtNode(identity("r0","@this",TObject("samples.ssa.Fibonacci")))>,
-	  <stmtNode(identity("r0","@this",TObject("samples.ssa.Fibonacci"))),stmtNode(identity("i1","@parameter0",TInteger()))>,
-	  <stmtNode(identity("i1","@parameter0",TInteger())),stmtNode(assign(localVariable("r2_version-0"),immediate(iValue(intValue(0)))))>,
-	  <stmtNode(assign(localVariable("r2_version-0"),immediate(iValue(intValue(0))))),stmtNode(assign(localVariable("r3_version-0"),immediate(iValue(intValue(1)))))>,
-	  <stmtNode(assign(localVariable("r3_version-0"),immediate(iValue(intValue(1))))),stmtNode(assign(localVariable("r4_version-0"),immediate(iValue(intValue(1)))))>,
-	  <stmtNode(assign(localVariable("r4_version-0"),immediate(iValue(intValue(1))))),stmtNode(gotoStmt("label2"))>,
-	  <stmtNode(gotoStmt("label2")),stmtNode(assign(localVariable("r2_version-1"),phiFunction(localVariable("r2"),[localVariable("r2_version-0"),localVariable("r2_version-2")])))>,
-	  <stmtNode(assign(localVariable("r2_version-1"),phiFunction(localVariable("r2"),[localVariable("r2_version-0"),localVariable("r2_version-2")]))),stmtNode(assign(localVariable("r3_version-1"),phiFunction(localVariable("r3"),[localVariable("r3_version-0")])))>,
-	  <stmtNode(assign(localVariable("r3_version-1"),phiFunction(localVariable("r3"),[localVariable("r3_version-0")]))),stmtNode(assign(localVariable("r4_version-1"),phiFunction(localVariable("r4"),[localVariable("r4_version-0")])))>,
-	  <stmtNode(assign(localVariable("r4_version-1"),phiFunction(localVariable("r4"),[localVariable("r4_version-0")]))),stmtNode(assign(localVariable("$r1_version-0"),phiFunction(localVariable("$r1"),[localVariable("$r1_version-0")])))>,
-	  <stmtNode(assign(localVariable("$r1_version-0"),phiFunction(localVariable("$r1"),[localVariable("$r1_version-0")]))),stmtNode(assign(localVariable("r5_version-0"),phiFunction(localVariable("r5"),[localVariable("r5_version-0")])))>,
-	  <stmtNode(assign(localVariable("r5_version-0"),phiFunction(localVariable("r5"),[localVariable("r5_version-0")]))),stmtNode(ifStmt(cmple(local("r4_version-1"),local("r1_version-0")),"label1"))>,
+	  <entryNode(),
+	    stmtNode(identity("r0","@this",TObject("samples.ssa.Fibonacci")))>,
 	
-	  <stmtNode(ifStmt(cmple(local("r4_version-1"),local("r1_version-0")),"label1")),stmtNode(returnEmptyStmt())>,
-	  <stmtNode(returnEmptyStmt()),exitNode()>,
+	  <stmtNode(identity("r0","@this",TObject("samples.ssa.Fibonacci"))),
+	    stmtNode(identity("i1","@parameter0",TInteger()))>,
+	  
+	  <stmtNode(identity("i1","@parameter0",TInteger())),
+	    stmtNode(assign(localVariable("r2_version-0"),immediate(iValue(intValue(0)))))>,
 	
-	  <stmtNode(ifStmt(cmple(local("r4_version-1"),local("r1_version-0")),"label1")),stmtNode(assign(localVariable("$r1_version-1"),immediate(local("r3_version-1"))))>,
-	  <stmtNode(assign(localVariable("$r1_version-1"),immediate(local("r3_version-1")))),stmtNode(assign(localVariable("r5_version-1"),immediate(local("$r1_version-1"))))>,
-	  <stmtNode(assign(localVariable("r5_version-1"),immediate(local("$r1_version-1")))),stmtNode(assign(localVariable("r2_version-2"),immediate(local("r3_version-1"))))>,
-	  <stmtNode(assign(localVariable("r2_version-2"),immediate(local("r3_version-1")))),stmtNode(assign(localVariable("r3_version-2"),immediate(local("r5_version-1"))))>,
-	  <stmtNode(assign(localVariable("r3_version-2"),immediate(local("r5_version-1")))),stmtNode(assign(localVariable("r4_version-2"),immediate(local("r4_version-1"))))>,
-	  <stmtNode(assign(localVariable("r4_version-2"),immediate(local("r4_version-1")))),stmtNode(assign(localVariable("r2_version-1"),phiFunction(localVariable("r2"),[localVariable("r2_version-0"),localVariable("r2_version-2")])))>
+	  <stmtNode(assign(localVariable("r2_version-0"),immediate(iValue(intValue(0))))),
+	    stmtNode(assign(localVariable("r3_version-0"),immediate(iValue(intValue(1)))))>,
+	
+	  <stmtNode(assign(localVariable("r3_version-0"),immediate(iValue(intValue(1))))),
+	    stmtNode(assign(localVariable("r4_version-0"),immediate(iValue(intValue(1)))))>,
+	
+	  <stmtNode(assign(localVariable("r4_version-0"),immediate(iValue(intValue(1))))),
+	    stmtNode(gotoStmt("label2"))>,
+	
+	  <stmtNode(gotoStmt("label2")),
+	    stmtNode(assign(localVariable("r2_version-1"),phiFunction(localVariable("r2"),[localVariable("r2_version-0"),localVariable("r2_version-2")])))>,
+	
+	  <stmtNode(assign(localVariable("r2_version-1"),phiFunction(localVariable("r2"),[localVariable("r2_version-0"),localVariable("r2_version-2")]))),
+	    stmtNode(assign(localVariable("r3_version-1"),phiFunction(localVariable("r3"),[localVariable("r3_version-0"),localVariable("r3_version-2")])))>,
+	
+	  <stmtNode(assign(localVariable("r3_version-1"),phiFunction(localVariable("r3"),[localVariable("r3_version-0"),localVariable("r3_version-2")]))),
+	    stmtNode(assign(localVariable("r4_version-1"),phiFunction(localVariable("r4"),[localVariable("r4_version-0"),localVariable("r4_version-2")])))>,
+	
+	  <stmtNode(assign(localVariable("r4_version-1"),phiFunction(localVariable("r4"),[localVariable("r4_version-0"),localVariable("r4_version-2")]))),
+	    stmtNode(assign(localVariable("$r1_version-0"),phiFunction(localVariable("$r1"),[localVariable("$r1_version-1")])))>,
+	
+	  <stmtNode(assign(localVariable("$r1_version-0"),phiFunction(localVariable("$r1"),[localVariable("$r1_version-1")]))),
+	    stmtNode(assign(localVariable("r5_version-0"),phiFunction(localVariable("r5"),[localVariable("r5_version-1")])))>,
+	
+	  <stmtNode(assign(localVariable("r5_version-0"),phiFunction(localVariable("r5"),[localVariable("r5_version-1")]))),
+	    stmtNode(ifStmt(cmple(local("r4_version-1"),local("r1_version-0")),"label1"))>,
+	
+	  <stmtNode(ifStmt(cmple(local("r4_version-1"),local("r1_version-0")),"label1")),
+	    stmtNode(returnEmptyStmt())>,
+	
+	  <stmtNode(returnEmptyStmt()),
+	    exitNode()>,
+	
+	  <stmtNode(ifStmt(cmple(local("r4_version-1"),local("r1_version-0")),"label1")),
+	    stmtNode(assign(localVariable("$r1_version-1"),plus(local("r2_version-1"),local("r3_version-1"))))>,
+	
+	  <stmtNode(assign(localVariable("$r1_version-1"),plus(local("r2_version-1"),local("r3_version-1")))),
+	    stmtNode(assign(localVariable("r5_version-1"),immediate(local("$r1_version-1"))))>,
+	
+	  <stmtNode(assign(localVariable("r5_version-1"),immediate(local("$r1_version-1")))),
+	    stmtNode(assign(localVariable("r2_version-2"),immediate(local("r3_version-1"))))>,
+	    
+	  <stmtNode(assign(localVariable("r2_version-2"),immediate(local("r3_version-1")))),
+	    stmtNode(assign(localVariable("r3_version-2"),immediate(local("r5_version-1"))))>,
+	
+	  <stmtNode(assign(localVariable("r3_version-2"),immediate(local("r5_version-1")))),
+	    stmtNode(assign(localVariable("r4_version-2"),plus(local("r4_version-1"),iValue(intValue(1)))))>,
+	
+	  <stmtNode(assign(localVariable("r4_version-2"),plus(local("r4_version-1"),iValue(intValue(1))))),
+	    stmtNode(assign(localVariable("r2_version-1"),phiFunction(localVariable("r2"),[localVariable("r2_version-0"),localVariable("r2_version-2")])))>
+	
 	};
 }
 
