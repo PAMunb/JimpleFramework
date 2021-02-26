@@ -65,10 +65,7 @@ public map[Node, list[Node]] replace(Node X) {
 		list[Immediate] rightHandNodeImmediates = getRightHandSideImmediates(X);
 
 		for(rightHandSideImmediate <- rightHandNodeImmediates) {
-			int variableVersion = getVariableVersionStacked(rightHandSideImmediate);
-			stackVariableVersion(rightHandSideImmediate, variableVersion);
-
-			newAssignStmt = replaceRightVariableVersion(ADJACENCIES_MATRIX, rightHandSideImmediate, X, variableVersion);
+			newAssignStmt = replaceRightVariableVersion(ADJACENCIES_MATRIX, rightHandSideImmediate, X);
 
 			renameNodeOcurrecies(X, newAssignStmt);
 
@@ -226,14 +223,19 @@ public Node replaceLeftVariableVersion(map[Node, list[Node]] blockTree, Node var
 	};
 }
 
-public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immediate variableToRename, Node variableNode, int versionVersion) {
+public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immediate variableToRename, Node variableNode) {
+	int variableVersion = getVariableVersionStacked(variableToRename);
 	String variableOriginalName = getImmediateName(variableToRename);
-	String newVersionName = buildVersionName(variableOriginalName, versionVersion);
+	String newVersionName = buildVersionName(variableOriginalName, variableVersion);
 
 	leftHandSide = returnLeftHandSideVariable(variableNode);
-	Node newAssignStmt = stmtNode(assign(leftHandSide, immediate(local(newVersionName))));
-
-	return newAssignStmt;
+	rightHandSide = returnRightHandSideExpression(variableNode);
+	
+	list[Immediate] immediates = getExpressionImmediates(rightHandSide);
+	int index = indexOf(immediates, variableToRename);
+	rightHandSide[index] = local(newVersionName);
+	
+	return stmtNode(assign(leftHandSide, rightHandSide));
 }
 
 public bool isRenamed(Node assignNode) {
