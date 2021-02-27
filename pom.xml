@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.rascalmpl</groupId>
 			<artifactId>rascal</artifactId>
-			<version>0.18.0</version>
+			<version>0.19.2</version>
 		</dependency>
 
 		<dependency>
@@ -34,11 +34,11 @@
 			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.12</version>
+			<version>1.18.18</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -55,35 +55,49 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.rascalmpl</groupId>
-				<artifactId>rascal-maven-plugin</artifactId>
-				<version>0.3.4</version>
-				<configuration>
-					<bin>${project.build.outputDirectory}</bin>
-					<errorsAsWarnings>true</errorsAsWarnings>
-					<enableStandardLibrary>true</enableStandardLibrary>
-					<srcs>
-						<src>${project.basedir}/src/main/rascal</src>
-					</srcs>
-					<srcIgnores>
-						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/GraphUtil.rsc</ignore>
-						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/CallGraph.rsc</ignore>
-					</srcIgnores>
-				</configuration>
-				<executions>
-					<execution>
-						<id>it-compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
 	</build>
+
+	<profiles>
+
+		<profile>
+			<id>rascal</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.rascalmpl</groupId>
+						<artifactId>rascal-maven-plugin</artifactId>
+						<version>0.3.4</version>
+						<configuration>
+							<bin>${project.build.outputDirectory}</bin>
+							<errorsAsWarnings>true</errorsAsWarnings>
+							<enableStandardLibrary>true</enableStandardLibrary>
+							<srcs>
+								<src>${project.basedir}/src/main/rascal</src>
+							</srcs>
+							<libs>
+								<lib>Vis</lib>
+								<lib>analysis</lib>
+							</libs>
+							<!-- <srcIgnores> -->
+							<!-- <ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/GraphUtil.rsc</ignore> -->
+							<!-- <ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/CallGraph.rsc</ignore> -->
+							<!-- </srcIgnores> -->
+						</configuration>
+						<executions>
+							<execution>
+								<id>it-compile</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 
 </project>
