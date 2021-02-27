@@ -240,7 +240,7 @@ public str prettyPrint(list[Type] types, str n) {
   return text;
 }
 
-public str prettyPrint(Field f: field(modifiers, fieldType, name)) =
+public str prettyPrint(Field::field(modifiers, fieldType, name)) =
 	"<prettyPrint(modifiers)> <prettyPrint(fieldType)> <name>;";
 
 public str prettyPrint(list[Field] fields) =
@@ -251,7 +251,7 @@ public str prettyPrint(list[Field] fields) =
 public str prettyPrint(LocalVariableDeclaration::localVariableDeclaration(Type varType, Identifier local)) = 
 	"<prettyPrint(varType)> <local>;";
 
-public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClauses)) =
+public str prettyPrint(MethodBody::methodBody(localVars, stmts, catchClauses)) =
 	"<for(l <- localVars){>
 	'   <prettyPrint(l)><}>
 	'<for(s <- stmts){>
@@ -259,7 +259,7 @@ public str prettyPrint(MethodBody body: methodBody(localVars, stmts, catchClause
 	'<prettyPrint(s)><} else {>
 	'   <prettyPrint(s)><}><}> <for(c <- catchClauses){>\n   <prettyPrint(c)><}>";
 
-public str prettyPrint(Method m: method(modifiers, returnType, name, formals, exceptions, body)) =
+public str prettyPrint(Method::method(modifiers, returnType, name, formals, exceptions, body)) =
 	"<prettyPrint(modifiers)> <prettyPrint(returnType)> <name>(<prettyPrint(formals,"")>) <prettyPrint(exceptions,"throws ")>
 	'{<prettyPrint(body)>
 	'}

@@ -4,3 +4,4 @@ Project-Name: JimpleFramework
 Courses: courses
 Main-Module: Plugin
 Source: src/main/rascal,src/test/rascal
+Require-Libraries: |lib://rascal_eclipse|
