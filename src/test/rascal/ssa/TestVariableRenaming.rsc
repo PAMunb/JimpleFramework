@@ -155,3 +155,57 @@ test bool testPhiFunctionArgumentsRename() {
 	    exitNode()>
 	};
 }
+
+test bool testPhiFunctionArrayArgumentsRename() {
+  	Statement s1 = assign(localVariable("v0"), immediate(iValue(intValue(1))));
+
+	Statement s2 = ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:");
+	Statement s3 = assign(arrayRef("v1", local("v0")), immediate(local("r0")));
+	Statement s4 = gotoStmt("print");
+
+	Statement s5 = label("label1:");
+	Statement s6 = assign(arrayRef("v1", local("v0")), immediate(local("r1")));
+  	Statement s7 = gotoStmt("print");
+
+  	Statement s8 = label("print");
+  	Statement s9 = returnStmt(local("v2"));
+
+	list[Statement] stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
+
+  	methodStatments = methodBody([], stmts, []);
+  	flowGraph = forwardFlowGraph(methodStatments);
+  	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
+
+	result = applyVariableRenaming(phiFunctionFlowGraph);
+	
+	return result == {
+	  <entryNode(),
+	    stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(intValue(1)))))>,
+	
+	  <stmtNode(assign(localVariable("v0_version-0"),immediate(iValue(intValue(1))))),
+	    stmtNode(ifStmt(cmp(local("v0_version-0"),iValue(booleanValue(false))),"label1:"))>,
+	
+	  <stmtNode(ifStmt(cmp(local("v0_version-0"),iValue(booleanValue(false))),"label1:")),
+	    stmtNode(assign(arrayRef("v1_version-2",local("v0_version-0")),immediate(local("r0_version-0"))))>,
+	  
+	  <stmtNode(assign(arrayRef("v1_version-2",local("v0_version-0")),immediate(local("r0_version-0")))),
+	    stmtNode(assign(arrayRef("v1_version-0",local("v0_version-0")),phiFunction(arrayRef("v1",local("v0")),[localVariable("v1_version-1"),localVariable("v1_version-2")])))>,
+	
+	  <stmtNode(ifStmt(cmp(local("v0_version-0"),iValue(booleanValue(false))),"label1:")),
+	    stmtNode(assign(arrayRef("v1_version-1",local("v0_version-0")),immediate(local("r1_version-0"))))>,
+	
+	  <stmtNode(assign(arrayRef("v1_version-1",local("v0_version-0")),immediate(local("r1_version-0")))),
+	    stmtNode(assign(arrayRef("v1_version-0",local("v0_version-0")),phiFunction(arrayRef("v1",local("v0")),[localVariable("v1_version-1"),localVariable("v1_version-2")])))>,
+	
+	  <stmtNode(assign(arrayRef("v1_version-0",local("v0_version-0")),phiFunction(arrayRef("v1",local("v0")),[localVariable("v1_version-1"),localVariable("v1_version-2")]))),
+	    stmtNode(gotoStmt("print"))>,
+	
+	  <stmtNode(gotoStmt("print")),
+	    stmtNode(returnStmt(local("v2_version-0")))>,
+	
+	  <stmtNode(returnStmt(local("v2_version-0"))),
+	    exitNode()>
+	};
+}

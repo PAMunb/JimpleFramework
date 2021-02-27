@@ -108,6 +108,7 @@ public void findAndAddPhiFunctionArgs(Node oldNode, Node newNode) {
 
 public void dfsPhiFunctionLookup(Node originalNode, Node entryNode, str variableName) {
 	if(!(entryNode in ADJACENCIES_MATRIX)) return;
+	if(size(ADJACENCIES_MATRIX[entryNode]) != 1) return;
 
 	for(child <- ADJACENCIES_MATRIX[entryNode]) {
 		if(child == originalNode) return;
@@ -130,6 +131,7 @@ public void dfsPhiFunctionLookup(Node originalNode, Node entryNode, str variable
 public bool matchPhiFunction(Node variableNode, str variableName) {
 	switch(variableNode){
 		case stmtNode(assign(_, phiFunction(localVariable(name), _))): return name == variableName; 
+		case stmtNode(assign(_, phiFunction(arrayRef(name, _), _))): return name == variableName; 
 		default: return false;
 	};
 }
@@ -246,14 +248,12 @@ public Node replaceLeftVariableVersion(map[Node, list[Node]] blockTree, Node var
 		case stmtNode(assign(localVariable(localName), rhs)):
 			return stmtNode(assign(localVariable(buildVersionName(localName, versionIndex)), rhs));
 		case stmtNode(assign(arrayRef(arrayName, localImm), rhs)):
-			return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), localImm), rhs));
+			return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), local(returnCurrentVersionName(localImm))) , rhs));
 	};
 }
 
 public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immediate variableToRename, Node variableNode) {
-	int variableVersion = getVariableVersionStacked(variableToRename);
-	String variableOriginalName = getImmediateName(variableToRename);
-	String newVersionName = buildVersionName(variableOriginalName, variableVersion);
+	String newVersionName = returnCurrentVersionName(variableToRename);
 
 	leftHandSide = returnLeftHandSideVariable(variableNode);
 	rightHandSide = returnRightHandSideExpression(variableNode);
@@ -263,6 +263,12 @@ public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immedia
 	rightHandSide[index] = local(newVersionName);
 	
 	return stmtNode(assign(leftHandSide, rightHandSide));
+}
+
+public String returnCurrentVersionName(Immediate immediate) {
+	int variableVersion = getVariableVersionStacked(immediate);
+	String variableOriginalName = getImmediateName(immediate);
+	return buildVersionName(variableOriginalName, variableVersion);
 }
 
 public bool isRenamed(Node assignNode) {
@@ -295,7 +301,7 @@ public String getImmediateName(Immediate immediate) {
 public bool isLeftHandSideVariable(Node variableNode) {
 	switch(variableNode) {
 		case stmtNode(assign(localVariable(_), _)): return true;
-		case stmtNode(assign(arrayRef(_, _), _)): return false;
+		case stmtNode(assign(arrayRef(_, _), _)): return true;
 		default: return false;
 	}
 }
