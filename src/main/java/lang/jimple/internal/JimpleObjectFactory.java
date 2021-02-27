@@ -3,16 +3,11 @@ package lang.jimple.internal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.swing.text.html.HTML.Tag;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 
-import io.usethesource.vallang.io.binary.util.TaggedInt;
-import lang.jimple.internal.Decompiler.InstructionSetVisitor.Operand;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
@@ -102,6 +97,20 @@ public class JimpleObjectFactory {
 		return res;
 	}
 	
+	public static String localVariableName(boolean isStackVariable, String type, int idx) {
+		String infix = "r"; 
+		
+		switch(type) {
+		 case "TLong" : infix = "l"; break;
+		 case "TChar" : infix = "c"; break;
+		 case "TByte" : infix = "b"; break;
+		 case "TShort" : infix = "s"; break;
+		 case "TFloat" : infix = "f"; break;
+		 case "TDouble" : infix = "d"; break;
+		}
+		
+		return isStackVariable ? "$" + (infix + idx) : (infix + idx); 
+	}
 	public static Type type(String descriptor) {
 		// primitive types 
 		switch(descriptor) {

@@ -27,12 +27,14 @@
 			<artifactId>rascal</artifactId>
 			<version>0.18.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -53,6 +55,34 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.rascalmpl</groupId>
+				<artifactId>rascal-maven-plugin</artifactId>
+				<version>0.3.4</version>
+				<configuration>
+					<bin>${project.build.outputDirectory}</bin>
+					<errorsAsWarnings>true</errorsAsWarnings>
+					<enableStandardLibrary>true</enableStandardLibrary>
+					<srcs>
+						<src>${project.basedir}/src/main/rascal</src>
+					</srcs>
+					<srcIgnores>
+						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/GraphUtil.rsc</ignore>
+						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/CallGraph.rsc</ignore>
+					</srcIgnores>
+				</configuration>
+				<executions>
+					<execution>
+						<id>it-compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 

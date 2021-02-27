@@ -95,7 +95,7 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 	return ExecutionContext(ct, mt);
 }
 
-private CID jimplify(CID c) = jimplify([processJimpleLabels, processConstantPropagator], c); 
+private CID jimplify(CID c) = jimplify([processJimpleLabels], c); 
 
 private CID jimplify(list[CID (CID)] fs, CID c) { 
   switch(fs) {

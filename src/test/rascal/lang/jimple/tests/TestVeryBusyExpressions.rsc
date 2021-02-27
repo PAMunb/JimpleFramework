@@ -1,4 +1,4 @@
-module TestVeryBusyExpressions
+module lang::jimple::tests::TestVeryBusyExpressions
 
 import lang::jimple::core::Syntax; 
 
@@ -57,4 +57,3 @@ test bool testVeryBusyExpressions() {
        && res.outSet[stmtNode(s10)]  == { }
        ;   
 }
-
