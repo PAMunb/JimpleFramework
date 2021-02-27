@@ -33,6 +33,7 @@ public bool hasUnsupportedInstruction(FlowGraph flowGraph) {
 public bool unspportedStatement(Node nodeStatement) {
 	switch(nodeStatement) {
 		case stmtNode(invokeStmt(_)): return true;
+		case stmtNode(assign(fieldRef(_, _), _)): return true;
 		default: return false; 
 	}
 }

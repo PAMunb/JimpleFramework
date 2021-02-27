@@ -247,22 +247,33 @@ public Node replaceLeftVariableVersion(map[Node, list[Node]] blockTree, Node var
 	switch(variableNode) {
 		case stmtNode(assign(localVariable(localName), rhs)):
 			return stmtNode(assign(localVariable(buildVersionName(localName, versionIndex)), rhs));
-		case stmtNode(assign(arrayRef(arrayName, localImm), rhs)):
-			return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), local(returnCurrentVersionName(localImm))) , rhs));
+		case stmtNode(assign(arrayRef(arrayName, local(localName)), rhs)):
+			return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), local(returnCurrentVersionName(local(localName)))) , rhs));
+		case stmtNode(assign(arrayRef(arrayName, immediate), rhs)):
+			return stmtNode(assign(arrayRef(buildVersionName(arrayName, versionIndex), immediate), rhs));
 	};
 }
 
-public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immediate variableToRename, Node variableNode) {
-	String newVersionName = returnCurrentVersionName(variableToRename);
-
+public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immediate immediateToRename, Node variableNode) {
 	leftHandSide = returnLeftHandSideVariable(variableNode);
-	rightHandSide = returnRightHandSideExpression(variableNode);
-	
-	list[Immediate] immediates = getExpressionImmediates(rightHandSide);
-	int index = indexOf(immediates, variableToRename);
-	rightHandSide[index] = local(newVersionName);
-	
+	Expression rightHandSide = returnRightHandSideExpression(variableNode);
+	rightHandSide = renameExpressionVariables(rightHandSide, immediateToRename);
 	return stmtNode(assign(leftHandSide, rightHandSide));
+}
+
+public Expression renameExpressionVariables(Expression expression, Immediate immediateToRename) {
+	String newVersionName = returnCurrentVersionName(immediateToRename);
+	
+	switch(expression) {
+		case arraySubscript(arrayName, local(localName)):
+			return arraySubscript(newVersionName, local(returnCurrentVersionName(local(localName))));
+	};
+	
+	list[Immediate] immediates = getExpressionImmediates(expression);
+	int index = indexOf(immediates, immediateToRename);
+	expression[index] = local(newVersionName);
+	
+	return expression;
 }
 
 public String returnCurrentVersionName(Immediate immediate) {
@@ -404,8 +415,8 @@ public list[Immediate] getExpressionImmediates(Expression expression) {
 	  case cast(Type toType, local(name)): return [];
 	  case instanceOf(Type baseType, local(name)): return [local(name)];
 	  case invokeExp(_): return [];
-	  case arraySubscript(Name name, local(name)): return [local(name)];
-	  case stringSubscript(String string, local(name)): return [local(name)];
+	  case arraySubscript(Name arrayName, _): return [local(arrayName)];
+	  case stringSubscript(String stringName, local(name)): return [local(stringName)];
 	  case localFieldRef(Name local, Name className, Type fieldType, Name fieldName): return [];
 	  case fieldRef(Name className, Type fieldType, Name fieldName): return [];
 	  case and(lhs, rhs): return [lhs, rhs];
