@@ -2,6 +2,7 @@ module ssa::SSAIntegrationTests::TestQuickSort
 
 import List;
 import Type;
+import Set;
 
 import analysis::graphs::Graph;
 
@@ -13,7 +14,7 @@ import lang::jimple::core::Syntax;
 
 import lang::jimple::toolkit::ssa::Generator;
 
-test bool testFirstMethod() {
+test bool testQuickSortPartitionMethod() {
 	loc classFilePath = |project://JimpleFramework/target/test-classes/samples/ssa/QuickSort.class|;
 	ClassOrInterfaceDeclaration classFileDeclaration = decompile(classFilePath);
 	classFileDeclaration = processJimpleLabels(classFileDeclaration);
@@ -22,10 +23,10 @@ test bool testFirstMethod() {
 	
 	FlowGraph result = applySSATransformation(methodBody);
 
-	return result == {};
+	return !isEmpty(result);
 }
 
-test bool testSecondMethod() {
+test bool testQuickSortSortMethod() {
 	loc classFilePath = |project://JimpleFramework/target/test-classes/samples/ssa/QuickSort.class|;
 	ClassOrInterfaceDeclaration classFileDeclaration = decompile(classFilePath);
 	classFileDeclaration = processJimpleLabels(classFileDeclaration);
@@ -38,7 +39,7 @@ test bool testSecondMethod() {
 	return result == {};
 }
 
-test bool testThirdMethod() {
+test bool testQuickSortPrintMethod() {
 	loc classFilePath = |project://JimpleFramework/target/test-classes/samples/ssa/QuickSort.class|;
 	ClassOrInterfaceDeclaration classFileDeclaration = decompile(classFilePath);
 	classFileDeclaration = processJimpleLabels(classFileDeclaration);
@@ -51,7 +52,7 @@ test bool testThirdMethod() {
 	return result == {};
 }
 
-test bool testFourthMethod() {
+test bool testQuickSortMainMethod() {
 	loc classFilePath = |project://JimpleFramework/target/test-classes/samples/ssa/QuickSort.class|;
 	ClassOrInterfaceDeclaration classFileDeclaration = decompile(classFilePath);
 	classFileDeclaration = processJimpleLabels(classFileDeclaration);

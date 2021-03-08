@@ -1,7 +1,8 @@
 module ssa::SSAIntegrationTests::TestSimpleException
 
 import List;
-import Type;
+import Type;import Type;
+
 
 import analysis::graphs::Graph;
 
@@ -18,7 +19,7 @@ test bool testRunMethod() {
 	loc simpleExceptionPath = |project://JimpleFramework/target/test-classes/samples/ssa/SimpleException.class|;
 	ClassOrInterfaceDeclaration simpleExceptionDeclaration = decompile(simpleExceptionPath);
 	list[Method] methodList = castMethodList(simpleExceptionDeclaration);
-	
+
 	MethodBody methodBody = castMethodBody(methodList[1]);
 	FlowGraph result = applySSATransformation(methodBody);
 	
