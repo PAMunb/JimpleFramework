@@ -1,4 +1,4 @@
-module ssa::SSAIntegrationTests::TestSootExampleCode
+module ssa::SSAIntegrationTests::util::CreateClassfileSSAFlowGraph
 
 import List;
 import Type;
@@ -14,16 +14,14 @@ import lang::jimple::core::Syntax;
 
 import lang::jimple::toolkit::ssa::Generator;
 
-test bool testSootSampleCodeMethod() {
-	loc classFilePath = |project://JimpleFramework/target/test-classes/samples/ssa/SootExampleCode.class|;
+public FlowGraph createClassFileSSAFlowGraph(loc classFilePath, int methodToReturn) {
+	loc classFilePath = classFilePath;
 	ClassOrInterfaceDeclaration classFileDeclaration = decompile(classFilePath);
 	classFileDeclaration = processJimpleLabels(classFileDeclaration);
 	list[Method] methodList = castMethodList(classFileDeclaration);	
-	MethodBody methodBody = castMethodBody(methodList[1]);
+	MethodBody methodBody = castMethodBody(methodList[methodToReturn]);
 	
-	FlowGraph result = applySSATransformation(methodBody);
-
-	return !isEmpty(result);
+	return applySSATransformation(methodBody);
 }
 
 private list[Method] castMethodList(ClassOrInterfaceDeclaration declaration) {

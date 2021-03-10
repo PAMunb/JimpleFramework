@@ -1,4 +1,6 @@
-package samples.ssa;
+package samples.ssa.sort;
+
+// Source: https://www.geeksforgeeks.org/java-program-for-quicksort/
 
 // Java program for implementation of QuickSort 
 class QuickSort { 

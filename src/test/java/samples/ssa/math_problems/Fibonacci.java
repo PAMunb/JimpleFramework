@@ -1,4 +1,4 @@
-package samples.ssa;
+package samples.ssa.math_problems;
 
 public class Fibonacci {
 	public void run(int maxNumber) {

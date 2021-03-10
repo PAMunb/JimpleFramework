@@ -1,4 +1,4 @@
-package samples.ssa;
+package samples.ssa.other;
 
 public class SootExampleCode {
 	
