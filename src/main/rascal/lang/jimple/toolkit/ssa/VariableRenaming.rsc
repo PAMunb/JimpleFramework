@@ -16,12 +16,10 @@ import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 import lang::jimple::toolkit::ssa::DominanceTree;
 
-
 map[str, Stack[int]] S = ();
 map[str, int] C = ();
 set[Node] REPLACED_NODES = {};
 map[Node, Node] LAST_VERSION_REPLACED = ();
-
 map[Node, list[Node]] IDOM_TREE;
 map[Node, list[Node]] ADJACENCIES_MATRIX;
 
@@ -34,10 +32,10 @@ public FlowGraph applyVariableRenaming(FlowGraph flowGraph) {
 	ADJACENCIES_MATRIX = createAdjacenciesMatrix(flowGraph); // Mainly used to rebuild the renamed flow graph
 	IDOM_TREE = createIdomTree(createDominanceTree(flowGraph)); // Used to traverse the flow graph
 
-	map[Node, list[Node]] newBlockTree = replace(entryNode());
+	map[Node, list[Node]] newBlockTree = replace(entryNode()); // Start algorithm
 
+	// Rebuild renamed flowGraph
 	FlowGraph newFlowGraph = {};
-
 	for(fatherNode <- newBlockTree) {
 		newFlowGraph = newFlowGraph + { <fatherNode, nodeChild> | nodeChild <- ADJACENCIES_MATRIX[fatherNode]};
 	};
@@ -51,19 +49,18 @@ public map[Node, list[Node]] replace(Node X) {
 	Node oldNode = X;
 
 	// Deal with all nodes that aren't assigments bug uses a variable in some way
-	if(!isReplaced(X) && !isOrdinaryAssignment(X) && !ignoreNode(X) && !isPhiFunctionAssigment(X)) {
+	if(isNonAssignmentStatementToRename(X)) {
 		stmtNode(statement) = X;
 		Node renamedStatement = stmtNode(replaceImmediateUse(statement));
-
 		renameNodeOcurrecies(X, renamedStatement);
-
 		X = renamedStatement;
 	};
 
-	// Deal will all nodes that are an assigment
+	// Deal will all nodes that are an assigment and are not renamed
 	if(isOrdinaryAssignment(X) && !isRenamed(X)) {
-		list[Immediate] rightHandNodeImmediates = getRightHandSideImmediates(X);
 
+		// Replace right hand side variables
+		list[Immediate] rightHandNodeImmediates = getRightHandSideImmediates(X);
 		for(rightHandSideImmediate <- rightHandNodeImmediates) {
 			newAssignStmt = replaceRightVariableVersion(ADJACENCIES_MATRIX, rightHandSideImmediate, X);
 
@@ -72,24 +69,27 @@ public map[Node, list[Node]] replace(Node X) {
 			X = newAssignStmt;
 		};
 
+		// Replace left hand side variables
 		if(isLeftHandSideVariable(X)) {
 			Variable V = getStmtVariable(X);
 			Immediate localVariableImmediate = local(V[0]);
 
-			int i = returnAssignmentQuantity(localVariableImmediate);
-			newAssignStmt = replaceLeftVariableVersion(ADJACENCIES_MATRIX, X, i);
+			int assingmentQuantity = returnAssignmentQuantity(localVariableImmediate);
+			newAssignStmt = replaceLeftVariableVersion(ADJACENCIES_MATRIX, X, assingmentQuantity);
 
 			renameNodeOcurrecies(X, newAssignStmt);
 
-			stackVariableVersion(localVariableImmediate, i);
+			stackVariableVersion(localVariableImmediate, assingmentQuantity);
 			iterateAssignmentQuantity(localVariableImmediate);
-			findAndAddPhiFunctionArgs(oldNode, newAssignStmt);
+			findAndAddPhiFunctionArgs(oldNode, newAssignStmt); // Search variable uses of replaced variable in phi-function and rename it
 
 			X = newAssignStmt;
-		};		
+		};
 	}
 
 	for(child <- IDOM_TREE[X]) {
+		// We need to check the last version replaced because the renamed version was not beign reflected in the current `for` statement iteration
+		// so we need to check the last version replaced
 		nodeToRename = LAST_VERSION_REPLACED[child]? ? LAST_VERSION_REPLACED[child] : child;
 		replace(nodeToRename);
 	};
@@ -103,39 +103,38 @@ public map[Node, list[Node]] replace(Node X) {
 public void findAndAddPhiFunctionArgs(Node oldNode, Node newNode) {
 	Variable variable = getStmtVariable(oldNode);
 	variableName = variable[0];
-	dfsPhiFunctionLookup(newNode, newNode, variableName);
+	dfsPhiFunctionLookupAndRename(newNode, newNode, variableName);
 }
 
-public void dfsPhiFunctionLookup(Node originalNode, Node entryNode, str variableName) {
+public void dfsPhiFunctionLookupAndRename(Node originalNode, Node entryNode, str variableName) {
 	if(!(entryNode in ADJACENCIES_MATRIX)) return;
 	if(size(ADJACENCIES_MATRIX[entryNode]) != 1) return;
 
 	for(child <- ADJACENCIES_MATRIX[entryNode]) {
 		if(child == originalNode) return;
-	
+
 		if(matchPhiFunction(child, variableName)) {
-		
+
 			oldPhiFunctionStmt = child;
 			newPhiFunctionStmt = replacePhiFunctionVersion(ADJACENCIES_MATRIX, child);
 			renameNodeOcurrecies(oldPhiFunctionStmt, newPhiFunctionStmt);
-		
-			return;	
+
+			return;
 		};
-		
-		dfsPhiFunctionLookup(originalNode, child, variableName);
+
+		dfsPhiFunctionLookupAndRename(originalNode, child, variableName);
 	};
-	
+
 	return;
 }
 
 public bool matchPhiFunction(Node variableNode, str variableName) {
 	switch(variableNode){
-		case stmtNode(assign(_, phiFunction(localVariable(name), _))): return name == variableName; 
-		case stmtNode(assign(_, phiFunction(arrayRef(name, _), _))): return name == variableName; 
+		case stmtNode(assign(_, phiFunction(localVariable(name), _))): return name == variableName;
+		case stmtNode(assign(_, phiFunction(arrayRef(name, _), _))): return name == variableName;
 		default: return false;
 	};
 }
-
 
 public void renameNodeOcurrecies(Node oldStmt, Node newStmt) {
 	ADJACENCIES_MATRIX = replaceNodeOcurrenciesInTrees(ADJACENCIES_MATRIX, oldStmt, newStmt);
@@ -193,7 +192,7 @@ public Expression replaceImmediateUse(Expression expression) {
 
 public Name returnLastVariableVersion(str name) {
 	Immediate immediate = local(name);
-	variableName = returnLocalImmediateName(immediate);
+	variableName = getVariableImmediateName(immediate);
 
 	int versionIndex = getVariableVersionStacked(immediate);
 	str newVariableName = buildVersionName(variableName, versionIndex);
@@ -214,17 +213,6 @@ public bool isSkipableStatement(stmtArgument) {
 	};
 
 	return false;
-}
-
-public Stack[int] popOldNode(Node oldNode) {
-	Variable V = getStmtVariable(oldNode);
-	Immediate localVariableImmediate = local(V[0]);
-
-	str name = returnLocalImmediateName(localVariableImmediate);
-	newStackTuple = pop(S[name])[1];
-	S[name] = newStackTuple;
-
-	return newStackTuple;
 }
 
 public Node replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
@@ -263,16 +251,16 @@ public Node replaceRightVariableVersion(map[Node, list[Node]] blockTree, Immedia
 
 public Expression renameExpressionVariables(Expression expression, Immediate immediateToRename) {
 	String newVersionName = returnCurrentVersionName(immediateToRename);
-	
+
 	switch(expression) {
 		case arraySubscript(arrayName, local(localName)):
 			return arraySubscript(newVersionName, local(returnCurrentVersionName(local(localName))));
 	};
-	
+
 	list[Immediate] immediates = getExpressionImmediates(expression);
 	int index = indexOf(immediates, immediateToRename);
 	expression[index] = local(newVersionName);
-	
+
 	return expression;
 }
 
@@ -340,6 +328,7 @@ public bool ignoreNode(Node variableNode) {
 		case stmtNode(gotoStmt(_)): return true;
 		case stmtNode(identity(_, _, _)):  return true;
 		case stmtNode(returnEmptyStmt()): return true;
+		case stmtNode(returnStmt(iValue(_))): return true;
 		default: return false;
 	}
 }
@@ -401,13 +390,6 @@ public bool isSameVariable(Node graphNode, Variable variable) {
 	return variableArg == variable;
 }
 
-public String getVariableImmediateName(Immediate immediate) {
-	switch(immediate) {
-		case local(String localName): return localName;
-		default: return "";
-	}
-}
-
 public list[Immediate] getExpressionImmediates(Expression expression) {
 	switch(expression) {
 	  case newInstance(Type instanceType): return [];
@@ -460,14 +442,19 @@ public Expression returnRightHandSideExpression(Node stmtNode) {
 	}
 }
 
-public str returnLocalImmediateName(Immediate immediate) {
+public bool isNonAssignmentStatementToRename(Node graphNode) {
+	return !isReplaced(graphNode) && !isOrdinaryAssignment(graphNode) && !ignoreNode(graphNode) && !isPhiFunctionAssigment(graphNode);
+}
+
+public String getVariableImmediateName(Immediate immediate) {
 	switch(immediate) {
-		case local(name): return name;
+		case local(String localName): return localName;
+		default: return "";
 	}
 }
 
 public int returnAssignmentQuantity(Immediate immediate) {
-	str name = returnLocalImmediateName(immediate);
+	str name = getVariableImmediateName(immediate);
 
 	if(name in C) return C[name];
 
@@ -476,7 +463,7 @@ public int returnAssignmentQuantity(Immediate immediate) {
 }
 
 public int iterateAssignmentQuantity(Immediate immediate) {
-	str name = returnLocalImmediateName(immediate);
+	str name = getVariableImmediateName(immediate);
 
 	C[name] = C[name] + 1;
 
@@ -484,7 +471,7 @@ public int iterateAssignmentQuantity(Immediate immediate) {
 }
 
 public str stackVariableVersion(Immediate immediate, int renameIndex) {
-	str name = returnLocalImmediateName(immediate);
+	str name = getVariableImmediateName(immediate);
 
 	S[name] = name in S ? push(renameIndex, S[name]) : push(0, emptyStack());
 
@@ -492,10 +479,21 @@ public str stackVariableVersion(Immediate immediate, int renameIndex) {
 }
 
 public int getVariableVersionStacked(Immediate immediate) {
-	str name = returnLocalImmediateName(immediate);
+	str name = getVariableImmediateName(immediate);
 
 	if(name in S) return peekIntValue(S[name]);
 
 	S[name] = push(0, emptyStack());
 	return 0;
+}
+
+public Stack[int] popOldNode(Node oldNode) {
+	Variable V = getStmtVariable(oldNode);
+	Immediate localVariableImmediate = local(V[0]);
+
+	str name = getVariableImmediateName(localVariableImmediate);
+	newStackTuple = pop(S[name])[1];
+	S[name] = newStackTuple;
+
+	return newStackTuple;
 }

@@ -13,7 +13,7 @@ import lang::jimple::toolkit::ssa::VariableRenaming;
 public FlowGraph applySSATransformation(MethodBody methodBody) {
 	FlowGraph flowGraph = forwardFlowGraph(methodBody);
 	
-	if(hasUnsupportedInstruction(flowGraph)) // Doest not support invokeStmt rename
+	if(hasUnsupportedInstruction(flowGraph)) // Doest not support invokeStmt and fieldRef rename 
 		return {};
 	
 	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);

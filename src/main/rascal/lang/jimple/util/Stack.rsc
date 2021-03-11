@@ -1,8 +1,8 @@
-// https://github.com/UnB-CIC/sle-course/blob/master/sample-code/oberon/src/lang/util/Stack.rsc
-
 module lang::jimple::util::Stack
 
 import lang::jimple::util::Maybe;
+
+// Source:  https://github.com/UnB-CIC/sle-course/blob/master/sample-code/oberon/src/lang/util/Stack.rsc
 
 data Stack[&T] = emptyStack() | push(&T v, Stack[&T] s);      
 

@@ -1,4 +1,4 @@
-package samples.ssa;
+package samples.ssa.sort;
 
 // Source: https://www.javatpoint.com/bubble-sort-in-java
 public class BubbleSort {
