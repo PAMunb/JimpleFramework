@@ -1,6 +1,7 @@
 package samples.ssa.math_problems;
 
 // Source: https://www.w3resource.com/java-exercises/math/java-math-exercise-20.php
+// This code trigges a decompiler bug, issue https://github.com/PAMunb/JimpleFramework/issues/37
 public class GeneratePrimes {
 	public static int [] generatePrimes(int num) {
 	    boolean[] temp = new boolean[num + 1];
