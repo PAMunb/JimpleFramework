@@ -16,16 +16,16 @@ import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 import lang::jimple::toolkit::ssa::DominanceTree;
 
-map[str, Stack[int]] S = ();
-map[str, int] C = ();
+map[str, Stack[int]] VARIABLE_VERSION_STACK = ();
+map[str, int] VARIABLE_ASSIGNMENT_COUNT = ();
 set[Node] REPLACED_NODES = {};
 map[Node, Node] LAST_VERSION_REPLACED = ();
 map[Node, list[Node]] IDOM_TREE;
 map[Node, list[Node]] ADJACENCIES_MATRIX;
 
 public FlowGraph applyVariableRenaming(FlowGraph flowGraph) {
-	S = ();
-	C = ();
+	VARIABLE_VERSION_STACK = (); // Stack for each variable that holds the next variable to ve replaced
+	VARIABLE_ASSIGNMENT_COUNT = (); // Counts how many assingments have been processed for a given variable
 	REPLACED_NODES = {}; // Keep tracking of all nodes replaced in one execution
 	LAST_VERSION_REPLACED = (); // Keep tracking of the new version of a given node
 
@@ -88,7 +88,7 @@ public map[Node, list[Node]] replace(Node X) {
 	}
 
 	for(child <- IDOM_TREE[X]) {
-		// We need to check the last version replaced because the renamed version was not beign reflected in the current `for` statement iteration
+		// We need to check the last version replaced because the renamed version was not beign reflected in the current `for` statement iteration,
 		// so we need to check the last version replaced
 		nodeToRename = LAST_VERSION_REPLACED[child]? ? LAST_VERSION_REPLACED[child] : child;
 		replace(nodeToRename);
@@ -456,24 +456,24 @@ public String getVariableImmediateName(Immediate immediate) {
 public int returnAssignmentQuantity(Immediate immediate) {
 	str name = getVariableImmediateName(immediate);
 
-	if(name in C) return C[name];
+	if(name in VARIABLE_ASSIGNMENT_COUNT) return VARIABLE_ASSIGNMENT_COUNT[name];
 
-	C[name] = 0;
-	return C[name];
+	VARIABLE_ASSIGNMENT_COUNT[name] = 0;
+	return VARIABLE_ASSIGNMENT_COUNT[name];
 }
 
 public int iterateAssignmentQuantity(Immediate immediate) {
 	str name = getVariableImmediateName(immediate);
 
-	C[name] = C[name] + 1;
+	VARIABLE_ASSIGNMENT_COUNT[name] = VARIABLE_ASSIGNMENT_COUNT[name] + 1;
 
-	return C[name];
+	return VARIABLE_ASSIGNMENT_COUNT[name];
 }
 
 public str stackVariableVersion(Immediate immediate, int renameIndex) {
 	str name = getVariableImmediateName(immediate);
 
-	S[name] = name in S ? push(renameIndex, S[name]) : push(0, emptyStack());
+	VARIABLE_VERSION_STACK[name] = name in VARIABLE_VERSION_STACK ? push(renameIndex, VARIABLE_VERSION_STACK[name]) : push(0, emptyStack());
 
 	return name;
 }
@@ -481,9 +481,9 @@ public str stackVariableVersion(Immediate immediate, int renameIndex) {
 public int getVariableVersionStacked(Immediate immediate) {
 	str name = getVariableImmediateName(immediate);
 
-	if(name in S) return peekIntValue(S[name]);
+	if(name in VARIABLE_VERSION_STACK) return peekIntValue(VARIABLE_VERSION_STACK[name]);
 
-	S[name] = push(0, emptyStack());
+	VARIABLE_VERSION_STACK[name] = push(0, emptyStack());
 	return 0;
 }
 
@@ -492,8 +492,8 @@ public Stack[int] popOldNode(Node oldNode) {
 	Immediate localVariableImmediate = local(V[0]);
 
 	str name = getVariableImmediateName(localVariableImmediate);
-	newStackTuple = pop(S[name])[1];
-	S[name] = newStackTuple;
+	newStackTuple = pop(VARIABLE_VERSION_STACK[name])[1];
+	VARIABLE_VERSION_STACK[name] = newStackTuple;
 
 	return newStackTuple;
 }
