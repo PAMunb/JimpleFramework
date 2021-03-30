@@ -7,10 +7,10 @@ import lang.jimple.internal.generated.Value;
 import lang.jimple.util.Pair;
 
 public class Operand {
-	
-	public Type type; 
-	public Immediate immediate; 
-	
+
+	public Type type;
+	public Immediate immediate;
+
 	Operand(Type type, Immediate immediate) {
 		this.type = type;
 		this.immediate = immediate;

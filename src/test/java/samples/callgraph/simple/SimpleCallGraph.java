@@ -1,13 +1,7 @@
 package samples.callgraph.simple;
 
 /**
-    A 
-   / \
-  B   C
- / \ / \
-D   E   F
-     \ /
-      G
+ * A / \ B C / \ / \ D E F \ / G
  */
 public class SimpleCallGraph {
 
@@ -30,7 +24,7 @@ public class SimpleCallGraph {
 		F();
 	}
 
-	private void D() {	
+	private void D() {
 		log("Executing D");
 	}
 
@@ -45,7 +39,7 @@ public class SimpleCallGraph {
 	private void G() {
 		log("Executing G");
 	}
-	
+
 	static void log(String message) {
 		System.out.println(message);
 	}

@@ -1,15 +1,16 @@
 package samples.generics;
 
 /**
- * @author Manuel Benz
- * created on 13.07.18
+ * @author Manuel Benz created on 13.07.18
  */
 public class A<T> {
-  T t;
+	T t;
 
-  void setT(T t){this.t = t;}
+	void setT(T t) {
+		this.t = t;
+	}
 
-  T getT(){
-    return this.t;
-  }
+	T getT() {
+		return this.t;
+	}
 }

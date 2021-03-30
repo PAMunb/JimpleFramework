@@ -10,11 +10,11 @@ public class CallGraphWithRecursion {
 		quickSort(arr, 0, arr.length - 1);
 		System.out.println(fibonacci(10));
 	}
-	
+
 	public static long fibonacci(final int n) {
 		return (n < 2) ? n : fibonacci(n - 1) + fibonacci(n - 2);
 	}
-	
+
 	void quickSort(int arr[], int low, int high) {
 		if (low < high) {
 			int partitionIndex = partition(arr, low, high);

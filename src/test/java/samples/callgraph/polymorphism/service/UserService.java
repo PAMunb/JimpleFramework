@@ -9,6 +9,7 @@ public class UserService extends AbstractService<User, String> {
 		super(repository);
 	}
 
+	@Override
 	protected boolean valid(User entity) {
 		log("[ContactService] valid: " + entity);
 		return true;

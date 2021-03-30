@@ -1,6 +1,6 @@
 module TestSuite
 
-import TestAvailableExpressions; 
+import lang::jimple::tests::TestAvailableExpressions;
 
 import IO; 
 import List; 
@@ -8,7 +8,6 @@ import List;
 data TestCase = TestCase(str name, bool () function); 
 
 list[TestCase] tcs = [TestCase("TestAvailableExpressions", testAvailableExpressions)]; 
-
 
 public void main(list[str] _) {
   int count = 0; 

@@ -24,7 +24,7 @@ public class CallGraphWithCycle {
 		F();
 	}
 
-	private void D() {	
+	private void D() {
 		A();
 		log("Executing D");
 	}
@@ -40,7 +40,7 @@ public class CallGraphWithCycle {
 	private void G() {
 		log("Executing G");
 	}
-	
+
 	static void log(String message) {
 		System.out.println(message);
 	}

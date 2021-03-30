@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Pair<First, Second> {
-	
-	First first; 
-	Second second; 
+
+	First first;
+	Second second;
 
 }

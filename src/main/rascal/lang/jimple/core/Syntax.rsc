@@ -192,7 +192,7 @@ data Type
   | TFloat()
   | TDouble()
   | TLong()
-  | TObject(Name name)  
+  | TObject(Name name)
   | TArray(Type baseType)
   | TVoid()
   | TString()

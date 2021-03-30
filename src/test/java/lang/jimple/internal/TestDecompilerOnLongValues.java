@@ -14,19 +14,18 @@ import io.usethesource.vallang.impl.persistent.ValueFactory;
 
 public class TestDecompilerOnLongValues {
 
-	@Test 
+	@Test
 	public void decompileInterface() {
 		try {
-			File classFile = new File("./target/test-classes/samples/LongValueSample.class"); 
+			File classFile = new File("./target/test-classes/samples/LongValueSample.class");
 			assertNotNull(classFile);
-			
+
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
 			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
-			
+
 			assertNotNull(c);
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}

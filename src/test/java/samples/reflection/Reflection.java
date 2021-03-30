@@ -8,15 +8,15 @@ import java.lang.reflect.Method;
  */
 public class Reflection {
 
-  public static void staticInvokeReflection() throws NoSuchMethodException {
-    // Invoking static method using reflection
-    Method method = A.class.getMethod("staticFoo");
-    try {
-      method.invoke(null);
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (InvocationTargetException e) {
-      e.printStackTrace();
-    }
-  }
+	public static void staticInvokeReflection() throws NoSuchMethodException {
+		// Invoking static method using reflection
+		Method method = A.class.getMethod("staticFoo");
+		try {
+			method.invoke(null);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
 }

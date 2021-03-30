@@ -72,18 +72,7 @@
 						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/CallGraph.rsc</ignore>
 					</srcIgnores>
 				</configuration>
-				<executions>
-					<execution>
-						<id>it-compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
-
 </project>

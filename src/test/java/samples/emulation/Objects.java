@@ -5,22 +5,22 @@ package samples.emulation;
  */
 public class Objects {
 
-  public void jObjectToJavaObject() {
-    System.out.println(new Foo());
-  }
+	public void jObjectToJavaObject() {
+		System.out.println(new Foo());
+	}
 
-  public void systemOut() {
-    System.out.println();
-  }
+	public void systemOut() {
+		System.out.println();
+	}
 
-  private static final class Foo {
+	private static final class Foo {
 
-    public Foo() {
-    }
+		public Foo() {
+		}
 
-    @Override
-    public String toString() {
-      return "foo";
-    }
-  }
+		@Override
+		public String toString() {
+			return "foo";
+		}
+	}
 }

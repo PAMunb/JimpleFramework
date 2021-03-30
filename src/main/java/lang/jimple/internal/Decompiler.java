@@ -21,12 +21,10 @@ import static lang.jimple.internal.JimpleObjectFactory.type;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -66,7 +64,6 @@ import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
 import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
-import lang.jimple.util.Pair;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -210,11 +207,11 @@ public class Decompiler {
 			mn.instructions.accept(insVisitor);
 
 			// TODO: we commented this line because we want to
-			//  solve this issue using a Jimple transformation.
-			//  we will keep the commented implementation here just while
-			//  we review the new strategy.
+			// solve this issue using a Jimple transformation.
+			// we will keep the commented implementation here just while
+			// we review the new strategy.
 			//
-			//  insVisitor.clearUnusedLabelInstructions();
+			// insVisitor.clearUnusedLabelInstructions();
 
 			stmts = insVisitor.instructions();
 
@@ -279,12 +276,10 @@ public class Decompiler {
 
 	}
 
-
-
 	class InstructionSetVisitor extends org.objectweb.asm.MethodVisitor {
-		
-		Stack<InstructionFlow> stack; 
-		
+
+		Stack<InstructionFlow> stack;
+
 		List<LocalVariableDeclaration> auxiliarlyLocalVariables;
 		HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables;
 		int locals;
@@ -298,14 +293,15 @@ public class Decompiler {
 
 		HashMap<String, CatchClause> catchClauses = new HashMap<>();
 
-		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
+		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables,
+				List<CatchClause> catchClauses) {
 			super(version);
 			this.localVariables = localVariables;
 			auxiliarlyLocalVariables = new ArrayList<>();
-			locals = 1; 
-			
+			locals = 1;
+
 			catchClauses.forEach(c -> this.catchClauses.put(c.with, c));
-			
+
 			stack = new Stack<>();
 			stack.push(new SingleInstructionFlow());
 		}
@@ -317,9 +313,9 @@ public class Decompiler {
 		private void notifyGotoStmt(Statement stmt, String label) {
 			stack.peek().notifyGotoStmt(stmt, label);
 		}
-		
+
 		private void notifyReturn() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.clear();
 			}
 		}
@@ -327,37 +323,35 @@ public class Decompiler {
 		private void nextBranch() {
 			stack.peek().nextBranch();
 		}
-		
+
 		private boolean isBranch() {
 			return stack.peek().isBranch();
 		}
-		
+
 		private boolean readyToMerge(String label) {
 			return stack.peek().readyToMerge(label);
 		}
-		
+
 		@Override
 		public void visitLabel(Label label) {
 			visitedLabels.add(label.toString());
 			if (catchClauses.containsKey(label.toString())) {
-				for(Environment env: stack.peek().environments()) {
+				for (Environment env : stack.peek().environments()) {
 					CatchClause c = catchClauses.get(label.toString());
 					env.operands.push(new Operand(c.exception, Immediate.caughtException()));
 					referencedLabels.add(label.toString());
 				}
 			}
 
-			if(isBranch() && stack.peek().matchMergePoint(label.toString())) {
+			if (isBranch() && stack.peek().matchMergePoint(label.toString())) {
 				nextBranch();
-			}
-			else if(readyToMerge(label.toString()) && stack.size() > 1) {
+			} else if (readyToMerge(label.toString()) && stack.size() > 1) {
 				List<Statement> stmts = new ArrayList<>(stack.pop().merge());
 				stack.peek().environments().get(0).instructions.addAll(stmts);
 				stack.peek().environments().get(0).instructions.add(Statement.label(label.toString()));
 				referencedLabels.add(label.toString());
-			}
-			else {
-				for(Environment env: stack.peek().environments()) {
+			} else {
+				for (Environment env : stack.peek().environments()) {
 					env.instructions.add(Statement.label(label.toString()));
 				}
 			}
@@ -413,7 +407,7 @@ public class Decompiler {
 			Immediate rhs = newIntValueImmediate(increment);
 			Expression expression = newPlusExpression(lhs, rhs);
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.instructions.add(assignmentStmt(Variable.localVariable(var), expression));
 			}
 
@@ -891,7 +885,7 @@ public class Decompiler {
 
 			List<Immediate> args = new ArrayList<>();
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				for (int i = 0; i < argTypes.size(); i++) {
 					args.add(0, env.operands.pop().immediate);
 				}
@@ -901,7 +895,8 @@ public class Decompiler {
 					env.instructions.add(Statement.invokeStmt(exp));
 				} else {
 					LocalVariableDeclaration local = createLocal(methodType);
-					env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+					env.instructions
+							.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
 					env.operands.push(new Operand(local));
 				}
 			}
@@ -910,7 +905,7 @@ public class Decompiler {
 
 		@Override
 		public void visitLdcInsn(Object value) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.push(new Operand(toJimpleTypedValue(value)));
 			}
 
@@ -919,7 +914,7 @@ public class Decompiler {
 
 		@Override
 		public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Immediate key = env.operands.pop().immediate;
 
 				List<CaseStmt> caseStmts = new ArrayList<>();
@@ -945,7 +940,7 @@ public class Decompiler {
 			if (dflt != null) {
 				caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
 			}
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Immediate key = env.operands.pop().immediate;
 				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts));
 			}
@@ -955,80 +950,80 @@ public class Decompiler {
 		@Override
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
-				notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
+				notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this
+																						// decision here.
 			} else if (opcode == Opcodes.JSR) {
 				throw RuntimeExceptionFactory.illegalArgument(vf.string("unsupported instruction JSR" + opcode), null,
 						null);
 			} else {
-				for(Environment env: stack.peek().environments()) {
+				for (Environment env : stack.peek().environments()) {
 					Expression exp = null;
 					Immediate first = env.operands.pop().immediate;
 					Immediate second = Immediate.iValue(Value.intValue(0));
 					switch (opcode) {
-						case Opcodes.IFEQ:
-							exp = Expression.cmpeq(first, second);
-							break;
-						case Opcodes.IFNE:
-							exp = Expression.cmpne(first, second);
-							break;
-						case Opcodes.IFLT:
-							exp = Expression.cmplt(first, second);
-							break;
-						case Opcodes.IFLE:
-							exp = Expression.cmple(first, second);
-							break;
-						case Opcodes.IFGT:
-							exp = Expression.cmpgt(first, second);
-							break;
-						case Opcodes.IFGE:
-							exp = Expression.cmpge(first, second);
-							break;
-						case Opcodes.IF_ICMPEQ:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmpeq(second, first);
-							break;
-						case Opcodes.IF_ICMPNE:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmpne(second, first);
-							break;
-						case Opcodes.IF_ICMPLT:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmplt(second, first);
-							break;
-						case Opcodes.IF_ICMPGE:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmpge(second, first);
-							break;
-						case Opcodes.IF_ICMPGT:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmpgt(second, first);
-							break;
-						case Opcodes.IF_ICMPLE:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmple(second, first);
-							break;
-						case Opcodes.IF_ACMPEQ:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmpeq(second, first);
-							break;
-						case Opcodes.IF_ACMPNE:
-							second = env.operands.pop().immediate;
-							exp = Expression.cmpne(second, first);
-							break;
-						case Opcodes.IFNULL:
-							exp = Expression.isNull(first);
-							break;
-						case Opcodes.IFNONNULL:
-							exp = Expression.isNotNull(first);
-							break;
-						default:
-							throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null,
-									null);
+					case Opcodes.IFEQ:
+						exp = Expression.cmpeq(first, second);
+						break;
+					case Opcodes.IFNE:
+						exp = Expression.cmpne(first, second);
+						break;
+					case Opcodes.IFLT:
+						exp = Expression.cmplt(first, second);
+						break;
+					case Opcodes.IFLE:
+						exp = Expression.cmple(first, second);
+						break;
+					case Opcodes.IFGT:
+						exp = Expression.cmpgt(first, second);
+						break;
+					case Opcodes.IFGE:
+						exp = Expression.cmpge(first, second);
+						break;
+					case Opcodes.IF_ICMPEQ:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmpeq(second, first);
+						break;
+					case Opcodes.IF_ICMPNE:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmpne(second, first);
+						break;
+					case Opcodes.IF_ICMPLT:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmplt(second, first);
+						break;
+					case Opcodes.IF_ICMPGE:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmpge(second, first);
+						break;
+					case Opcodes.IF_ICMPGT:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmpgt(second, first);
+						break;
+					case Opcodes.IF_ICMPLE:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmple(second, first);
+						break;
+					case Opcodes.IF_ACMPEQ:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmpeq(second, first);
+						break;
+					case Opcodes.IF_ACMPNE:
+						second = env.operands.pop().immediate;
+						exp = Expression.cmpne(second, first);
+						break;
+					case Opcodes.IFNULL:
+						exp = Expression.isNull(first);
+						break;
+					case Opcodes.IFNONNULL:
+						exp = Expression.isNotNull(first);
+						break;
+					default:
+						throw RuntimeExceptionFactory.illegalArgument(vf.string("invalid instruction " + opcode), null,
+								null);
 					}
-					if(visitedLabels.contains(label.toString())) {
+					if (visitedLabels.contains(label.toString())) {
 						env.instructions.add(Statement.ifStmt(exp, label.toString()));
-					}
-					else {
+					} else {
 						stack.push(new BranchInstructionFlow(exp, label.toString()));
 					}
 				}
@@ -1045,7 +1040,7 @@ public class Decompiler {
 				InvokeExpressionFactory factory) {
 			MethodSignature signature = methodSignature(owner.replace("/", "."), name, descriptor);
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				List<Immediate> args = new ArrayList<>();
 
 				for (int i = 0; i < signature.formals.size(); i++) {
@@ -1065,7 +1060,8 @@ public class Decompiler {
 					env.instructions.add(Statement.invokeStmt(exp));
 				} else {
 					LocalVariableDeclaration local = createLocal(signature.returnType);
-					env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+					env.instructions
+							.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
 					env.operands.push(new Operand(local));
 				}
 			}
@@ -1096,7 +1092,7 @@ public class Decompiler {
 		 */
 		private void loadIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.push(new Operand(local));
 			}
 		}
@@ -1109,7 +1105,8 @@ public class Decompiler {
 
 			for (Environment env : stack.peek().environments()) {
 				Immediate immediate = env.operands.pop().immediate;
-				env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
+				env.instructions
+						.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
 			}
 		}
 
@@ -1120,21 +1117,22 @@ public class Decompiler {
 		 */
 		private void retIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.instructions.add(Statement.retStmt(Immediate.local(local.local)));
 			}
 		}
 
 		private void newInstanceIns(Type type) {
 			LocalVariableDeclaration newLocal = createLocal(type);
-			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newInstance(type)));
+			for (Environment env : stack.peek().environments()) {
+				env.instructions
+						.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newInstance(type)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
 
 		private void aNewArrayIns(Type type) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(Type.TArray(type));
 				c_iValue value = (Immediate.c_iValue) operand.immediate;
@@ -1146,7 +1144,8 @@ public class Decompiler {
 				List<ArrayDescriptor> dims = new ArrayList<>();
 				dims.add(ArrayDescriptor.fixedSize(size));
 
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newArray(type, dims)));
+				env.instructions
+						.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newArray(type, dims)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1155,7 +1154,7 @@ public class Decompiler {
 		 * Add a nop instruction
 		 */
 		private void nopIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.instructions.add(Statement.nop());
 			}
 		}
@@ -1164,7 +1163,7 @@ public class Decompiler {
 		 * Load a null value into the top of the operand stack.
 		 */
 		private void acconstNullIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.push(new Operand(Type.TNull(), Immediate.iValue(Value.nullValue())));
 			}
 		}
@@ -1173,7 +1172,7 @@ public class Decompiler {
 		 * Load an int const into the top of the operand stack.
 		 */
 		private void loadIntConstIns(int value, String descriptor) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.push(new Operand(type(descriptor), Immediate.iValue(Value.intValue(value))));
 			}
 		}
@@ -1191,7 +1190,7 @@ public class Decompiler {
 		 * Neg instruction (INEG, LNEG, FNEG, DNEG)
 		 */
 		private void negIns(Type type) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 
 				LocalVariableDeclaration newLocal = createLocal(type);
@@ -1208,7 +1207,7 @@ public class Decompiler {
 		 * Instructions supporting binarya operations.
 		 */
 		private void binOperatorIns(Type type, BinExpressionFactory factory) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand rhs = env.operands.pop();
 				Operand lhs = env.operands.pop();
 
@@ -1223,7 +1222,7 @@ public class Decompiler {
 		}
 
 		private void simpleCastIns(Type targetType) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(targetType);
 				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
@@ -1233,7 +1232,7 @@ public class Decompiler {
 		}
 
 		private void instanceOfIns(Type type) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(Type.TBoolean());
 				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
@@ -1243,7 +1242,7 @@ public class Decompiler {
 		}
 
 		private void returnIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 				env.instructions.add(Statement.returnStmt(operand.immediate));
 				// TODO: perhaps we should call an exit monitor here.
@@ -1252,7 +1251,7 @@ public class Decompiler {
 		}
 
 		private void returnVoidIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.instructions.add(Statement.returnEmptyStmt());
 				// TODO: perhaps we should call an exit monitor here.
 				notifyReturn();
@@ -1260,17 +1259,17 @@ public class Decompiler {
 		}
 
 		private void arrayLengthIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand arrayRef = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal("I");
-				env.instructions.add(
-						assignmentStmt(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate)));
+				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
+						Expression.lengthOf(arrayRef.immediate)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
 
 		private void throwIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand reference = env.operands.pop();
 				env.instructions.add(Statement.throwStmt(reference.immediate));
 				notifyReturn();
@@ -1279,14 +1278,14 @@ public class Decompiler {
 		}
 
 		private void monitorEnterIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand reference = env.operands.pop();
 				env.instructions.add(Statement.enterMonitor(reference.immediate));
 			}
 		}
 
 		private void monitorExitIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand reference = env.operands.pop();
 				env.instructions.add(Statement.exitMonitor(reference.immediate));
 			}
@@ -1298,7 +1297,7 @@ public class Decompiler {
 		 * the stack.
 		 */
 		private void arraySubscriptIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand idx = env.operands.pop();
 				Operand ref = env.operands.pop();
 
@@ -1326,7 +1325,7 @@ public class Decompiler {
 		 * After popping value, idx, and array, no value is introduced into the stack.
 		 */
 		private void storeIntoArrayIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Immediate value = env.operands.pop().immediate;
 				Immediate idx = env.operands.pop().immediate;
 				Immediate arrayRef = env.operands.pop().immediate;
@@ -1341,7 +1340,7 @@ public class Decompiler {
 		 * Removes an operand from the stack.
 		 */
 		private void popIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.pop();
 			}
 		}
@@ -1351,7 +1350,7 @@ public class Decompiler {
 		 * the first operand is either a long or a double, it removes just one operand.
 		 */
 		private void pop2Ins() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand value = env.operands.pop();
 
 				if (allCategory1(value.type)) {
@@ -1364,7 +1363,7 @@ public class Decompiler {
 		 * Duplicate the top operand stack value
 		 */
 		private void dupIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand value = env.operands.pop();
 
 				env.operands.push(value);
@@ -1376,7 +1375,7 @@ public class Decompiler {
 		 * Duplicate the top operand stack value and insert the copy two values down.
 		 */
 		private void dupX1Ins() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				assert env.operands.size() >= 2;
 
 				Operand value1 = env.operands.pop();
@@ -1393,7 +1392,7 @@ public class Decompiler {
 		 * down.
 		 */
 		private void dupX2Ins() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				assert env.operands.size() >= 2;
 
 				Operand value1 = env.operands.pop();
@@ -1420,7 +1419,7 @@ public class Decompiler {
 		 * it duplicates just the first value.
 		 */
 		private void dup2Ins() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				assert env.operands.size() >= 2;
 
 				Operand value1 = env.operands.pop();
@@ -1444,7 +1443,7 @@ public class Decompiler {
 		 * values down, depending on the type category of the values.
 		 */
 		private void dup2X1Ins() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				assert env.operands.size() >= 3;
 
 				Operand value1 = env.operands.pop();
@@ -1471,7 +1470,7 @@ public class Decompiler {
 		 * four values down
 		 */
 		private void dup2X2Ins() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				assert env.operands.size() >= 4;
 
 				Operand value1 = env.operands.pop();
@@ -1510,7 +1509,7 @@ public class Decompiler {
 		}
 
 		private void swapIns() {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				assert env.operands.size() >= 2;
 
 				Operand value1 = env.operands.pop();
@@ -1535,7 +1534,7 @@ public class Decompiler {
 			Type fieldType = type(descriptor);
 			Expression fieldRef = Expression.fieldRef(owner.replace("/", "."), fieldType, field);
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
 
 				env.operands.push(new Operand(newLocal));
@@ -1545,21 +1544,21 @@ public class Decompiler {
 		private void putStaticIns(String owner, String field, String descriptor) {
 			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand value = env.operands.pop();
-				env.instructions.add(assignmentStmt(Variable.staticFieldRef(signature), Expression.immediate(value.immediate)));
+				env.instructions
+						.add(assignmentStmt(Variable.staticFieldRef(signature), Expression.immediate(value.immediate)));
 			}
 		}
 
 		private void putFieldIns(String owner, String field, String descriptor) {
 			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				Operand value = env.operands.pop();
 				Operand operand = env.operands.pop();
 
 				String reference = ((Immediate.c_local) operand.immediate).localName;
-
 
 				env.instructions.add(
 						assignmentStmt(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate)));
@@ -1581,13 +1580,12 @@ public class Decompiler {
 
 			Type fieldType = type(descriptor);
 
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 
 				Immediate instance = env.operands.pop().immediate;
 
-
-				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner, fieldType,
-						field);
+				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner,
+						fieldType, field);
 
 				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
 
@@ -1625,7 +1623,7 @@ public class Decompiler {
 		}
 
 		private void pushConstantValue(Type type, Immediate immediate) {
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				env.operands.push(new Operand(type, immediate));
 			}
 		}
@@ -1679,9 +1677,10 @@ public class Decompiler {
 					idx++;
 				}
 			}
-			for(Environment env: stack.peek().environments()) {
+			for (Environment env : stack.peek().environments()) {
 				if (!staticMethod) {
-					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));
+					env.instructions.add(
+							Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));
 				}
 				int idx = 0;
 				for (Type t : formals) {

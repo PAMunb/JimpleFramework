@@ -1,20 +1,13 @@
 package samples.operators;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 public class IntOps {
-  /*
-  public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
-    IntOps ops = new IntOps();
-    for (Method method : IntOps.class.getMethods()) {
-      if (!method.getName().contains("main")) {
-        final Object invoke = method.invoke(ops);
-        System.out.println(method.getName());
-      }
-    }
-  }
-  */
+	/*
+	 * public static void main(String[] args) throws InvocationTargetException,
+	 * IllegalAccessException { IntOps ops = new IntOps(); for (Method method :
+	 * IntOps.class.getMethods()) { if (!method.getName().contains("main")) { final
+	 * Object invoke = method.invoke(ops); System.out.println(method.getName()); } }
+	 * }
+	 */
 
 //  public void addition() {
 //    int a = 5;
@@ -143,11 +136,11 @@ public class IntOps {
 //    boolean result = (a <= b);
 //    System.out.println(result);
 //  }
-  
-  public void ternaryExpression() {
-	int a = 5;
-	int b = 5;
-	int result = (a == b) ? 1 : 0;
-	System.out.println(result);
-  }
+
+	public void ternaryExpression() {
+		int a = 5;
+		int b = 5;
+		int result = (a == b) ? 1 : 0;
+		System.out.println(result);
+	}
 }

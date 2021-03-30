@@ -2,11 +2,11 @@ package samples.staticInvoke;
 
 public class StaticInvoke {
 
-  public static void staticInvoke() {
-    callee();
-  }
+	public static void staticInvoke() {
+		callee();
+	}
 
-  private static void callee() {
-    System.out.println("foo");
-  }
+	private static void callee() {
+		System.out.println("foo");
+	}
 }

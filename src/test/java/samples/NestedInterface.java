@@ -5,6 +5,7 @@ interface MyInterfaceA {
 }
 
 class NestedInterface implements MyInterfaceA {
+	@Override
 	public void display() {
 		System.out.println("Nested interface method");
 	}

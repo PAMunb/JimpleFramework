@@ -3,12 +3,10 @@ package lang.jimple.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Stack;
-
 import lang.jimple.internal.generated.Statement;
 
 public class SingleInstructionFlow implements InstructionFlow {
-	
+
 	Environment environment;
 
 	public SingleInstructionFlow() {
@@ -23,7 +21,8 @@ public class SingleInstructionFlow implements InstructionFlow {
 	}
 
 	@Override
-	public void nextBranch() { }
+	public void nextBranch() {
+	}
 
 	@Override
 	public void notifyGotoStmt(Statement stmt, String label) {

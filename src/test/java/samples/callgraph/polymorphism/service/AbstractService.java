@@ -15,12 +15,13 @@ public abstract class AbstractService<E extends Entity<ID>, ID extends Serializa
 
 	protected abstract boolean valid(E entity);
 
+	@Override
 	public E save(E entity) {
 		log("[AbstractService] save: " + entity);
 		if (valid(entity)) {
 			return getRepository().save(entity);
 		}
-		throw new RuntimeException("Invalid entity: "+entity);
+		throw new RuntimeException("Invalid entity: " + entity);
 	}
 
 	@Override

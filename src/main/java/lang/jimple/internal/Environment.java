@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Stack;
 
 public class Environment {
-    Stack<Operand> operands;
-    List<Statement> instructions;
+	Stack<Operand> operands;
+	List<Statement> instructions;
 
-    public Environment() {
-        operands = new Stack<>();
-        instructions = new ArrayList<>();
-    }
+	public Environment() {
+		operands = new Stack<>();
+		instructions = new ArrayList<>();
+	}
 }

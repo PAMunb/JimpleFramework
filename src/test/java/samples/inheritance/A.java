@@ -1,9 +1,9 @@
 package samples.inheritance;
 
 abstract class A {
-  abstract void print();
+	abstract void print();
 
-  public void methodA() {
-    System.out.println("eval");
-  }
+	public void methodA() {
+		System.out.println("eval");
+	}
 }

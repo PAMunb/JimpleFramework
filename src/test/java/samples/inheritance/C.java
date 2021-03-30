@@ -5,14 +5,14 @@ package samples.inheritance;
  */
 public class C extends B {
 
-  public int a = 4;
+	public int a = 4;
 
-  @Override
-  public void methodA() {
-    System.out.println("methodAinC");
-  }
+	@Override
+	public void methodA() {
+		System.out.println("methodAinC");
+	}
 
-  public void methodC(){
-    System.out.println("methodC");
-  }
+	public void methodC() {
+		System.out.println("methodC");
+	}
 }

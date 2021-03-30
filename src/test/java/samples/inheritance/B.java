@@ -1,14 +1,15 @@
 package samples.inheritance;
 
 class B extends A {
-  protected int a = 5;
-  protected int b = 3;
+	protected int a = 5;
+	protected int b = 3;
 
-  public void print() {
-    System.out.println("printB");
-  }
+	@Override
+	public void print() {
+		System.out.println("printB");
+	}
 
-  public void methodB() {
-    System.out.println("methodB");
-  }
+	public void methodB() {
+		System.out.println("methodB");
+	}
 }

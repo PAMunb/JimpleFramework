@@ -9,7 +9,7 @@ import List;
 import IO;
 
 loc classLocation = |project://JimpleFramework/target/test-classes/samples/SimpleLambdaExpression.class|;  
-
+//loc classLocation = |project://JimpleFramework/target/test-classes/samples/arrays/ArrayExample.class|;
 
 test bool testLambdaTransformer() { 
   ClassOrInterfaceDeclaration c = decompile(classLocation);
@@ -20,7 +20,8 @@ test bool testLambdaTransformer() {
   
   for(ClassOrInterfaceDeclaration aClass <- classes) {
   	println(prettyPrint(aClass));
+  	println(aClass);	//abstract syntax tree
   }
   
-  return size(classes) == 1; 
+  return size(classes) == 2; 
 }

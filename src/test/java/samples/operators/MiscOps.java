@@ -5,21 +5,21 @@ package samples.operators;
  */
 public class MiscOps {
 
-  public void instanceofOperator() {
-    String name = "Java";
-    boolean result = name instanceof String;
-    System.out.println(result);
-  }
+	public void instanceofOperator() {
+		String name = "Java";
+		boolean result = name instanceof String;
+		System.out.println(result);
+	}
 
-  public void instanceofOperator2() {
-    A a = new A();
-    boolean result = a instanceof A;
-    System.out.println(result);
-  }
+	public void instanceofOperator2() {
+		A a = new A();
+		boolean result = a instanceof A;
+		System.out.println(result);
+	}
 
-  public void ternaryOperator() {
-    boolean a = true;
-    String d = a ? "foo" : "bar";
-    System.out.println(d);
-  }
+	public void ternaryOperator() {
+		boolean a = true;
+		String d = a ? "foo" : "bar";
+		System.out.println(d);
+	}
 }
