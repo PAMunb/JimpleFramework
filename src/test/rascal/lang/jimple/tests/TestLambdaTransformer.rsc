@@ -16,11 +16,12 @@ lrel[loc, int] testRelation = [<|project://<samplesPath>SimpleLambdaExpression.c
 							   <|project://<samplesPath>/lambdaExpressions/AddLambda.class|, 2>,	// 2: Interface Lambda
 							   <|project://<samplesPath>/lambdaExpressions/Palindromes.class|, 4>,	// 3: Palindrome Lambda
 							   <|project://<samplesPath>/lambdaExpressions/Runners.class|, 7>,		// 4: Multiple Runnable Lambdas
-							   <|project://<samplesPath>/lambdaExpressions/SumList.class|, 2>];		// 5: List Lambda
+							   <|project://<samplesPath>/lambdaExpressions/SumList.class|, 2>,		// 5: List Lambda
+							   <|project://<samplesPath>/lambdaExpressions/IncClosure.class|, 2>];	// 6: Closure
 
 test bool testLambdaTransformer() { 
 
-  int n = 3;
+  int n = 6;
   loc classLocation = testRelation[n][0];
   
   ClassOrInterfaceDeclaration c = decompile(classLocation);
@@ -33,5 +34,5 @@ test bool testLambdaTransformer() {
   	//println(aClass);	//abstract syntax tree
   }
   
-  return size(classes) == testRelation[n][1]-1; 
+  return size(classes) == testRelation[n][1]; 
 }

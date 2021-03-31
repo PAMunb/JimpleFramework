@@ -4,7 +4,6 @@ import lang::jimple::core::Syntax;
 
 import String;
 import List;
-//import Type;
 
 alias CID = ClassOrInterfaceDeclaration;
 
@@ -13,7 +12,7 @@ str bootstrapMethod = "bootstrap$";
 public list[ClassOrInterfaceDeclaration] lambdaTransformer(ClassOrInterfaceDeclaration c) {
   list[ClassOrInterfaceDeclaration] classes = [];
   
-  c = visit(c) {	//add LambdaMetafactory verification(in the indy's first argument)
+  c = visit(c) {	//TODO: add LambdaMetafactory verification(in the indy's first argument)
     	
     //Accumulating Transformer: traverse the tree, collect information and also transform tree.
 	case dynamicInvoke(_, bsmArgs, sig, args): {
@@ -24,7 +23,7 @@ public list[ClassOrInterfaceDeclaration] lambdaTransformer(ClassOrInterfaceDecla
 	}
 	
   }
-  //classes += c;
+  classes += c;
   return classes; 
 }
 
@@ -42,35 +41,24 @@ private CID generateBootstrapClass(list[Immediate] bsmArgs, MethodSignature bsmS
 	
 	MethodSignature bootstrapSig = methodSignature(bsmClassName, TVoid(), "\<init\>", formals(bsmSig)); 
 	
-	MethodSignature initSig = methodSignature("java.lang.Object", TVoid(), "\<init\>", []);	
+	MethodSignature initSig = methodSignature("java.lang.Object", TVoid(), "\<init\>", []);
+	
+	list[Type] classVars = formals(bsmSig);
 		
 	list[Immediate] lambdaArgs = [];
 			
 	//MethodBody local variable declarations	
-	list[LocalVariableDeclaration] bsmLocals = generateLocalVarDecls(formals(bsmSig), 0)	//class attribute vars
+	list[LocalVariableDeclaration] bsmLocals = generateLocalVarDecls(formals(bsmSig), 0)	//instance attribute vars
 											   + generateLocalVarDecls([TObject(bsmClassName)], size(formals(bsmSig))); //thisClass var
 												
 	list[LocalVariableDeclaration] initLocals = generateLocalVarDecls([TObject(bsmClassName)], 0)	//thisClass var
-												+ generateLocalVarDecls(formals(bsmSig), 1);	//class attribute vars
+												+ generateLocalVarDecls(formals(bsmSig), 1);	//instance attribute vars
 		
 	// if the type is TObject("java.lang.Object"), jlO, we need to create local variables for type casting
-	
-	//These fail when they shouldn't and I need to know why:
-	//if(valueFormals(bsmArgs[0])[0]==TObject("java.lang.Object"))
-	//if(valueFormals(bsmArgs[0])[0]==object())
-	
-	//comparing a formal to TInteger() ields the correct result, be it true or false
-	//comparing TObject("java.lang.Object") and object() ields the correct result
-	//creating a dummy iValue(methodValue(···)) just like the ones we are reading from 
-	//the abstract syntax tree with a TObject("java.lang.Object") as a formal also ields the correct results
-	//so why is this failing when we read from de decompiled .class?
-	
-	//we only want to create the variables for the cast if the cast is needed
-	//and it is only needed when the lambda type is erased and turned into TObject("java.lang.Object")
-	//this happens most of the time but not in the AddLambda sample for example, where an interface is used
-	
+		
 	list[Type] frm1 = valueFormals(bsmArgs[0]);	//lambda signature formals
 	list[Type] frm2 = valueFormals(bsmArgs[2]);	//erased signature formals (real types)
+	int numArgs = size(frm1);
 	int numCasts = 0;
 		
 	for(i <- [0..size(frm1)]) {
@@ -84,7 +72,7 @@ private CID generateBootstrapClass(list[Immediate] bsmArgs, MethodSignature bsmS
 	if(numCasts>0)
 		targetLocals += generateLocalVarDecls(valueFormals(bsmArgs[2]), size(valueFormals(bsmArgs[0]))+1);
 	
-	targetLocals += generateLocalVarDecls(formals(bsmSig), size(valueFormals(bsmArgs[0]))+numCasts+1);		//class attribute vars
+	targetLocals += generateLocalVarDecls(formals(bsmSig), size(valueFormals(bsmArgs[0]))+numCasts+1);		//instance attribute vars
 	
 	//return var
 	if(returnType(targetSig) != TVoid())
@@ -127,11 +115,13 @@ private CID generateBootstrapClass(list[Immediate] bsmArgs, MethodSignature bsmS
 		lambdaArgs += local("$r<i+numCasts+1>");
 	}
 	
-	//2nd: localFieldRef : class attributes (cap0,..)
+	//2nd: localFieldRef : instance attributes (cap0,..)
 	for(int i <- [0..size(formals(bsmSig))]){
 		Expression lfr = localFieldRef("$r0", bsmClassName, formals(bsmSig)[i], "cap<i>");
-		targetStmts += assign(localVariable("$r<i+(numCasts*2)+1>"), lfr);
-		lambdaArgs += local("$r<i+(numCasts*2)+1>");
+		targetStmts += assign(localVariable("$r<i+(numArgs+numCasts)+1>"), lfr);
+		lambdaArgs += local("$r<i+(numArgs+numCasts)+1>");
+		//targetStmts += assign(localVariable("$r<i+(numCasts*2)+1>"), lfr);
+		//lambdaArgs += local("$r<i+(numCasts*2)+1>");
 	}
 	
 	if(size(frm1)>0 && size(formals(bsmSig))>0)
@@ -145,7 +135,6 @@ private CID generateBootstrapClass(list[Immediate] bsmArgs, MethodSignature bsmS
 		targetStmts += assign(localVariable("$i0"), invokeExp(staticMethodInvoke(methodSignature(bsmArgs[1]), lambdaArgs)));
 		targetStmts += returnStmt(local("$i0"));
 	}
-	
 	
 	//Method bodies
 	MethodBody bsmBody = methodBody(bsmLocals, bsmStmts, []);
