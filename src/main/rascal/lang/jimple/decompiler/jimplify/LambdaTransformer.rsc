@@ -120,8 +120,6 @@ private CID generateBootstrapClass(list[Immediate] bsmArgs, MethodSignature bsmS
 		Expression lfr = localFieldRef("$r0", bsmClassName, formals(bsmSig)[i], "cap<i>");
 		targetStmts += assign(localVariable("$r<i+(numArgs+numCasts)+1>"), lfr);
 		lambdaArgs += local("$r<i+(numArgs+numCasts)+1>");
-		//targetStmts += assign(localVariable("$r<i+(numCasts*2)+1>"), lfr);
-		//lambdaArgs += local("$r<i+(numCasts*2)+1>");
 	}
 	
 	if(size(frm1)>0 && size(formals(bsmSig))>0)
