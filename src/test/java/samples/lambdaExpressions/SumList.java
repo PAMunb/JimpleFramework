@@ -1,10 +1,13 @@
-import java.util.*;
+package samples.lambdaExpressions;
 
-public class SumList{
-    public static void main (String[] args) throws Exception {
+import java.util.Arrays;
+import java.util.List;
 
-        List<Integer> nums = Arrays.asList(1,2,3,4);
-        
-        System.out.println(nums.stream().mapToInt(n -> n.intValue()).sum());
-    }
+public class SumList {
+	public static void main(String[] args) throws Exception {
+
+		List<Integer> nums = Arrays.asList(1, 2, 3, 4);
+
+		System.out.println(nums.stream().mapToInt(n -> n.intValue()).sum());
+	}
 }

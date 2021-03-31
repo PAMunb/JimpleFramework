@@ -5,23 +5,33 @@ import lang::jimple::decompiler::Decompiler;
 import lang::jimple::decompiler::jimplify::LambdaTransformer;
 import lang::jimple::util::JPrettyPrinter; 
  
-import List; 
+import List;
 import IO;
 
-loc classLocation = |project://JimpleFramework/target/test-classes/samples/SimpleLambdaExpression.class|;  
-//loc classLocation = |project://JimpleFramework/target/test-classes/samples/arrays/ArrayExample.class|;
+
+str samplesPath = "JimpleFramework/target/test-classes/samples/";
+
+lrel[loc, int] testRelation = [<|project://<samplesPath>SimpleLambdaExpression.class|, 2>,			// 0: Simple Lambda
+							   <|project://<samplesPath>/arrays/ArrayExample.class|, 3>,			// 1: Array Lambda
+							   <|project://<samplesPath>/lambdaExpressions/AddLambda.class|, 2>,	// 2: Interface Lambda
+							   <|project://<samplesPath>/lambdaExpressions/Palindromes.class|, 4>,	// 3: Palindrome Lambda
+							   <|project://<samplesPath>/lambdaExpressions/Runners.class|, 7>,		// 4: Multiple Runnable Lambdas
+							   <|project://<samplesPath>/lambdaExpressions/SumList.class|, 2>];		// 5: List Lambda
 
 test bool testLambdaTransformer() { 
+
+  int n = 3;
+  loc classLocation = testRelation[n][0];
+  
   ClassOrInterfaceDeclaration c = decompile(classLocation);
   
   println(prettyPrint(c));
   
   list[ClassOrInterfaceDeclaration] classes = lambdaTransformer(c);
-  
   for(ClassOrInterfaceDeclaration aClass <- classes) {
   	println(prettyPrint(aClass));
-  	println(aClass);	//abstract syntax tree
+  	//println(aClass);	//abstract syntax tree
   }
   
-  return size(classes) == 2; 
+  return size(classes) == testRelation[n][1]-1; 
 }
