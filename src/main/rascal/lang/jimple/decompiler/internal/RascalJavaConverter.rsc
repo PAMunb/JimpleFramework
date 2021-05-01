@@ -237,7 +237,7 @@ private str resolve(map[str, str] aliases, str t) {
   // these are two special cases here. 
   // lets do a workaround here, because 
   // we cannot differentiate int and long in Rascal. 
-  // the same is true beteen real and double
+  // the same is true between real and double
   switch(t) {
     case "Long"  : return "Long";
     case "Double": return "Double";  
