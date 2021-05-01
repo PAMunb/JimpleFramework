@@ -30,15 +30,15 @@ data Immediate
  ; 
  
 public data ClassOrInterfaceDeclaration 
- = classDecl(Type typeName,
-     list[Modifier] modifiers,
+ = classDecl(list[Modifier] modifiers,
+     Type classType,
      Type superClass,
      list[Type] interfaces,
      list[Field] fields,
      list[Method] methods
    ) 
- | interfaceDecl(Type typeName,
-     list[Modifier] modifiers, 
+ | interfaceDecl(list[Modifier] modifiers,
+     Type interfaceType, 
      list[Type] interfaces, 
      list[Field] fields,
      list[Method] methods
