@@ -20,12 +20,12 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
 
    
    
-   public static ClassOrInterfaceDeclaration classDecl(Type typeName, List<Modifier> modifiers, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods)  {
-     return new c_classDecl(typeName, modifiers, superClass, interfaces, fields, methods);
+   public static ClassOrInterfaceDeclaration classDecl(List<Modifier> modifiers, Type classType, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods)  {
+     return new c_classDecl(modifiers, classType, superClass, interfaces, fields, methods);
    }
    
-   public static ClassOrInterfaceDeclaration interfaceDecl(Type typeName, List<Modifier> modifiers, List<Type> interfaces, List<Field> fields, List<Method> methods)  {
-     return new c_interfaceDecl(typeName, modifiers, interfaces, fields, methods);
+   public static ClassOrInterfaceDeclaration interfaceDecl(List<Modifier> modifiers, Type interfaceType, List<Type> interfaces, List<Field> fields, List<Method> methods)  {
+     return new c_interfaceDecl(modifiers, interfaceType, interfaces, fields, methods);
    }
     
 
@@ -33,9 +33,9 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
    @EqualsAndHashCode
    public static class c_classDecl extends ClassOrInterfaceDeclaration {
      
-     public Type typeName;
-     
      public List<Modifier> modifiers;
+     
+     public Type classType;
      
      public Type superClass;
      
@@ -46,11 +46,11 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      public List<Method> methods;
      
    
-       public c_classDecl(Type typeName, List<Modifier> modifiers, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods) {
-        
-          this.typeName = typeName;  
+       public c_classDecl(List<Modifier> modifiers, Type classType, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods) {
         
           this.modifiers = modifiers;  
+        
+          this.classType = classType;  
         
           this.superClass = superClass;  
         
@@ -66,14 +66,14 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      public IConstructor createVallangInstance(IValueFactory vf) {
      
        
-         IValue iv_typeName = typeName.createVallangInstance(vf);
-       
          IList iv_modifiers = vf.list();
          
          for(Modifier v: modifiers) {
           iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
          }
                  
+       
+         IValue iv_classType = classType.createVallangInstance(vf);
        
          IValue iv_superClass = superClass.createVallangInstance(vf);
        
@@ -101,9 +101,9 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
          
        return vf.constructor(getVallangConstructor()
                 
-                , iv_typeName 
-               
                 , iv_modifiers 
+               
+                , iv_classType 
                
                 , iv_superClass 
                
@@ -125,9 +125,9 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
    @EqualsAndHashCode
    public static class c_interfaceDecl extends ClassOrInterfaceDeclaration {
      
-     public Type typeName;
-     
      public List<Modifier> modifiers;
+     
+     public Type interfaceType;
      
      public List<Type> interfaces;
      
@@ -136,11 +136,11 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      public List<Method> methods;
      
    
-       public c_interfaceDecl(Type typeName, List<Modifier> modifiers, List<Type> interfaces, List<Field> fields, List<Method> methods) {
-        
-          this.typeName = typeName;  
+       public c_interfaceDecl(List<Modifier> modifiers, Type interfaceType, List<Type> interfaces, List<Field> fields, List<Method> methods) {
         
           this.modifiers = modifiers;  
+        
+          this.interfaceType = interfaceType;  
         
           this.interfaces = interfaces;  
         
@@ -154,14 +154,14 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      public IConstructor createVallangInstance(IValueFactory vf) {
      
        
-         IValue iv_typeName = typeName.createVallangInstance(vf);
-       
          IList iv_modifiers = vf.list();
          
          for(Modifier v: modifiers) {
           iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
          }
                  
+       
+         IValue iv_interfaceType = interfaceType.createVallangInstance(vf);
        
          IList iv_interfaces = vf.list();
          
@@ -187,9 +187,9 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
          
        return vf.constructor(getVallangConstructor()
                 
-                , iv_typeName 
-               
                 , iv_modifiers 
+               
+                , iv_interfaceType 
                
                 , iv_interfaces 
                

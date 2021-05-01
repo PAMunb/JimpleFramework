@@ -21,12 +21,10 @@ import static lang.jimple.internal.JimpleObjectFactory.type;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -66,7 +64,6 @@ import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
 import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
-import lang.jimple.util.Pair;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -164,11 +161,11 @@ public class Decompiler {
 			}
 
 			if (isInterface) {
-				_class = ClassOrInterfaceDeclaration.interfaceDecl(type, classModifiers, interfaces, fields, methods)
+				_class = ClassOrInterfaceDeclaration.interfaceDecl(classModifiers, type, interfaces, fields, methods)
 						.createVallangInstance(vf);
 			} else {
 				_class = ClassOrInterfaceDeclaration
-						.classDecl(type, classModifiers, superClass, interfaces, fields, methods)
+						.classDecl(classModifiers, type, superClass, interfaces, fields, methods)
 						.createVallangInstance(vf);
 			}
 		}

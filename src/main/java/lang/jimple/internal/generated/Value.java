@@ -40,6 +40,10 @@ public abstract class Value extends JimpleAbstractDataType {
      return new c_stringValue(sv);
    }
    
+   public static Value booleanValue(Boolean bl)  {
+     return new c_booleanValue(bl);
+   }
+   
    public static Value methodValue(Type returnType, List<Type> formals)  {
      return new c_methodValue(returnType, formals);
    }
@@ -219,6 +223,38 @@ public abstract class Value extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "stringValue";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_booleanValue extends Value {
+     
+     public Boolean bl;
+     
+   
+       public c_booleanValue(Boolean bl) {
+        
+          this.bl = bl;  
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         IValue iv_bl = vf.bool(bl);
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                , iv_bl 
+               
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "booleanValue";
      }
    }
    

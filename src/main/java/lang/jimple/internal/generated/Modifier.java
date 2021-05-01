@@ -20,18 +20,6 @@ public abstract class Modifier extends JimpleAbstractDataType {
 
    
    
-   public static Modifier Abstract()  {
-     return new c_Abstract();
-   }
-   
-   public static Modifier Final()  {
-     return new c_Final();
-   }
-   
-   public static Modifier Native()  {
-     return new c_Native();
-   }
-   
    public static Modifier Public()  {
      return new c_Public();
    }
@@ -44,12 +32,28 @@ public abstract class Modifier extends JimpleAbstractDataType {
      return new c_Private();
    }
    
+   public static Modifier Abstract()  {
+     return new c_Abstract();
+   }
+   
    public static Modifier Static()  {
      return new c_Static();
    }
    
+   public static Modifier Final()  {
+     return new c_Final();
+   }
+   
    public static Modifier Synchronized()  {
      return new c_Synchronized();
+   }
+   
+   public static Modifier Native()  {
+     return new c_Native();
+   }
+   
+   public static Modifier Strictfp()  {
+     return new c_Strictfp();
    }
    
    public static Modifier Transient()  {
@@ -58,10 +62,6 @@ public abstract class Modifier extends JimpleAbstractDataType {
    
    public static Modifier Volatile()  {
      return new c_Volatile();
-   }
-   
-   public static Modifier Strictfp()  {
-     return new c_Strictfp();
    }
    
    public static Modifier Enum()  {
@@ -77,78 +77,6 @@ public abstract class Modifier extends JimpleAbstractDataType {
    }
     
 
-   
-   @EqualsAndHashCode
-   public static class c_Abstract extends Modifier {
-     
-   
-       public c_Abstract() {
-          
-       } 
-     
-     @Override
-     public IConstructor createVallangInstance(IValueFactory vf) {
-     
-       
-         
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
-     }
-   
-     @Override
-     public String getConstructor() {
-       return "Abstract";
-     }
-   }
-   
-   @EqualsAndHashCode
-   public static class c_Final extends Modifier {
-     
-   
-       public c_Final() {
-          
-       } 
-     
-     @Override
-     public IConstructor createVallangInstance(IValueFactory vf) {
-     
-       
-         
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
-     }
-   
-     @Override
-     public String getConstructor() {
-       return "Final";
-     }
-   }
-   
-   @EqualsAndHashCode
-   public static class c_Native extends Modifier {
-     
-   
-       public c_Native() {
-          
-       } 
-     
-     @Override
-     public IConstructor createVallangInstance(IValueFactory vf) {
-     
-       
-         
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
-     }
-   
-     @Override
-     public String getConstructor() {
-       return "Native";
-     }
-   }
    
    @EqualsAndHashCode
    public static class c_Public extends Modifier {
@@ -223,6 +151,30 @@ public abstract class Modifier extends JimpleAbstractDataType {
    }
    
    @EqualsAndHashCode
+   public static class c_Abstract extends Modifier {
+     
+   
+       public c_Abstract() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "Abstract";
+     }
+   }
+   
+   @EqualsAndHashCode
    public static class c_Static extends Modifier {
      
    
@@ -247,6 +199,30 @@ public abstract class Modifier extends JimpleAbstractDataType {
    }
    
    @EqualsAndHashCode
+   public static class c_Final extends Modifier {
+     
+   
+       public c_Final() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "Final";
+     }
+   }
+   
+   @EqualsAndHashCode
    public static class c_Synchronized extends Modifier {
      
    
@@ -267,6 +243,54 @@ public abstract class Modifier extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "Synchronized";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_Native extends Modifier {
+     
+   
+       public c_Native() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "Native";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_Strictfp extends Modifier {
+     
+   
+       public c_Strictfp() {
+          
+       } 
+     
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+     
+       
+         
+       return vf.constructor(getVallangConstructor()
+                
+                ); 
+     }
+   
+     @Override
+     public String getConstructor() {
+       return "Strictfp";
      }
    }
    
@@ -315,30 +339,6 @@ public abstract class Modifier extends JimpleAbstractDataType {
      @Override
      public String getConstructor() {
        return "Volatile";
-     }
-   }
-   
-   @EqualsAndHashCode
-   public static class c_Strictfp extends Modifier {
-     
-   
-       public c_Strictfp() {
-          
-       } 
-     
-     @Override
-     public IConstructor createVallangInstance(IValueFactory vf) {
-     
-       
-         
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
-     }
-   
-     @Override
-     public String getConstructor() {
-       return "Strictfp";
      }
    }
    
