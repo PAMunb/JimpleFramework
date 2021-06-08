@@ -74,7 +74,7 @@ data Variable
  | staticFieldRef(FieldSignature field)
  ;  
  
-data Statement  
+data Statement(String methodSignature = "", int startLine = -1, int endLine = -1)  
   = label(Label label)  
   | breakpoint()
   | enterMonitor(Immediate immediate)

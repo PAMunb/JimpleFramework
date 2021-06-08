@@ -14,12 +14,47 @@ import io.usethesource.vallang.IValueFactory;
 import io.usethesource.vallang.impl.persistent.ValueFactory;
 
 public class TestDecompiler {
+	@Test
+	public void decompileClassWithIfStatement() {
+		try {
+			File classFile = new File("./target/test-classes/samples/IfStatement.class");
+			assertNotNull(classFile);
+
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+
+			assertNotNull(c);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
 
 
-	@Test 
+	@Test
 	public void decompileClassWithFields() {
 		try {
 			File classFile = new File("./target/test-classes/samples/ClassWithFields.class"); 
+			assertNotNull(classFile);
+			
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			
+			assertNotNull(c);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+	
+	@Test 
+	public void decompileClassWithSimpleLambdaExpression() {
+		try {
+			File classFile = new File("./target/test-classes/samples/SimpleLambdaExpression.class"); 
 			assertNotNull(classFile);
 			
 			IValueFactory vf = ValueFactory.getInstance();
@@ -89,6 +124,7 @@ public class TestDecompiler {
 		}
 	}
 	
+	@Ignore
 	@Test 
 	public void decompileSlf4JMDCClass() {
 		try {
@@ -162,7 +198,7 @@ public class TestDecompiler {
 		}
 	}
 	
-	@Test 
+	@Test
 	public void decompileSwitchCaseSample() {
 		try {
 			File classFile = new File("./target/test-classes/samples/SwitchCaseSample.class"); 			
@@ -180,7 +216,7 @@ public class TestDecompiler {
 		}
 	}
 	
-	@Test 
+	@Test
 	public void decompileControlStatements() {
 		try {
 			File classFile = new File("./target/test-classes/samples/ControlStatements.class"); 			
