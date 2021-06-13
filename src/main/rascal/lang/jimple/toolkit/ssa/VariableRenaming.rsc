@@ -217,9 +217,12 @@ public bool isSkipableStatement(stmtArgument) {
 }
 
 public Node replacePhiFunctionVersion(map[Node, list[Node]] blockTree, Node variableNode) {
-	assignStatement = returnStmtNodeBody(variableNode);	
-	assign(assignVariable, assignPhiFunction) = assignStatement;
-	phiFunction(phiFunctionVariable, variableVersionList) = assignPhiFunction;
+	assignVariable = returnLeftHandSideVariable(variableNode);
+	assignPhiFunction = returnRightHandSideExpression(variableNode);
+	
+	phiFunctionVariable = returnPhiFunctionLeftHandSide(assignPhiFunction);
+	variableVersionList = returnPhiFunctionRightHandSide(assignPhiFunction);
+	
 	variableName = phiFunctionVariable[0];
 	Immediate localVariableImmediate = local(variableName);
 	versionIndex = getVariableVersionStacked(localVariableImmediate);
@@ -274,7 +277,7 @@ public String returnCurrentVersionName(Immediate immediate) {
 public bool isRenamed(Node assignNode) {
 	if(ignoreNode(assignNode)) return false;
 
-	stmtNode(assignStmt) = assignNode;
+	assignStmt = returnStmtNodeBody(assignNode);
 
 	switch(assignNode) {
 		case stmtNode(assign(localVariable(name), _)) : return contains(name, "version");
@@ -310,7 +313,7 @@ public bool ignoreNode(Node variableNode) {
 public bool isOrdinaryAssignment(Node variableNode) {
 	if(ignoreNode(variableNode)) return false;
 
-	stmtNode(statement) = variableNode;
+	statement = returnStmtNodeBody(variableNode);
 	switch(statement) {
 		case assign(_, _): return true;
 		default: return false;
@@ -320,7 +323,7 @@ public bool isOrdinaryAssignment(Node variableNode) {
 public bool isPhiFunctionAssigment(Node variableNode) {
 	if(ignoreNode(variableNode)) return false;
 
-	stmtNode(assignStatement) = variableNode;
+	assignStatement = returnStmtNodeBody(variableNode);
 	if(size(assignStatement[..]) != 2) return false;
 
 	possiblePhiFunction = assignStatement[1];
@@ -334,7 +337,7 @@ public bool isPhiFunctionAssigment(Node variableNode) {
 public bool isVariable(Node graphNode) {
 	if (size(graphNode[..]) == 0) return false;
 
-	stmtNode(assignStatement) = graphNode;
+	assignStatement = returnStmtNodeBody(graphNode);
 	variableArg = assignStatement[0];
 	typeOfVariableArg = typeOf(variableArg);
 
@@ -346,7 +349,7 @@ public bool isVariable(Node graphNode) {
 public bool isSameVariable(Node graphNode, Variable variable) {
 	if (size(graphNode[..]) == 0) return false;
 
-	stmtNode(assignStatement) = graphNode;
+	assignStatement = returnStmtNodeBody(graphNode);
 	variableArg = assignStatement[0];
 	typeOfVariableArg = typeOf(variableArg);
 

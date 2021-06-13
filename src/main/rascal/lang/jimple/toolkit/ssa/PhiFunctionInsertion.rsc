@@ -3,13 +3,15 @@ module lang::jimple::toolkit::ssa::PhiFunctionInsertion
 import demo::Dominators;
 import Set;
 import Relation;
-import analysis::graphs::Graph;
-import lang::jimple::toolkit::FlowGraph;
-import lang::jimple::core::Syntax;
 import Type;
 import IO;
 import Node;
 import List;
+
+import analysis::graphs::Graph;
+import lang::jimple::toolkit::FlowGraph;
+import lang::jimple::core::Syntax;
+import lang::jimple::toolkit::ssa::Helpers;
 
 public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] dominanceFrontier) {
 	newFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph };
@@ -55,7 +57,7 @@ public bool isJoinNode(FlowGraph flowGraph, Node frontierNode) {
 }
 
 public &T getStmtVariable(Node graphNode) {
-	stmtNode(assignStatement) = graphNode;
+	assignStatement = returnStmtNodeBody(graphNode);
 	variableArg = assignStatement[0];
 
 	return variableArg;
@@ -68,7 +70,7 @@ public list[Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {
 public bool isVariable(Node graphNode) {
 	if (size(graphNode[..]) == 0) return false;
 
-	stmtNode(assignStatement) = graphNode;
+	assignStatement = returnStmtNodeBody(graphNode);
 	if (size(assignStatement[..]) == 0) return false;
 
 	variableArg = assignStatement[0];
@@ -82,7 +84,7 @@ public bool isVariable(Node graphNode) {
 public bool isSameVariable(Node graphNode, Variable variable) {
 	if (size(graphNode[..]) == 0) return false;
 
-	stmtNode(assignStatement) = graphNode;
+	assignStatement = returnStmtNodeBody(graphNode);
 	if (size(assignStatement[..]) == 0) return false;
 
 	variableArg = assignStatement[0];

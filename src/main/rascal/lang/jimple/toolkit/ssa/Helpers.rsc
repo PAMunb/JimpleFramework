@@ -8,7 +8,7 @@ import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::core::Syntax;
 
 public Variable returnStmtVariable(Node graphNode) {
-	stmtNode(assignStatement) = graphNode;
+	assignStatement = returnStmtNodeBody(graphNode);
 	variableArg = assignStatement[0];
 
 	switch(variableArg) {
@@ -19,6 +19,18 @@ public Variable returnStmtVariable(Node graphNode) {
 public Statement returnStmtNodeBody(Node stmtNode) {
 	switch(stmtNode) {
 		case stmtNode(stmtBody): return stmtBody;
+	}
+}
+
+public Variable returnPhiFunctionLeftHandSide(Expression phiFunctionExpr) {
+	switch(phiFunctionExpr) {
+		case phiFunction(leftHandSide, _): return leftHandSide;
+	}
+}
+
+public list[Variable] returnPhiFunctionRightHandSide(Expression phiFunctionExpr) {
+	switch(phiFunctionExpr) {
+		case phiFunction(_, rightHandSide): return rightHandSide;
 	}
 }
 
