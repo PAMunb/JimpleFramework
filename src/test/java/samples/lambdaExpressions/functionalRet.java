@@ -2,5 +2,5 @@ package samples.lambdaExpressions;
 
 @FunctionalInterface
 interface functionalRet {
-  String eval();
+	String eval();
 }
