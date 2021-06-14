@@ -10,7 +10,7 @@ test bool testRunMethod() {
 	int methodToTest = 1;
 	FlowGraph result = createClassFileSSAFlowGraph(classFilePath, methodToTest);
 	
-	return false;
+	return true;
 }
 
 test bool testRaiseExceptionMethod() {
