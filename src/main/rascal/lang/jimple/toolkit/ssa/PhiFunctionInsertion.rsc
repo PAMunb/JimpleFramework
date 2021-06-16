@@ -16,51 +16,36 @@ import lang::jimple::toolkit::ssa::Helpers;
 public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] dominanceFrontier) {
 	newFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph };
 	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
-
-	for(Variable variable <- variableList) {
-		phiBasicBlocks = {}; // "F" set of basic blocks where φ is added
-		basicBlocksContainsVariable = {}; // "W" set of basic blocks that contain definitions of v
-
-		for(variableNode <- blocksWithVariable(flowGraph, variable)) { // d ∈ Defs(v)
-			tempVariableNode = variableNode;
-			basicBlocksContainsVariable = basicBlocksContainsVariable + {tempVariableNode};
+	
+	for(V <- variableList) {
+		DomFromPlus = ();
+		Work = ();
+		W = {};
+	
+		for(X <- blocksWithVariable(flowGraph, V)) {
+			Work[X] = 1;
+			W = W + {X};
 		};
-
-		while(size(basicBlocksContainsVariable) != 0) {
-			// remove a basic block X from W
-			tuple[Node, set[Node]] elements = takeOneFrom(basicBlocksContainsVariable);
-			X = elements[0];
-			basicBlocksContainsVariable = elements[1];
-
-			if(X in dominanceFrontier) { // Avoids NoSuchKey error
-				frontierNodes = dominanceFrontier[X];
-				for(frontierNode <- frontierNodes) { // Y : basic block ∈ DF(X )
-					if(size({frontierNode} & phiBasicBlocks) == 0 && isJoinNode(flowGraph, frontierNode)) { // Y \notin F && Y is a join node
-						newFlowGraph = insertPhiFunction(newFlowGraph, frontierNode, variable); // add v←φ(...) at entry of Y
-						phiBasicBlocks = phiBasicBlocks + {frontierNode}; // F ← F ∪ {Y}
-						if(size([frontierNode] & blocksWithVariable(flowGraph, variable)) == 0) { // Y \notin Defs(v)
-							basicBlocksContainsVariable = basicBlocksContainsVariable + {frontierNode}; // W ←W ∪{Y}
-						};
+		
+		while(W != {}) {
+			<X, newSet> = takeOneFrom(W);
+			W = newSet;
+			
+			for(Y <- dominanceFrontier[X]) {
+				if(!(Y in DomFromPlus)) {
+					newFlowGraph = insertPhiFunction(newFlowGraph, Y, V); // add v←φ(...) at entry of Y
+					DomFromPlus[Y] = 1;
+					if(!(Y in DomFromPlus)) {
+						Work(Y) = 1;
+						W = W + {Y};
 					};
 				};
 			};
 		};
 	};
-
+	
 	return newFlowGraph;
-}
 
-public bool isJoinNode(FlowGraph flowGraph, Node frontierNode) {
-	int fathersSize = size([ fatherNode | <fatherNode, childNode> <- flowGraph, childNode == frontierNode ]);
-
-	return fathersSize > 1;
-}
-
-public &T getStmtVariable(Node graphNode) {
-	assignStatement = returnStmtNodeBody(graphNode);
-	variableArg = assignStatement[0];
-
-	return variableArg;
 }
 
 public list[Node] blocksWithVariable(FlowGraph flowGraph, Variable variable) {
