@@ -5,7 +5,7 @@ import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceTree;
 
-public map[Node, set[Node]] createDominanceFrontierBottomUp(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
+public map[Node, set[Node]] createDominanceFrontier(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
 	dominanceFrontiers = ();
 
 	for(X <- dominanceTree) {

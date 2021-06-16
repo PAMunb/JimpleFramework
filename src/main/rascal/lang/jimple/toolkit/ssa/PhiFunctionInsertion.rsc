@@ -14,7 +14,6 @@ import lang::jimple::core::Syntax;
 import lang::jimple::toolkit::ssa::Helpers;
 
 public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] dominanceFrontier) {
-	newFlowGraph = { <origin, destination> | <origin, destination> <- flowGraph };
 	variableList = { getStmtVariable(graphNode) | <graphNode, _> <- flowGraph, isVariable(graphNode) };
 	
 	for(V <- variableList) {
@@ -33,7 +32,7 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 			
 			for(Y <- dominanceFrontier[X]) {
 				if(!(Y in DomFromPlus)) {
-					newFlowGraph = insertPhiFunction(newFlowGraph, Y, V); // add v←φ(...) at entry of Y
+					flowGraph = insertPhiFunction(flowGraph, Y, V); // add v←φ(...) at entry of Y
 					DomFromPlus[Y] = 1;
 					if(!(Y in DomFromPlus)) {
 						Work(Y) = 1;
@@ -44,7 +43,7 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 		};
 	};
 	
-	return newFlowGraph;
+	return flowGraph;
 
 }
 
@@ -66,6 +65,13 @@ public bool isVariable(Node graphNode) {
 	return typeOfVariableArg.name == "Variable";
 }
 
+public &T getStmtVariable(Node graphNode) {
+	assignStatement = returnStmtNodeBody(graphNode);
+	variableArg = assignStatement[0];
+
+	return variableArg;
+}
+
 public bool isSameVariable(Node graphNode, Variable variable) {
 	if (size(graphNode[..]) == 0) return false;
 
@@ -81,6 +87,8 @@ public bool isSameVariable(Node graphNode, Variable variable) {
 }
 
 public FlowGraph insertPhiFunction(FlowGraph flowGraph, Node childNode, Variable variable) {
+	if (childNode == exitNode()) return flowGraph;
+	
 	fatherNodes = predecessors(flowGraph, childNode);
 	phiFunctionStmt = stmtNode(assign(variable, phiFunction(variable, [])));
 
