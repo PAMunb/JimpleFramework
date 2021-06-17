@@ -2,20 +2,13 @@ module lang::jimple::toolkit::ssa::DominanceTree
 
 import demo::Dominators;
 import Set;
-import Relation;
 import lang::jimple::toolkit::FlowGraph;
 import analysis::graphs::Graph;
+import demo::Dominators;
 
 public map[&T, set[&T]] createDominanceTree(Graph[&T] graph) {
-	PRED = graph;
-	ROOT = entryNode();
-
-	set[&T] rootDominators = reachX(PRED, {ROOT}, {});
-	set[&T] VERTICES = carrier(PRED);
-
-	temp = dominators(PRED, ROOT);
-
-	return (V: (rootDominators - reachX(removeNodeFromGraph(graph, V), {ROOT}, {V}) - {V}) | &T V <- VERTICES );
+	rel[&T, set[&T]] dominanceTreeRelations = dominators(graph, entryNode());
+	return ( father: childs | <father, childs> <- dominanceTreeRelations );
 }
 
 public map[Node, list[Node]] createAdjacenciesMatrix(FlowGraph flowGraph) {
@@ -47,7 +40,6 @@ public Graph[&T] removeNodeFromGraph(Graph[&T] graph, &T nodeToRemove) {
 
 
 public Node findIdom(map[&T, set[&T]] dominanceTree, Node child) {
-	ROOT = entryNode();
 	idom = entryNode();
 
 	possibleIdoms = [ father | father <- dominanceTree, child in dominanceTree[father] ];
