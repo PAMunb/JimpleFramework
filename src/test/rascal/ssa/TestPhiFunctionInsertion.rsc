@@ -32,15 +32,15 @@ test bool testPhiFunctionInsertion() {
   	Statement s7 = gotoStmt("print");
 
   	Statement s8 = label("print");
-  	Statement s9 = returnStmt(local("v2"));
+  	Statement s9 = returnStmt(local("v1"));
 
 	list[Statement] stmts = [s1, s2, s3, s4, s5, s6, s7, s8, s9];
 
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
+  	dominanceTree = createDominanceTree(flowGraph);
 
-	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
 	
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 

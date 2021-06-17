@@ -5,23 +5,24 @@ import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceTree;
 
-public map[Node, set[Node]] createDominanceFrontier(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
-	dominanceFrontiers = ();
+public map[Node, set[Node]] createDominanceFrontier(Node X, map[&T, set[&T]] dominanceFrontiers, FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
+	
+	for(child <- dominanceTree[X]) {
+		dominanceFrontiers = createDominanceFrontier(child, dominanceFrontiers, flowGraph, dominanceTree);
+	};
 
-	for(X <- dominanceTree) {
-		dominanceFrontiers[X] = {};
-		
-		for(Y <- flowGraph[X]){
-			if(findIdom(dominanceTree, Y) != X) {
-				dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};		
-			};
+	dominanceFrontiers[X] = {};
+	
+	for(Y <- flowGraph[X]){
+		if(findIdom(dominanceTree, Y) != X) {
+			dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};		
 		};
-		
-		for(Z <- dominanceTree[X]) {
-			for(Y <- dominanceTree[Z]) {
-				if(findIdom(dominanceTree, Y) != Z) {
-					dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};
-				};
+	};
+	
+	for(Z <- dominanceTree[X]) {
+		for(Y <- dominanceTree[Z]) {
+			if(findIdom(dominanceTree, Y) != Z) {
+				dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};
 			};
 		};
 	};
