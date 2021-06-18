@@ -25,10 +25,31 @@ test bool testDominanceFrontier() {
   	flowGraph = forwardFlowGraph(methodStatments);
   	dominanceTree = createDominanceTree(flowGraph);
 
-	result = createDominanceFrontier(flowGraph, dominanceTree);
+	result = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
 
 	return result == (
-	  stmtNode(s6): { stmtNode(gotoStmt("print")) },
-	  stmtNode(s3): { stmtNode(gotoStmt("print")) }
+	  stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(2))))):{
+	    stmtNode(gotoStmt("print"))
+	  },
+	  entryNode():{
+	    stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(2))))),
+	    stmtNode(returnStmt(local("v2"))),
+	    stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(1))))),
+	    exitNode(),
+	    stmtNode(gotoStmt("print"))
+	  },
+	  stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")):{
+	    exitNode()
+	  },
+	  stmtNode(returnStmt(local("v2"))):{},
+	  stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false))))):{
+	    stmtNode(returnStmt(local("v2"))),
+	    exitNode()
+	  },
+	  stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(1))))):{
+	    stmtNode(gotoStmt("print"))
+	  },
+	  exitNode():{},
+	  stmtNode(gotoStmt("print")):{}
 	);
 }

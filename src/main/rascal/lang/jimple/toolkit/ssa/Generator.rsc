@@ -17,7 +17,7 @@ public FlowGraph applySSATransformation(MethodBody methodBody) {
 		return {};
 	
 	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 	result = applyVariableRenaming(phiFunctionFlowGraph);
 	
