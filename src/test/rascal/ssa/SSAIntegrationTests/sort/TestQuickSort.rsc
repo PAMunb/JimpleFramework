@@ -9,6 +9,7 @@ test bool testQuickSortPartitionMethod() {
 	int methodToTest = 1;
 	FlowGraph result = createClassFileSSAFlowGraph(classFilePath, methodToTest);
 
+	// Flow Graph creation error
 	return !isEmpty(result);
 }
 
