@@ -14,14 +14,14 @@ public map[Node, set[Node]] createDominanceFrontier(Node X, map[&T, set[&T]] dom
 	dominanceFrontiers[X] = {};
 	
 	for(Y <- flowGraph[X]){
-		if(findIdom(dominanceTree, Y) != X) {
+		if(findIdom(dominanceTree, Y) != X && isJoinNode(flowGraph, Y)) {
 			dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};		
 		};
 	};
 	
 	for(Z <- dominanceTree[X]) {
 		for(Y <- dominanceTree[Z]) {
-			if(findIdom(dominanceTree, Y) != Z) {
+			if(findIdom(dominanceTree, Y) != Z && isJoinNode(flowGraph, Y)) {
 				dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};
 			};
 		};

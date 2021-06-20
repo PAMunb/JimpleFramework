@@ -15,7 +15,9 @@ test bool testDoesNotInserntInSimpleAssigment() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);	
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+
+	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 	
 	return phiFunctionFlowGraph == flowGraph;
 }
@@ -45,32 +47,32 @@ test bool testPhiFunctionInsertion() {
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	return result == {
-		<entryNode(),
-			stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false)))))>,
-			
-		<stmtNode(assign(localVariable("v0"), immediate(iValue(booleanValue(false))))),
-			stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:"))>,
-		
-		<stmtNode(ifStmt(cmp(local("v0"), iValue(booleanValue(false))), "label1:")),
-			stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2)))))>,
-
-		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(2))))),
-			stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [])))>,
-		
-		<stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")),
-			stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1)))))>,
-		
-		<stmtNode(assign(localVariable("v1"), immediate(iValue(intValue(1))))),
-			stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), [])))>,
-
-		<stmtNode(assign(localVariable("v1"), phiFunction(localVariable("v1"), []))),
-			stmtNode(gotoStmt("print"))>,
-		
-		<stmtNode(gotoStmt("print")),
-			stmtNode(returnStmt(local("v2")))>,
-		
-		<stmtNode(returnStmt(local("v2"))),
-			exitNode()>
+	  <entryNode(),
+	    stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false)))))>,  
+	    
+	  <stmtNode(assign(localVariable("v0"),immediate(iValue(booleanValue(false))))),
+	  	stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:"))>,
+	  	
+	  <stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")),
+	    stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(2)))))>,
+	    
+	  <stmtNode(ifStmt(cmp(local("v0"),iValue(booleanValue(false))),"label1:")),
+	    stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(1)))))>,
+	    
+	  <stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(1))))),
+	    stmtNode(assign(localVariable("v1"),phiFunction(localVariable("v1"),[])))>,
+	    
+	  <stmtNode(assign(localVariable("v1"),immediate(iValue(intValue(2))))),
+	    stmtNode(assign(localVariable("v1"),phiFunction(localVariable("v1"),[])))>,
+	      
+	  <stmtNode(assign(localVariable("v1"),phiFunction(localVariable("v1"),[]))),
+	    stmtNode(gotoStmt("print"))>,
+	    
+	  <stmtNode(gotoStmt("print")),
+	    stmtNode(returnStmt(local("v1")))>,
+	    
+	  <stmtNode(returnStmt(local("v1"))),
+	    exitNode()>
 	};
 }
 
@@ -94,7 +96,7 @@ test bool testPhiFunctionInsertionForArray() {
   	flowGraph = forwardFlowGraph(methodStatments);
 
 	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
 	
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 
