@@ -30,13 +30,15 @@ public FlowGraph insertPhiFunctions(FlowGraph flowGraph, map[&T, set[&T]] domina
 			<X, newSet> = takeOneFrom(W);
 			W = newSet;
 			
-			for(Y <- dominanceFrontier[X]) {
-				if(!(Y in DomFromPlus)) {
-					flowGraph = insertPhiFunction(flowGraph, Y, V); // add v←φ(...) at entry of Y
-					DomFromPlus[Y] = 1;
+			if(X in dominanceFrontier) {
+				for(Y <- dominanceFrontier[X]) {
 					if(!(Y in DomFromPlus)) {
-						Work(Y) = 1;
-						W = W + {Y};
+						flowGraph = insertPhiFunction(flowGraph, Y, V); // add v←φ(...) at entry of Y
+						DomFromPlus[Y] = 1;
+						if(!(Y in DomFromPlus)) {
+							Work(Y) = 1;
+							W = W + {Y};
+						};
 					};
 				};
 			};

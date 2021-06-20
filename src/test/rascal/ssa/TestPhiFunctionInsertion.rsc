@@ -42,7 +42,7 @@ test bool testPhiFunctionInsertion() {
   	flowGraph = forwardFlowGraph(methodStatments);
   	dominanceTree = createDominanceTree(flowGraph);
 
-	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 

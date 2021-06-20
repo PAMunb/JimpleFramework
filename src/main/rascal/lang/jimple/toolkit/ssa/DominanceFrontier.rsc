@@ -5,31 +5,21 @@ import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceTree;
 
-public map[Node, set[Node]] createDominanceFrontier(Node X, map[&T, set[&T]] dominanceFrontiers, FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
+public map[Node, set[Node]] createDominanceFrontier(FlowGraph flowGraph, map[&T, set[&T]] dominanceTree) {
+	allNodes = { origin | <origin, _> <- flowGraph } + { destination | <_, destination> <- flowGraph };
 	
-	for(child <- dominanceTree[X]) {
-		dominanceFrontiers = createDominanceFrontier(child, dominanceFrontiers, flowGraph, dominanceTree);
-	};
-
-	dominanceFrontiers[X] = {};
+	dominanceFrontiers = ();
 	
-	for(Y <- flowGraph[X]){
-		if(findIdom(dominanceTree, Y) != X && isJoinNode(flowGraph, Y)) {
-			dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};		
-		};
-	};
-	
-	for(Z <- dominanceTree[X]) {
-		for(Y <- dominanceTree[Z]) {
-			if(findIdom(dominanceTree, Y) != Z && isJoinNode(flowGraph, Y)) {
-				dominanceFrontiers[X] = dominanceFrontiers[X] + {Y};
+	for(graphNode <- allNodes) {
+		for(predecessor <- predecessors(flowGraph, graphNode)) {
+			tempPredecessor = predecessor;
+			while(tempPredecessor != findIdom(dominanceTree, graphNode)) {
+				dominanceFrontiers[tempPredecessor] = tempPredecessor in dominanceFrontiers ? dominanceFrontiers[tempPredecessor] : {};
+				dominanceFrontiers[tempPredecessor] = dominanceFrontiers[tempPredecessor] + {graphNode};
+				tempPredecessor = findIdom(dominanceTree, tempPredecessor);
 			};
 		};
 	};
-
+	
 	return dominanceFrontiers;
-}
-
-public bool isJoinNode(FlowGraph flowGraph, Node child) {
-	return size(predecessors(flowGraph, child)) >= 2;
 }
