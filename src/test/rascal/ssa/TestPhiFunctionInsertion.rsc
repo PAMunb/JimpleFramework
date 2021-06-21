@@ -15,7 +15,7 @@ test bool testDoesNotInserntInSimpleAssigment() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);	
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 	
@@ -96,7 +96,7 @@ test bool testPhiFunctionInsertionForArray() {
   	flowGraph = forwardFlowGraph(methodStatments);
 
 	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	
 	result = insertPhiFunctions(flowGraph, dominanceFrontier);
 

@@ -1,6 +1,5 @@
 module lang::jimple::toolkit::ssa::DominanceFrontier
 
-import Set;
 import analysis::graphs::Graph;
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::toolkit::ssa::DominanceTree;

@@ -16,7 +16,7 @@ test bool testLeftHandSideImmediatesRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
@@ -37,7 +37,7 @@ test bool testRightHandSideImmediatesRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
@@ -62,7 +62,7 @@ test bool testRightHandMultipleImmediatesRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
@@ -86,7 +86,7 @@ test bool testLeftHandMultipleImmediatesRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
@@ -120,7 +120,7 @@ test bool testPhiFunctionArgumentsRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
@@ -174,7 +174,7 @@ test bool testPhiFunctionArrayArgumentsRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
@@ -230,7 +230,7 @@ test bool testPhiFunctionArraySubsArgumentsRename() {
   	methodStatments = methodBody([], stmts, []);
   	flowGraph = forwardFlowGraph(methodStatments);
   	map[&T, set[&T]] dominanceTree = createDominanceTree(flowGraph);
-  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(entryNode(), (), flowGraph, dominanceTree);
+  	map[&T, set[&T]] dominanceFrontier = createDominanceFrontier(flowGraph, dominanceTree);
 	FlowGraph phiFunctionFlowGraph = insertPhiFunctions(flowGraph, dominanceFrontier);
 
 	result = applyVariableRenaming(phiFunctionFlowGraph);
