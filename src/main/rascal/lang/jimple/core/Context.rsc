@@ -32,7 +32,7 @@ data ClassType = ApplicationClass()
                
 data DeclaredMethod = Method(Method method, bool entryPoint); 
                
-data DeclaredClass = Class(ClassOrInterfaceDeclaration, ClassType); 
+data DeclaredClass = Class(ClassOrInterfaceDeclaration dec, ClassType t); 
 
 alias ClassTable = map[Type, DeclaredClass];
 alias MethodTable = map[Name, DeclaredMethod];
@@ -72,6 +72,8 @@ alias Transformation = Analysis[ExecutionContext];
  *
  * TODO: we should compute the signature of the method before checking if it is 
  * in the <code>entryPoints</code>. 
+ *
+ * TODO: omit the package-info. Is being treated as an interface
  */
 ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints) = createExecutionContext(classPath, entryPoints, false);
 ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoints, bool verbose) {
@@ -79,7 +81,8 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 	
 	errors = [f | Error(f) <- classes]; 
 	
-	if(verbose) {
+	if(verbose && !isEmpty(errors)) {
+		println("ERRORS: ");
 		println(errors); 
 	}
 		

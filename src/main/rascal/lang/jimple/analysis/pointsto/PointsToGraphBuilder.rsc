@@ -2,6 +2,7 @@ module lang::jimple::analysis::pointsto::PointsToGraphBuilder
 
 import lang::jimple::analysis::pointsto::PointsToGraph;
 import lang::jimple::core::Syntax;
+import lang::jimple::core::Context; 
 
 import lang::jimple::toolkit::CallGraph;
 import lang::jimple::util::Converters;
@@ -15,13 +16,18 @@ import Node;
 import Relation;
 import Set;
 import String;
+import Exception;
 
 import Type;
+import IO;
+import vis::Render;
+import lang::jimple::toolkit::PrettyPrinter;
 
 
 int i = 0;
 //TODO escolher nome "direito"!!!
 alias Nome = tuple[PointerAssignmentNodeType , PointerAssignmentEdgeType, PointerAssignmentNodeType];
+
 
 public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 	PointerAssignGraph pag = {};
@@ -40,7 +46,8 @@ public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 				println("<currentMethod.name> An assign with invoke to other method"); 
 				//Creates a VarNode with AssignmentEdge to the parameter of method (another VarNode)
 				//Looks for variable nodes that maybe arg in args list of invoke
-				args = getAllPagVars(pag) & exp.args;
+				//args = getAllPagVars(pag) & exp.args;
+				args = getAllPagVars(pag) & getArgs(exp);
 				for (Immediate i <- args) {
 					var1 = VariableNode("green", methodSig, "<i.localName>", getVarType(currentMethod.body, i.localName));
 					var2 = VariableNode("green", "INVOKE", "INVOKE_ARGS", getVarType(currentMethod.body, i.localName));
@@ -67,6 +74,12 @@ public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 	}			
 	return pag;
 }
+
+private list[Immediate] getArgs(specialInvoke(_, _, args)) = args;
+private list[Immediate] getArgs(virtualInvoke(_, _, args)) = args;
+private list[Immediate] getArgs(interfaceInvoke(_, _, args)) = args;
+private list[Immediate] getArgs(staticMethodInvoke(_, args)) = args;
+private list[Immediate] getArgs(dynamicInvoke(_, _, _, args)) = args;
 
 // x = new A			
 private Nome build(Method currentMethod, str methodSig, assign(localVariable(lhs), newInstance(\type))){

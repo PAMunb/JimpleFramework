@@ -171,6 +171,7 @@ private CGModel computeCallGraph(list[MethodSignature] methodsList, CallGraphRun
 		methodsList = drop(1,methodsList);	
 		
 		str from = signature(currentMethod.className, currentMethod.methodName, currentMethod.formals);  
+		//str from = signature(currentMethod);
 
 	  	if(from in rt.ctx.mt){	  	  		  	
 	  		if(! (from in mm)) {

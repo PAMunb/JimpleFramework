@@ -26,10 +26,15 @@ import Relation;
 
 
 //	Types of node on graph
+//TODO tirar color
 data PointerAssignmentNodeType = AllocationNode(str color, str methodSig, str name, Expression exp)
 								| VariableNode(str color, str methodSig, str name, Type \type)
 								| FieldRefNode(str color, str methodSig, str name)
 								| ConcreteFieldNode(str color, str methodSig, str name);
+data PointerAssignmentNodeTypeNovo = AllocationNode(str methodSig, str name, Expression exp)
+								| VariableNode(str methodSig, str name, Type \type)
+								| FieldRefNode(str methodSig, str name)
+								| ConcreteFieldNode(str methodSig, str name);								
 
 //	Types of edges on graph (some way to map NodeType -> NodeType)
 data PointerAssignmentEdgeType = AllocationEdge()
@@ -44,5 +49,7 @@ alias PointerAssignGraph = LGraph[PointerAssignmentNodeType , PointerAssignmentE
 
 // Model for pointsTo Set interface.
 data AllocationSite = allocsite(str methodSig, str name, Expression exp);
+//TODO migrar para relation
 alias PointsToSet = map[str, set[AllocationSite]];
+alias PointsToSetNovo = rel[str, set[AllocationSite]];
 
