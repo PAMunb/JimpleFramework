@@ -92,6 +92,27 @@ public Figure toFigure(PointerAssignGraph pag) {
   boxes = [];
    
   top-down visit(nodes) {
+    case AllocationNode(methodSig, name, _): boxes += box(text("Alloc <name>"), id("<methodSig>.<name>"), size(50), fillColor("blue"));    
+    case VariableNode(methodSig, name, _):   boxes += box(text(name), id("<methodSig>.<name>"), size(50), fillColor("green"));    
+    case FieldRefNode(methodSig, name):      boxes += box(text(name), id("<methodSig>.<name>"), size(50), fillColor("red"));    
+    case ConcreteFieldNode(methodSig, name): boxes += box(text(name), id("<methodSig>.<name>"), size(50), fillColor("yellow"));    
+  }  
+  
+  //Create edges
+  edges = [];
+  edges += [e("<t1.methodSig>.<t1.name>", "<t2.methodSig>.<t2.name>") | <t1, _, t2> <- pag];
+      
+  return scrollable(graph(boxes, edges, hint("layered"), std(size(20)), std(gap(20))));    
+}
+
+private Edge e(str i, str j, FProperty props ...) = edge(i, j, props + toArrow(triangle(5)));
+/*
+public Figure toFigure(PointerAssignGraph pag) {
+  //Create nodes  
+  nodes = carrier(pag);
+  boxes = [];
+   
+  top-down visit(nodes) {
     case AllocationNode(color, methodSig, name, _): {
       println("<methodSig>.<name>");
       boxes += box(text("Alloc <name>"), id("<methodSig>.<name>"), size(50), fillColor(color));
@@ -112,4 +133,4 @@ public Figure toFigure(PointerAssignGraph pag) {
   edges += [edge("<t1.methodSig>.<t1.name>", "<t2.methodSig>.<t2.name>") | <t1, f, t2> <- pag];
       
   return scrollable(graph(boxes, edges, hint("layered"), std(size(20)), std(gap(10))));    
-}
+}*/

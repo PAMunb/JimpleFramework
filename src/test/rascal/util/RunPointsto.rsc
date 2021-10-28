@@ -27,7 +27,8 @@ import lang::jimple::analysis::pointsto::PointsToGraphBuilder;
 public tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/pointsto/simple/|];
-    es = ["samples.pointsto.simple.FooBar.foo()"];
+	//TODO rever entry points
+    es = ["samples.pointsto.simple.FooBar.foo()", "samples.pointsto.simple.FooBar.bar(samples.pointsto.simple.Node)"];
     return <files, es>;
 }
 
@@ -42,33 +43,5 @@ public void pointsTo() {
     PointerAssignGraph pag = execute(files, es, Analysis(pointsToAnalysis(es)), true);
     println("TERMINOU");
     render(toFigure(pag));  
-       
-}
-
-public Figure toFigure(PointerAssignGraph pag) {
-  //Create nodes  
-  nodes = carrier(pag);
-  boxes = [];
-   
-  top-down visit(nodes) {
-    case AllocationNode(color, methodSig, name, _): {
-      println("<methodSig>.<name>");
-      boxes += box(text("Alloc <name>"), id("<methodSig>.<name>"), size(50), fillColor(color));
-    } 
-    case VariableNode(color, methodSig, name, _): {
-      println("<methodSig>.<name>");
-      boxes += box(text(name), id("<methodSig>.<name>"), size(50), fillColor(color));
-    }
-    case FieldRefNode(color, methodSig, name): {
-      println("<methodSig>.<name>");
-      boxes += box(text(name), id("<methodSig>.<name>"), size(50), fillColor(color));
-    }
-    case ConcreteFieldNode(color, _, name): boxes += box(text(name), id(name), size(50), fillColor(color));
-  }  
-  
-  //Create edges
-  edges = [];
-  edges += [edge("<t1.methodSig>.<t1.name>", "<t2.methodSig>.<t2.name>") | <t1, f, t2> <- pag];
-      
-  return scrollable(graph(boxes, edges, hint("layered"), std(size(20)), std(gap(10))));    
+  	     
 }

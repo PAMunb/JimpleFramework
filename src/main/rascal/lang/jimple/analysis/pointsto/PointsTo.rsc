@@ -22,8 +22,8 @@ import Exception;
 
 import Type;
 import IO;
-import vis::Render;
 import lang::jimple::toolkit::PrettyPrinter;
+import lang::jimple::util::JPrettyPrinter;
 
 /*
 The analysis consists of three stages: 
@@ -41,12 +41,17 @@ public &T(ExecutionContext) pointsToAnalysis(list[str] entryPoints) {
 private PointerAssignGraph execute(ExecutionContext ctx, list[str] entryPoints){
 	methodsList = toMethods(ctx, entryPoints);
 			
-	println("ENTRY POINTS: <entryPoints>");
-	println("METHODS: <methodsList>");
-	show(ctx);
+	//println("ENTRY POINTS: <entryPoints>");
+	//println("METHODS: <methodsList>");
+	//show(ctx);
+	/*for(t <- ctx.ct){
+		println(prettyPrint(ctx.ct[t].dec));
+	}*/
 	
 	//build pointer assignement graph
+	//PointerAssignGraph pag = {};
 	PointerAssignGraph pag = buildsPointsToGraph(methodsList);
+	
 	//simplify pointer assignement graph
 	//...
 	//points-to set propagator
