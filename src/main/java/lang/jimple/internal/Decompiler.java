@@ -346,18 +346,25 @@ public class Decompiler {
 
 			if(isBranch() && stack.peek().matchMergePoint(label.toString())) {
 				nextBranch();
+				if(stack.peek().immediateMerge()) {
+					mergeBranches(label);
+				}
 			}
-			else if(readyToMerge(label.toString()) && stack.size() > 1) {
-				List<Statement> stmts = new ArrayList<>(stack.pop().merge());
-				stack.peek().environments().get(0).instructions.addAll(stmts);
-				stack.peek().environments().get(0).instructions.add(Statement.label(label.toString()));
-				referencedLabels.add(label.toString());
+			else if(stack.size() > 1 && (readyToMerge(label.toString()))) {
+				mergeBranches(label);
 			}
 			else {
 				for(Environment env: stack.peek().environments()) {
 					env.instructions.add(Statement.label(label.toString()));
 				}
 			}
+		}
+
+		private void mergeBranches(Label label) {
+			List<Statement> stmts = new ArrayList<>(stack.pop().merge());
+			stack.peek().environments().get(0).instructions.addAll(stmts);
+			//stack.peek().environments().get(0).instructions.add(Statement.label(label.toString()));
+			referencedLabels.add(label.toString());
 		}
 
 		/*
@@ -952,7 +959,13 @@ public class Decompiler {
 		@Override
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
-				notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
+				if(!visitedLabels.contains(label.toString())) {
+					notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
+				} else {
+					for(Environment env: stack.peek().environments()) {
+						env.instructions.add(Statement.gotoStmt(label.toString()));
+					}
+				}
 			} else if (opcode == Opcodes.JSR) {
 				throw RuntimeExceptionFactory.illegalArgument(vf.string("unsupported instruction JSR" + opcode), null,
 						null);

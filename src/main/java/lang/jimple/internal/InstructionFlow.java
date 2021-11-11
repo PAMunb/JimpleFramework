@@ -13,4 +13,5 @@ public interface InstructionFlow {
 	void notifyGotoStmt(Statement stmt, String label);
 	boolean isBranch();
 	boolean readyToMerge(String label);
+	boolean immediateMerge();
 }

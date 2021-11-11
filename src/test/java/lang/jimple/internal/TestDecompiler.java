@@ -1,17 +1,17 @@
 package lang.jimple.internal;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileInputStream;
 
+import io.usethesource.vallang.IList;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IValueFactory;
 import io.usethesource.vallang.impl.persistent.ValueFactory;
+
+import static org.junit.Assert.*;
 
 public class TestDecompiler {
 	@Test
@@ -263,6 +263,7 @@ public class TestDecompiler {
 			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
+			assertExecuteMethodStmts(c, 17);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -304,5 +305,54 @@ public class TestDecompiler {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
+	}
+
+	@Test
+	public void decompileDoWhileStatement() {
+		try {
+			File classFile = new File("./target/test-classes/samples/controlStatements/DoWhileStatement.class");
+			assertNotNull(classFile);
+
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+
+			assertNotNull(c);
+			assertExecuteMethodStmts(c, 15);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	@Test
+	public void decompileWhileStatement() {
+		try {
+			File classFile = new File("./target/test-classes/samples/controlStatements/WhileStatement.class");
+			assertNotNull(classFile);
+
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+
+			assertNotNull(c);
+			assertExecuteMethodStmts(c, 16);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	private void assertExecuteMethodStmts(IConstructor c, int size) {
+		IList methods = (IList) c.get(5);
+
+		assertTrue(methods.size() == 2);
+
+		IConstructor executeMethod = (IConstructor)methods.get(1);
+		IList stmts = (IList) ((IConstructor)executeMethod.get(5)).get(1);
+		assertEquals(size, stmts.size());
+		System.out.println(stmts);
 	}
 }
