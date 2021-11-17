@@ -4,7 +4,6 @@ import lang::jimple::core::Syntax;
 import lang::jimple::analysis::pointsto::spark::PointerAssignmentGraph;
 
 import Relation;
-//import analysis::graphs::Graph;
 import vis::Figure;
 
 

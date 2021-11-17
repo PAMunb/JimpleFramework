@@ -4,22 +4,17 @@ import lang::jimple::core::Context;
 import lang::jimple::core::Syntax;
 import lang::jimple::util::Converters;
 
-import analysis::graphs::Graph;
-import analysis::graphs::LabeledGraph;
-
 import lang::jimple::analysis::pointsto::spark::PointerAssignmentGraph;
 import lang::jimple::analysis::pointsto::spark::PointerAssignmentGraphBuilder;
 import lang::jimple::analysis::pointsto::spark::SparkUtil;
-//import lang::jimple::analysis::pointsto::PointsToGraph;
 
+import Exception;
 import IO;
 import List;
-import Relation;
 import Set;
-//import vis::Figure;
+import String;
+
 import vis::Render;
-
-
 
 
 
@@ -30,35 +25,47 @@ public &T(ExecutionContext) pointsToAnalysis(list[str] entryPoints) {
 }			
 
 //TODO nao eh esse o tipo de retorno
-private PointerAssignGraph execute(ExecutionContext ctx, list[str] entryPoints){
-	methodsList = toMethods(ctx, entryPoints);
+private PointerAssignGraph execute(ExecutionContext ctx, list[str] methods){
+	// select the entry points
+	entrypoints = selectEntryPoints(ctx, methods);
 
 	//build pointer assignement graph
-	PointerAssignGraph pag = buildsPointsToGraph(methodsList);
+	PointerAssignGraph pag = buildsPointsToGraph(ctx, entrypoints);
 	
 	//simplify pointer assignement graph
 	//...
+	
 	//points-to set propagator
 	//...
+	
 	//return points-to analysis result
 	//...
 	
 	return pag;
 }		
 
+list[MethodSignature] selectEntryPoints(ExecutionContext ctx, list[str] givenMethods) = [toMethodSignature(m,ctx) | m <- givenMethods, m in ctx.mt];
 
-private list[Method] toMethods(ExecutionContext ctx, list[str] entryPoints){
-	methodsList = [];	
-	for(e <- entryPoints){
-		methodsList = methodsList + ctx.mt[e].method;
+
+MethodSignature toMethodSignature(str ms, ExecutionContext ctx) {
+	Name className = getClassName(ms);
+	if(className != ""){
+		m = ctx.mt[ms].method;		
+		return methodSignature(className, m.returnType, m.name, m.formals);
 	}
-	return methodsList;
-}		
+	throw IllegalArgument(methodSignature, "The method does not exist in the execution context.");
+}
 
-
+str getClassName(str methodSignature) {
+	if(contains(methodSignature,"(") && contains(methodSignature,".")){
+		untilMethodName = substring(methodSignature,0,findFirst(methodSignature,"("));	
+		return substring(untilMethodName,0,findLast(untilMethodName,"."));
+	}
+	return "";
+}
 
 ////////////////////////////////////////////
-public tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
+tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
 	//TODO compile class before using: mvn test -DskipTests
 	files = [|project://JimpleFramework/target/test-classes/samples/pointsto/simple/|];
 	//TODO rever entry points
@@ -79,49 +86,4 @@ public void pointsTo() {
     render(toFigure(pag));  
   	     
 }
-
-public void p2(){
-MethodBody b = methodBody(  
-    [localVariableDeclaration(TArray(TObject("java.lang.String")),"r6"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"$r0"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"r1"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"r2"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"$r3"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"r4"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"r5")],
-    [identity("r6","@parameter0",TArray(TObject("java.lang.String"))),
-    assign(localVariable("$r0"),newInstance(TObject("samples.pointsto.ex2.O"))),
-    invokeStmt(specialInvoke("$r0",methodSignature("samples.pointsto.ex2.O",TVoid(),"\<init\>",[]),[])),
-    assign(localVariable("r1"),immediate(local("$r0"))),
-    assign(localVariable("r2"),immediate(local("r1"))),
-    assign(localVariable("$r3"),newInstance(TObject("samples.pointsto.ex2.O"))),
-    invokeStmt(specialInvoke("$r3",methodSignature("samples.pointsto.ex2.O",TVoid(),"\<init\>",[]),[])),
-    assign(localVariable("r4"),immediate(local("$r3"))),
-    assign(fieldRef("r1",fieldSignature("samples/pointsto/ex2/O",TObject("samples.pointsto.ex2.O"),"f")),immediate(local("r4"))),
-    assign(localVariable("r5"),invokeExp(staticMethodInvoke(
-      methodSignature(
-      "samples.pointsto.ex2.FooBar",
-      TObject("samples.pointsto.ex2.O"),
-      "bar",
-      [TObject("samples.pointsto.ex2.O")]),
-      [local("r2")]))),
-    returnEmptyStmt()], []);
-    
-  Method main = method([Public(), Static()], TVoid(), "main", [], [], b);
-
-
-  MethodBody c = methodBody(
-    [localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"$r1"),
-    localVariableDeclaration(TObject("samples.pointsto.ex2.O"),"r1")],
-    [identity("r1","@parameter0",TArray(TObject("samples.pointsto.ex2.O"))),
-    assign(localVariable("$r1"),localFieldRef("r1", "samples.pointsto.ex2.O", TObject("samples.pointsto.ex2.O"), "f")),
-    retStmt(local("$r1"))], []);
-  
-  Method bar =  method([Static()], TObject("samples.pointsto.ex2.O"), "bar", [], [], c);
-    
-  PointerAssignGraph pag = buildsPointsToGraph([main, bar]);
-  //println("CG=<pag>");
-  //render(toFigure(pag));  
-}
-
 

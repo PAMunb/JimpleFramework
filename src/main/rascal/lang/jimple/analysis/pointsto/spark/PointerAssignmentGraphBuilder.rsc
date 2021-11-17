@@ -35,7 +35,7 @@ public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodS
 			//TODO arrumar ...					
 			// x = bar(something in our VarNode)			
 			case assign(localVariable(lhs), invokeExp(exp)): {				
-				println("<currentMethod.name> An assign with invoke to other method = <exp>"); 
+				println("******************** <currentMethod.name> An assign with invoke to other method = <exp>"); 
 				//Creates a VarNode with AssignmentEdge to the parameter of method (another VarNode)
 				//Looks for variable nodes that maybe arg in args list of invoke
 				//args = getAllPagVars(pag) & exp.args;
@@ -45,12 +45,16 @@ public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodS
 					//var2 = VariableNode("INVOKE", "INVOKE_ARGS", getVarType(currentMethod.body, i.localName));
 					var1 = VariableNode(methodSig, "<i.localName>", getVarType(currentMethod, i));
 					var2 = VariableNode("INVOKE", "INVOKE_ARGS", getVarType(currentMethod, i));
+					println("interno_var1=<var1>");
+					println("interno_var2=<var2>");
 					edge = AssignmentEdge();
 					pag += <var1, edge, var2>;					
 				}
 				// We also create a relation to be resolved later when the invoked method is treated.				
 				var1 = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));
 				var2 = VariableNode("INVOKE", "INVOKE_ARGS", getVarType(currentMethod.body, lhs));
+				println("var1=<var1>");
+				println("var2=<var2>");
 				edge = ToBeResolved();
 				println("ToBeResolved");
 				pag += <var1, edge, var2>;
@@ -151,6 +155,7 @@ private list[Immediate] getAllPagVars(PointerAssignGraph pag) {
 	return vars;
 }
 
+/*
 private str buildMethodSignatureFromMethod(Method m) {
 	return signature(methodSignature("", m.returnType, m.name, m.formals)); 	
 }
@@ -158,3 +163,4 @@ private str buildMethodSignatureFromMethod(Method m) {
 private AllocationSite AllocSiteFromAllocNode(PointerAssignmentNodeType n) {
 	return allocsite(n.methodSig, n.name, n.exp);	
 }
+*/
