@@ -16,15 +16,17 @@ int i = 0;
 alias Nome = tuple[PointerAssignmentNodeType , PointerAssignmentEdgeType, PointerAssignmentNodeType];
 
 
-public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
+public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodSignature] methodsList) {
 	PointerAssignGraph pag = {};
 	i = 0;
 	
 	// Loking for assigns, all kinds (pointer ones)
 	// Still to go: return, identity, throw
 	while(!isEmpty(methodsList)) {
-		Method currentMethod = head(methodsList);
-		str methodSig = buildMethodSignatureFromMethod(currentMethod);
+		MethodSignature sig = head(methodsList);
+		str methodSig = signature(sig.className, sig.methodName, sig.formals); 
+		Method currentMethod = ctx.mt[methodSig].method;
+		
 		//TODO arrumar assinatura (nao tem o nome da classe)
 		println("****** current method=<methodSig> ");
 		methodsList = drop(1,methodsList);
@@ -70,7 +72,8 @@ public PointerAssignGraph buildsPointsToGraph(list[Method] methodsList) {
 	return pag;
 }
 
-// x = new A			
+// x = new A 
+// a: new A --> x			
 private Nome build(Method currentMethod, str methodSig, assign(localVariable(lhs), newInstance(\type))){
 	println("<currentMethod.name> Creates AllocNode and VariableNode and AllocationEdge"); 
 	i += 1;
@@ -79,8 +82,6 @@ private Nome build(Method currentMethod, str methodSig, assign(localVariable(lhs
 	edge = AllocationEdge();
 	return <alloc, edge, var>;
 }
-
-
 
 // x = new A[][]	
 private Nome build(Method currentMethod, str methodSig,	assign(localVariable(lhs), newArray(\type, _))){	
@@ -104,31 +105,34 @@ private Nome build(Method currentMethod, str methodSig,	assign(localVariable(lhs
 	return <alloc, edge, var>;
 }			
 
-// y = x		
+// y = x	
+// x --> y	
 private Nome build(Method currentMethod, str methodSig, assign(localVariable(lhs), immediate(local(rhs)))){
 	println("<currentMethod.name> Creates VariableNode and VariableNode and AssignmentEdge"); 
-	var1 = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));
-	var2 = VariableNode(methodSig, "<rhs>", getVarType(currentMethod.body, rhs));
+	to = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));
+	from = VariableNode(methodSig, "<rhs>", getVarType(currentMethod.body, rhs));
 	edge = AssignmentEdge();
-	return <var1, edge, var2>;
+	return <from, edge, to>;
 }
 
-
-// z = x.f		
+// z = x.f	
+// x.f --> z	
 private Nome build(Method currentMethod, str methodSig,	a: assign(localVariable(lhs), localFieldRef(rhs, class, \type, fieldName))){
-	println("<currentMethod.name> Creates VariableNode and FieldRefNode and LoadEdge = <a>"); 
-	var = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));
-	ref = FieldRefNode(methodSig, "<lhs>",  "<rhs>.<fieldName>", \type);
+	println("<currentMethod.name> Creates VariableNode and FieldRefNode and LoadEdge = <a>");
+	ref = FieldRefNode(methodSig, "<lhs>",  "<rhs>.<fieldName>", \type); 
+	var = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));	
 	edge = LoadEdge();
-	return <var, edge, ref>;
-}
-// x.f = z	
-private Nome build(Method currentMethod, str methodSig,	a: assign(fieldRef(lhs,fieldSignature(class, \type, fieldName)),immediate(local(rhs)))){
-	println("<currentMethod.name> Creates FieldRefNode abd VariableNode and StoreEdge = <a>");  
-	ref = FieldRefNode(methodSig, "<rhs>", "<lhs>.<fieldName>", \type);
-	var = VariableNode(methodSig, "<rhs>", getVarType(currentMethod.body, rhs));
-	edge = StoreEdge();
 	return <ref, edge, var>;
+}
+
+// x.f = z	
+// z --> x.f
+private Nome build(Method currentMethod, str methodSig,	a: assign(fieldRef(lhs,fieldSignature(class, \type, fieldName)),immediate(local(rhs)))){
+	println("<currentMethod.name> Creates FieldRefNode and VariableNode and StoreEdge = <a>");
+	var = VariableNode(methodSig, "<rhs>", getVarType(currentMethod.body, rhs));  
+	ref = FieldRefNode(methodSig, "<rhs>", "<lhs>.<fieldName>", \type);	
+	edge = StoreEdge();
+	return <var, edge, ref>;
 }	
 
 
