@@ -24,8 +24,8 @@ public PrettyPrintMap PrettyPrint(ExecutionContext ctx) {
 	PrettyPrintMap ppMap = ();
 	
 	top-down visit(ctx) {
-		case classDecl(n, ms, s, is, fs, mss): ppMap[prettyPrint(n)] = prettyPrint(classDecl(n, ms, s, is, fs, mss));
-		case interfaceDecl(n, ms, is, fs, mss):ppMap[prettyPrint(n)] = prettyPrint(interfaceDecl(n, ms, is, fs, mss));	
+		case classDecl(ms, n, s, is, fs, mss): ppMap[prettyPrint(n)] = prettyPrint(classDecl(ms, n, s, is, fs, mss));
+		case interfaceDecl(ms, n, is, fs, mss):ppMap[prettyPrint(n)] = prettyPrint(interfaceDecl(ms, n, is, fs, mss));	
 	}	
 	return ppMap;
 }

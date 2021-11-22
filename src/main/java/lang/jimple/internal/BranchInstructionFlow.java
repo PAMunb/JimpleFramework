@@ -20,6 +20,8 @@ public class BranchInstructionFlow implements InstructionFlow {
 	private BranchState status;
 
 	private Statement gotoMergeStmt;
+
+	private boolean immediateMerge = false;
 	
 	enum BranchState {
 		LEFT,
@@ -109,8 +111,8 @@ public class BranchInstructionFlow implements InstructionFlow {
 				status = BranchState.RIGHT;
 			}
 		    else {
-		    	left.instructions.add(Statement.label(targetStatement));
 		    	status = BranchState.ReadyToMerge;
+		    	immediateMerge = true;
 			}
 		    break;
 		 case RIGHT: status = BranchState.ReadyToMerge; break;
@@ -126,5 +128,10 @@ public class BranchInstructionFlow implements InstructionFlow {
 	@Override
 	public boolean readyToMerge(String label) {
 		return status.equals(BranchState.ReadyToMerge);
+	}
+
+	@Override
+	public boolean immediateMerge() {
+		return immediateMerge;
 	}
 }

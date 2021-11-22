@@ -21,12 +21,10 @@ import static lang.jimple.internal.JimpleObjectFactory.type;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -66,7 +64,6 @@ import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
 import lang.jimple.internal.generated.Value;
 import lang.jimple.internal.generated.Variable;
-import lang.jimple.util.Pair;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -164,11 +161,11 @@ public class Decompiler {
 			}
 
 			if (isInterface) {
-				_class = ClassOrInterfaceDeclaration.interfaceDecl(type, classModifiers, interfaces, fields, methods)
+				_class = ClassOrInterfaceDeclaration.interfaceDecl(classModifiers, type, interfaces, fields, methods)
 						.createVallangInstance(vf);
 			} else {
 				_class = ClassOrInterfaceDeclaration
-						.classDecl(type, classModifiers, superClass, interfaces, fields, methods)
+						.classDecl(classModifiers, type, superClass, interfaces, fields, methods)
 						.createVallangInstance(vf);
 			}
 		}
@@ -349,18 +346,25 @@ public class Decompiler {
 
 			if(isBranch() && stack.peek().matchMergePoint(label.toString())) {
 				nextBranch();
+				if(stack.peek().immediateMerge()) {
+					mergeBranches(label);
+				}
 			}
-			else if(readyToMerge(label.toString()) && stack.size() > 1) {
-				List<Statement> stmts = new ArrayList<>(stack.pop().merge());
-				stack.peek().environments().get(0).instructions.addAll(stmts);
-				stack.peek().environments().get(0).instructions.add(Statement.label(label.toString()));
-				referencedLabels.add(label.toString());
+			else if(stack.size() > 1 && (readyToMerge(label.toString()))) {
+				mergeBranches(label);
 			}
 			else {
 				for(Environment env: stack.peek().environments()) {
 					env.instructions.add(Statement.label(label.toString()));
 				}
 			}
+		}
+
+		private void mergeBranches(Label label) {
+			List<Statement> stmts = new ArrayList<>(stack.pop().merge());
+			stack.peek().environments().get(0).instructions.addAll(stmts);
+			//stack.peek().environments().get(0).instructions.add(Statement.label(label.toString()));
+			referencedLabels.add(label.toString());
 		}
 
 		/*
@@ -955,7 +959,13 @@ public class Decompiler {
 		@Override
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
-				notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
+				if(!visitedLabels.contains(label.toString())) {
+					notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
+				} else {
+					for(Environment env: stack.peek().environments()) {
+						env.instructions.add(Statement.gotoStmt(label.toString()));
+					}
+				}
 			} else if (opcode == Opcodes.JSR) {
 				throw RuntimeExceptionFactory.illegalArgument(vf.string("unsupported instruction JSR" + opcode), null,
 						null);

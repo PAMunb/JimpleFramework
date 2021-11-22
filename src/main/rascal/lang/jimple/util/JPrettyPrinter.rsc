@@ -271,13 +271,13 @@ public str prettyPrint(list[Method] methods) =
 
 public str prettyPrint(ClassOrInterfaceDeclaration unit) {
   switch(unit) {
-    case classDecl(name,ms,super,infs,fields,methods): 
+    case classDecl(ms, name, super, infs, fields, methods): 
     	return 
 			"<prettyPrint(ms)> class <prettyPrint(name)> extends <prettyPrint(super)> <prettyPrint(infs, "implements ")>
     		'{
     		'<prettyPrint(fields)> <prettyPrint(methods)>
 			'}";
-    case interfaceDecl(name,ms,infs,fields,methods):
+    case interfaceDecl(ms, name, infs, fields, methods):
     	return
 			"<prettyPrint(ms)> interface <prettyPrint(name)> extends <prettyPrint(infs,"")>
 			'{ 

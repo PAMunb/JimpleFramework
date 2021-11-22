@@ -50,4 +50,8 @@ public class SingleInstructionFlow implements InstructionFlow {
 		return true;
 	}
 
+	@Override
+	public boolean immediateMerge() {
+		return false;
+	}
 }

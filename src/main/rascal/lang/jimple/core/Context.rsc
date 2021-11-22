@@ -86,14 +86,14 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 		println(errors); 
 	}
 		
-	ClassTable ct  = (n : Class(jimplify(classDecl(n, ms, s, is, fs, mss)), ApplicationClass()) | Success(classDecl(n, ms, s, is, fs, mss)) <- classes);
-	ct = ct + (n : Class(jimplify(interfaceDecl(n, ms, is, fs, mss)), ApplicationClass()) | Success(interfaceDecl(n, ms, is, fs, mss)) <- classes);
+	ClassTable ct  = (n : Class(jimplify(classDecl(ms, n, s, is, fs, mss)), ApplicationClass()) | Success(classDecl(ms, n, s, is, fs, mss)) <- classes);
+	ct = ct + (n : Class(jimplify(interfaceDecl(ms, n, is, fs, mss)), ApplicationClass()) | Success(interfaceDecl(ms, n, is, fs, mss)) <- classes);
 	
 	MethodTable mt = ();
 
 	top-down visit(ct) {
-    	case classDecl(TObject(cn), _, _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints);   
-        case interfaceDecl(TObject(cn), _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints); 
+    	case classDecl(_, TObject(cn), _, _, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints);   
+        case interfaceDecl(_, TObject(cn),_, _, mss): mt = mt + toMethodsTable(cn, mss, entryPoints); 
    	}  
 	return ExecutionContext(ct, mt);
 }
