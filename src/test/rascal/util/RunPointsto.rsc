@@ -19,10 +19,12 @@ import lang::jimple::toolkit::CallGraph;
 import lang::jimple::toolkit::GraphUtil;
 import lang::jimple::util::Converters;
 import lang::jimple::toolkit::PrettyPrinter;
+import lang::jimple::util::JPrettyPrinter;
 
-import lang::jimple::analysis::pointsto::PointsTo;
-import lang::jimple::analysis::pointsto::PointsToGraph;
-import lang::jimple::analysis::pointsto::PointsToGraphBuilder;
+import lang::jimple::analysis::pointsto::spark::Spark;
+import lang::jimple::analysis::pointsto::spark::PointerAssignmentGraph;
+import lang::jimple::analysis::pointsto::spark::PointerAssignmentGraphBuilder;
+import lang::jimple::analysis::pointsto::spark::SparkUtil;
 
 public tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
 	//TODO compile class before using: mvn test -DskipTests
@@ -44,4 +46,18 @@ public void pointsTo() {
     println("TERMINOU");
     render(toFigure(pag));  
   	     
+}
+
+public void toJimple(){
+	// possible tests	
+	tuple[list[loc] cp, list[str] e] t = fooBar();
+
+    classPath = t.cp;
+    entryPoints = t.e;
+	ExecutionContext ctx = createExecutionContext(classPath, entryPoints, true);
+	
+	for(className <- ctx.ct){
+		
+		println(prettyPrint(ctx.ct[className].dec));
+	}
 }

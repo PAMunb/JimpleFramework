@@ -11,13 +11,20 @@ import List;
 import Relation;
 import Set;
 
+import lang::jimple::util::JPrettyPrinter;
+
+
+data PagRuntime = pagRuntime(ExecutionContext ctx);
 
 int i = 0;
 alias Nome = tuple[PointerAssignmentNodeType , PointerAssignmentEdgeType, PointerAssignmentNodeType];
 
+PointerAssignGraph pag = {};
+PagRuntime rt;
 
 public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodSignature] methodsList) {
-	PointerAssignGraph pag = {};
+	rt = pagRuntime(ctx);
+	pag = {};
 	i = 0;
 	
 	// Loking for assigns, all kinds (pointer ones)
@@ -34,7 +41,7 @@ public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodS
 		
 			//TODO arrumar ...					
 			// x = bar(something in our VarNode)			
-			case assign(localVariable(lhs), invokeExp(exp)): {				
+			/*case assign(localVariable(lhs), invokeExp(exp)): {				
 				println("******************** <currentMethod.name> An assign with invoke to other method = <exp>"); 
 				//Creates a VarNode with AssignmentEdge to the parameter of method (another VarNode)
 				//Looks for variable nodes that maybe arg in args list of invoke
@@ -58,13 +65,14 @@ public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodS
 				edge = ToBeResolved();
 				println("ToBeResolved");
 				pag += <var1, edge, var2>;
-			}
+			}*/
 						
 			case a: assign(_, _): {
 				println("A=<a>");
 				//TODO trocar nome do metodo
 				//println("retorno=<build(currentMethod, methodSig, a)>");
-				pag += build(currentMethod, methodSig, a);
+				//pag += build(currentMethod, methodSig, a);
+				build(currentMethod, methodSig, a);
 			}
 			
 			//case Statement s => println("=========== <s>")
@@ -76,71 +84,100 @@ public PointerAssignGraph buildsPointsToGraph(ExecutionContext ctx, list[MethodS
 	return pag;
 }
 
+
+void build(Method currentMethod, str methodSig, assign(localVariable(lhs), inv: invokeExp(s: staticMethodInvoke(sig, args)))){
+	println("%%%%%%%%%%%%%%%%%%%% STATIC: <sig>"); 
+	println("ARGS=<args>");	
+	println("LHS=<lhs>");
+	println("currentMethod=<currentMethod.formals>");
+	println("sig=<sig>");
+	str destmethod = signature(sig);
+	println("destmethod=<destmethod>");
+	println("destMethod=<rt.ctx.mt[destmethod].method.formals>");
+	println("destMethod=<rt.ctx.mt[destmethod].method.body>");
+	//println("destMethod=<prettyPrint(rt.ctx.mt[destmethod].method.body)>");
+	println("args=<getArgs(s)>");
+	//alloc = VariableNode("", "<i>", TUnknown());
+	//var = VariableNode("", "<lhs>", TUnknown());
+	//edge = AssignmentEdge();
+	//pag = pag + <alloc, edge, var>;
+}
+
 // x = new A 
 // a: new A --> x			
-private Nome build(Method currentMethod, str methodSig, assign(localVariable(lhs), newInstance(\type))){
+void build(Method currentMethod, str methodSig, assign(localVariable(lhs), newInstance(\type))){
 	println("<currentMethod.name> Creates AllocNode and VariableNode and AllocationEdge"); 
 	i += 1;
 	alloc = AllocationNode(methodSig, "<i>", newInstance(\type));
 	var = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));
 	edge = AllocationEdge();
-	return <alloc, edge, var>;
+	pag = pag + <alloc, edge, var>;
 }
 
 // x = new A[][]	
-private Nome build(Method currentMethod, str methodSig,	assign(localVariable(lhs), newArray(\type, _))){	
+void build(Method currentMethod, str methodSig,	assign(localVariable(lhs), newArray(\type, _))){	
 	println("<currentMethod.name> Creates NewArray AllocNode and VariableNode and AllocationEdge");
 	i += 1;
 	//TODO rever
 	alloc = AllocationNode(methodSig, "<i>", immediate(iValue(stringValue(_))));
 	var = VariableNode(methodSig, "Global<lhs>", \type);
 	edge = AllocationEdge();
-	return <alloc, edge, var>;
+	pag = pag + <alloc, edge, var>;
 }
 
 // x = "Hello"		
 //TODO botar a expressao toda
-private Nome build(Method currentMethod, str methodSig,	assign(localVariable(lhs), immediate(iValue(stringValue(_))))){				
+void build(Method currentMethod, str methodSig,	assign(localVariable(lhs), immediate(iValue(stringValue(_))))){				
 	println("<currentMethod.name> Creates String AllocNode and VariableNode and AllocationEdge");
 	i += 1;
 	alloc = AllocationNode(methodSig, "<i>", immediate(iValue(stringValue(_))));
 	var = VariableNode(methodSig, "Global<lhs>", TObject("java.lang.String"));
 	edge = AllocationEdge();
-	return <alloc, edge, var>;
+	pag = pag + <alloc, edge, var>;
 }			
 
 // y = x	
 // x --> y	
-private Nome build(Method currentMethod, str methodSig, assign(localVariable(lhs), immediate(local(rhs)))){
+void build(Method currentMethod, str methodSig, assign(localVariable(lhs), immediate(local(rhs)))){
 	println("<currentMethod.name> Creates VariableNode and VariableNode and AssignmentEdge"); 
 	to = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));
 	from = VariableNode(methodSig, "<rhs>", getVarType(currentMethod.body, rhs));
 	edge = AssignmentEdge();
-	return <from, edge, to>;
+	pag = pag + <from, edge, to>;
 }
 
 // z = x.f	
 // x.f --> z	
-private Nome build(Method currentMethod, str methodSig,	a: assign(localVariable(lhs), localFieldRef(rhs, class, \type, fieldName))){
+void build(Method currentMethod, str methodSig,	a: assign(localVariable(lhs), localFieldRef(rhs, class, \type, fieldName))){
 	println("<currentMethod.name> Creates VariableNode and FieldRefNode and LoadEdge = <a>");
 	ref = FieldRefNode(methodSig, "<lhs>",  "<rhs>.<fieldName>", \type); 
 	var = VariableNode(methodSig, "<lhs>", getVarType(currentMethod.body, lhs));	
 	edge = LoadEdge();
-	return <ref, edge, var>;
+	pag = pag + <ref, edge, var>;
 }
 
 // x.f = z	
 // z --> x.f
-private Nome build(Method currentMethod, str methodSig,	a: assign(fieldRef(lhs,fieldSignature(class, \type, fieldName)),immediate(local(rhs)))){
+void build(Method currentMethod, str methodSig,	a: assign(fieldRef(lhs,fieldSignature(class, \type, fieldName)),immediate(local(rhs)))){
 	println("<currentMethod.name> Creates FieldRefNode and VariableNode and StoreEdge = <a>");
 	var = VariableNode(methodSig, "<rhs>", getVarType(currentMethod.body, rhs));  
 	ref = FieldRefNode(methodSig, "<rhs>", "<lhs>.<fieldName>", \type);	
 	edge = StoreEdge();
-	return <var, edge, ref>;
+	pag = pag + <var, edge, ref>;
 }	
 
 
 ////////////////////////////////////////////	
+/*
+ * Retrieves the method signature from the method invocation info.
+ */
+private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) = ms; 
+private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) = ms; 
+private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) = ms;
+private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) = ms; 
+//TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
+private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) = ms; 
+
 private list[Immediate] getArgs(specialInvoke(_, _, args)) = args;
 private list[Immediate] getArgs(virtualInvoke(_, _, args)) = args;
 private list[Immediate] getArgs(interfaceInvoke(_, _, args)) = args;
