@@ -63,6 +63,14 @@ public  class FieldSignature extends JimpleAbstractDataType {
                  ); 
       }
      
+     
+      @Override
+      public io.usethesource.vallang.type.Type[] children() {
+        return new io.usethesource.vallang.type.Type[] { 
+            tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
+        };
+      } 
+     
       @Override
       public String getConstructor() {
          return "fieldSignature";

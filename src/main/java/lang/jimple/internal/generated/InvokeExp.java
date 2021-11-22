@@ -90,6 +90,13 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), sig.getVallangConstructor(), tf.listType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "specialInvoke";
      }
@@ -142,6 +149,13 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), sig.getVallangConstructor(), tf.listType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "virtualInvoke";
@@ -196,6 +210,13 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), sig.getVallangConstructor(), tf.listType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "interfaceInvoke";
      }
@@ -240,6 +261,13 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           sig.getVallangConstructor(), tf.listType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "staticMethodInvoke";
@@ -306,6 +334,13 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           bsmSig.getVallangConstructor(), tf.listType(), sig.getVallangConstructor(), tf.listType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "dynamicInvoke";

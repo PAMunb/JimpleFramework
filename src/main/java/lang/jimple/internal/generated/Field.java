@@ -68,6 +68,14 @@ public  class Field extends JimpleAbstractDataType {
                  ); 
       }
      
+     
+      @Override
+      public io.usethesource.vallang.type.Type[] children() {
+        return new io.usethesource.vallang.type.Type[] { 
+            tf.listType(), fieldType.getVallangConstructor(), tf.stringType()
+        };
+      } 
+     
       @Override
       public String getConstructor() {
          return "field";

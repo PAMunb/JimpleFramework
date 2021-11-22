@@ -6,6 +6,15 @@ import io.usethesource.vallang.type.Type;
 import io.usethesource.vallang.type.TypeFactory;
 import io.usethesource.vallang.type.TypeStore;
 
+/**
+ * This class implements a couple of methods 
+ * that help us to instantiate Vallang objects 
+ * that match the JIMPLE AST. These (template) methods 
+ * actually calls abstract methods that are automatically 
+ * generated from the RascalJavaConverter 
+ * 
+ * @author rbonifacio
+ */
 public abstract class JimpleAbstractDataType {
 	
 	public static TypeStore typestore = new TypeStore();
@@ -16,11 +25,12 @@ public abstract class JimpleAbstractDataType {
 	}
 	
 	public Type getVallangConstructor() {
-		return tf.constructor(typestore, getVallangType(), getConstructor());
+		return tf.constructor(typestore, getVallangType(), getConstructor(), children());
 	}
 	
 	public abstract String getBaseType();
 	public abstract String getConstructor();
-	public abstract IConstructor createVallangInstance(IValueFactory vf); 
+	public abstract IConstructor createVallangInstance(IValueFactory vf);
+	public abstract Type[] children();
 
 }

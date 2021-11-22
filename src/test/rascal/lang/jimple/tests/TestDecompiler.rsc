@@ -71,7 +71,7 @@ test bool testDoWhileStatement() {
       Statement s3 = identity("r0","@this",TObject("samples.controlStatements.DoWhileStatement"));
       println(s1);
       println(s2);
-      return s1 := s2;
+      return comparable(s1, s2);
     }
     default: return false; 
   }

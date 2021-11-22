@@ -61,6 +61,13 @@ public abstract class Immediate extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "local";
      }
@@ -93,6 +100,13 @@ public abstract class Immediate extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           v.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "iValue";
      }
@@ -116,6 +130,13 @@ public abstract class Immediate extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "caughtException";

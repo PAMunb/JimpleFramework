@@ -117,6 +117,13 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.listType(), classType.getVallangConstructor(), superClass.getVallangConstructor(), tf.listType(), tf.listType(), tf.listType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "classDecl";
      }
@@ -200,6 +207,13 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.listType(), interfaceType.getVallangConstructor(), tf.listType(), tf.listType(), tf.listType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "interfaceDecl";
