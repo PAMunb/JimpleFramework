@@ -239,7 +239,7 @@ public abstract class Expression extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           baseType.getVallangConstructor(), tf.listType()
+           baseType.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     

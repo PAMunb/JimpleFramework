@@ -64,7 +64,7 @@ public  class UnnamedMethodSignature extends JimpleAbstractDataType {
       @Override
       public io.usethesource.vallang.type.Type[] children() {
         return new io.usethesource.vallang.type.Type[] { 
-            returnType.getVallangConstructor(), tf.listType()
+            returnType.getVallangConstructor(), tf.listType(tf.valueType())
         };
       } 
      

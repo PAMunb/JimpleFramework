@@ -208,9 +208,7 @@ private str callTypeFactory(map[str, str] aliases, Type t, Name n) {
      case (Type)`bool`: return "tf.boolType()";
      case (Type)`real`: return "tf.realType()"; 
      case (Type)`list[<TypeArg arg>]` : { 
-       println(unparse(t));
-       println(unparse(arg)); 
-       return "tf.listType(<extractTypeFactoryFromArgument(aliases, arg)>)";
+       return "tf.listType(tf.valueType())";
      }
      default: return callTypeFactoryFromUserDefinedType(aliases, namedType, field);
   }

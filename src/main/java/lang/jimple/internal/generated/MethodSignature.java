@@ -80,7 +80,7 @@ public  class MethodSignature extends JimpleAbstractDataType {
       @Override
       public io.usethesource.vallang.type.Type[] children() {
         return new io.usethesource.vallang.type.Type[] { 
-            tf.stringType(), returnType.getVallangConstructor(), tf.stringType(), tf.listType()
+            tf.stringType(), returnType.getVallangConstructor(), tf.stringType(), tf.listType(tf.valueType())
         };
       } 
      

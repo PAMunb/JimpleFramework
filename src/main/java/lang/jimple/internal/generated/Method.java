@@ -106,7 +106,7 @@ public  class Method extends JimpleAbstractDataType {
       @Override
       public io.usethesource.vallang.type.Type[] children() {
         return new io.usethesource.vallang.type.Type[] { 
-            tf.listType(), returnType.getVallangConstructor(), tf.stringType(), tf.listType(), tf.listType(), body.getVallangConstructor()
+            tf.listType(tf.valueType()), returnType.getVallangConstructor(), tf.stringType(), tf.listType(tf.valueType()), tf.listType(tf.valueType()), body.getVallangConstructor()
         };
       } 
      

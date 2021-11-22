@@ -92,7 +92,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), sig.getVallangConstructor(), tf.listType()
+           tf.stringType(), sig.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     
@@ -152,7 +152,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), sig.getVallangConstructor(), tf.listType()
+           tf.stringType(), sig.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     
@@ -212,7 +212,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), sig.getVallangConstructor(), tf.listType()
+           tf.stringType(), sig.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     
@@ -264,7 +264,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           sig.getVallangConstructor(), tf.listType()
+           sig.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     
@@ -337,7 +337,7 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           bsmSig.getVallangConstructor(), tf.listType(), sig.getVallangConstructor(), tf.listType()
+           bsmSig.getVallangConstructor(), tf.listType(tf.valueType()), sig.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     

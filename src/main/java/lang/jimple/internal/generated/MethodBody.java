@@ -90,7 +90,7 @@ public abstract class MethodBody extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.listType(), tf.listType(), tf.listType()
+           tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
        };
      }
     

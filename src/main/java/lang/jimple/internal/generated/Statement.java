@@ -300,7 +300,7 @@ public abstract class Statement extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor(), tf.integerType(), tf.integerType(), tf.listType()
+           immediate.getVallangConstructor(), tf.integerType(), tf.integerType(), tf.listType(tf.valueType())
        };
      }
     
@@ -352,7 +352,7 @@ public abstract class Statement extends JimpleAbstractDataType {
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor(), tf.listType()
+           immediate.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     
