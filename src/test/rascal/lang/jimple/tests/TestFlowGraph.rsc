@@ -6,6 +6,8 @@ import lang::jimple::decompiler::jimplify::ProcessLabels;
 
 import lang::jimple::toolkit::FlowGraph;
 import lang::jimple::util::JPrettyPrinter;
+import lang::jimple::toolkit::GraphUtil;
+
 
 import Set; 
 import List;
@@ -94,13 +96,15 @@ test bool controlFlowFromWhileStmtSample() {
 
 test bool controlFlowFromIntOps() {
   ClassOrInterfaceDeclaration c = processJimpleLabels(decompile(intOps));
-  //c = processJimpleLabels(c);
+  c = processJimpleLabels(c);
   
-  methods = [m | /MethodBody m <- c];  
- 
-  for(MethodBody m <- methods) {
-  	println(prettyPrint(m));
-  }
-  println(size(methods));
+  methods = [m | /Method m <- c]; 
+  
+  g = forwardFlowGraph(methods[1].body);
+  
+  println(toDot(g));
+  
+  
+  
   return size(methods) == 2; 
 }

@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the MethodBody construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class MethodBody extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "MethodBody";
    } 
-
    
    
    public static MethodBody methodBody(List<LocalVariableDeclaration> localVariableDecls, List<Statement> stmts, List<CatchClause> catchClauses)  {
@@ -28,7 +36,6 @@ public abstract class MethodBody extends JimpleAbstractDataType {
      return new c_signatureOnly();
    }
     
-
    
    @EqualsAndHashCode
    public static class c_methodBody extends MethodBody {
@@ -39,20 +46,18 @@ public abstract class MethodBody extends JimpleAbstractDataType {
      
      public List<CatchClause> catchClauses;
      
-   
-       public c_methodBody(List<LocalVariableDeclaration> localVariableDecls, List<Statement> stmts, List<CatchClause> catchClauses) {
+     public c_methodBody(List<LocalVariableDeclaration> localVariableDecls, List<Statement> stmts, List<CatchClause> catchClauses) {
+      
+        this.localVariableDecls = localVariableDecls;  
+      
+        this.stmts = stmts;  
+      
+        this.catchClauses = catchClauses;  
         
-          this.localVariableDecls = localVariableDecls;  
-        
-          this.stmts = stmts;  
-        
-          this.catchClauses = catchClauses;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IList iv_localVariableDecls = vf.list();
          
@@ -76,21 +81,21 @@ public abstract class MethodBody extends JimpleAbstractDataType {
                  
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_localVariableDecls 
-               
-                , iv_stmts 
-               
-                , iv_catchClauses 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_localVariableDecls 
+          
+            , iv_stmts 
+          
+            , iv_catchClauses 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
+         tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
        };
      }
     
@@ -103,25 +108,23 @@ public abstract class MethodBody extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_signatureOnly extends MethodBody {
      
-   
-       public c_signatureOnly() {
-          
-       } 
-     
+     public c_signatureOnly() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     

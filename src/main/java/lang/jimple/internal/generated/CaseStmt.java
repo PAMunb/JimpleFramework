@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the CaseStmt construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class CaseStmt extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "CaseStmt";
    } 
-
    
    
    public static CaseStmt caseOption(Integer option, String targetStmt)  {
@@ -28,7 +36,6 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      return new c_defaultOption(targetStmt);
    }
     
-
    
    @EqualsAndHashCode
    public static class c_caseOption extends CaseStmt {
@@ -37,37 +44,35 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      
      public String targetStmt;
      
-   
-       public c_caseOption(Integer option, String targetStmt) {
+     public c_caseOption(Integer option, String targetStmt) {
+      
+        this.option = option;  
+      
+        this.targetStmt = targetStmt;  
         
-          this.option = option;  
-        
-          this.targetStmt = targetStmt;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_option = vf.integer(option);
        
          IValue iv_targetStmt = vf.string(targetStmt);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_option 
-               
-                , iv_targetStmt 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_option 
+          
+            , iv_targetStmt 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.integerType(), tf.stringType()
+         tf.integerType(), tf.stringType()
        };
      }
     
@@ -82,31 +87,29 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      
      public String targetStmt;
      
-   
-       public c_defaultOption(String targetStmt) {
+     public c_defaultOption(String targetStmt) {
+      
+        this.targetStmt = targetStmt;  
         
-          this.targetStmt = targetStmt;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_targetStmt = vf.string(targetStmt);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_targetStmt 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_targetStmt 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType()
+         tf.stringType()
        };
      }
     

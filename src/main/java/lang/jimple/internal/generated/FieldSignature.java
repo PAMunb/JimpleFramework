@@ -10,72 +10,79 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the FieldSignature construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 @Builder
 @EqualsAndHashCode
 public  class FieldSignature extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "FieldSignature";
    } 
-
    
+   
+    
+    public String className;
+    
+    public Type fieldType;
+    
+    public String fieldName;
+    
+   
+    public static FieldSignature fieldSignature(String className, Type fieldType, String fieldName)  {
+      return new FieldSignature(className, fieldType, fieldName);
+    }
+    
+    public FieldSignature(String className, Type fieldType, String fieldName) {
      
-      
-       public String className;
-      
-       public Type fieldType;
-      
-       public String fieldName;
-      
+       this.className = className;  
      
-      public static FieldSignature fieldSignature(String className, Type fieldType, String fieldName)  {
-        return new FieldSignature(className, fieldType, fieldName);
-      }
-      
-        public FieldSignature(String className, Type fieldType, String fieldName) {
-         
-           this.className = className;  
-         
-           this.fieldType = fieldType;  
-         
-           this.fieldName = fieldName;  
-           
-        } 
-      @Override
-      public IConstructor createVallangInstance(IValueFactory vf) {
-      
-        
-          IValue iv_className = vf.string(className);
-        
-          IValue iv_fieldType = fieldType.createVallangInstance(vf);
-        
-          IValue iv_fieldName = vf.string(fieldName);
-        
-          
-        return vf.constructor(getVallangConstructor()
-                 
-                 , iv_className 
-                
-                 , iv_fieldType 
-                
-                 , iv_fieldName 
-                
-                 ); 
-      }
+       this.fieldType = fieldType;  
      
-     
-      @Override
-      public io.usethesource.vallang.type.Type[] children() {
-        return new io.usethesource.vallang.type.Type[] { 
-            tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
-        };
-      } 
-     
-      @Override
-      public String getConstructor() {
-         return "fieldSignature";
-      }
+       this.fieldName = fieldName;  
        
-                                  
+    } 
+    @Override
+    public IConstructor createVallangInstance(IValueFactory vf) {
+      
+        IValue iv_className = vf.string(className);
+      
+        IValue iv_fieldType = fieldType.createVallangInstance(vf);
+      
+        IValue iv_fieldName = vf.string(fieldName);
+      
+        
+         return vf.constructor(getVallangConstructor()
+         
+           , iv_className 
+         
+           , iv_fieldType 
+         
+           , iv_fieldName 
+         
+         ); 
+    }
+   
+   
+    @Override
+    public io.usethesource.vallang.type.Type[] children() {
+      return new io.usethesource.vallang.type.Type[] { 
+          tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
+      };
+    } 
+   
+    @Override
+    public String getConstructor() {
+       return "fieldSignature";
+    }
+     
+                                
     
 }

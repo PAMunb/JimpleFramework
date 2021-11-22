@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the ArrayDescriptor construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class ArrayDescriptor extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "ArrayDescriptor";
    } 
-
    
    
    public static ArrayDescriptor fixedSize(Integer size)  {
@@ -28,38 +36,35 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
      return new c_variableSize();
    }
     
-
    
    @EqualsAndHashCode
    public static class c_fixedSize extends ArrayDescriptor {
      
      public Integer size;
      
-   
-       public c_fixedSize(Integer size) {
+     public c_fixedSize(Integer size) {
+      
+        this.size = size;  
         
-          this.size = size;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_size = vf.integer(size);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_size 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_size 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.integerType()
+         tf.integerType()
        };
      }
     
@@ -72,25 +77,23 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_variableSize extends ArrayDescriptor {
      
-   
-       public c_variableSize() {
-          
-       } 
-     
+     public c_variableSize() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     

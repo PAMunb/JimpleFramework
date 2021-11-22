@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the Type construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class Type extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "Type";
    } 
-
    
    
    public static Type TByte()  {
@@ -92,30 +100,27 @@ public abstract class Type extends JimpleAbstractDataType {
      return new c_TUnknown();
    }
     
-
    
    @EqualsAndHashCode
    public static class c_TByte extends Type {
      
-   
-       public c_TByte() {
-          
-       } 
-     
+     public c_TByte() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -128,25 +133,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TBoolean extends Type {
      
-   
-       public c_TBoolean() {
-          
-       } 
-     
+     public c_TBoolean() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -159,25 +162,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TShort extends Type {
      
-   
-       public c_TShort() {
-          
-       } 
-     
+     public c_TShort() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -190,25 +191,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TCharacter extends Type {
      
-   
-       public c_TCharacter() {
-          
-       } 
-     
+     public c_TCharacter() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -221,25 +220,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TInteger extends Type {
      
-   
-       public c_TInteger() {
-          
-       } 
-     
+     public c_TInteger() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -252,25 +249,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TFloat extends Type {
      
-   
-       public c_TFloat() {
-          
-       } 
-     
+     public c_TFloat() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -283,25 +278,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TDouble extends Type {
      
-   
-       public c_TDouble() {
-          
-       } 
-     
+     public c_TDouble() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -314,25 +307,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TLong extends Type {
      
-   
-       public c_TLong() {
-          
-       } 
-     
+     public c_TLong() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -347,31 +338,29 @@ public abstract class Type extends JimpleAbstractDataType {
      
      public String name;
      
-   
-       public c_TObject(String name) {
+     public c_TObject(String name) {
+      
+        this.name = name;  
         
-          this.name = name;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_name = vf.string(name);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_name 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_name 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType()
+         tf.stringType()
        };
      }
     
@@ -386,31 +375,29 @@ public abstract class Type extends JimpleAbstractDataType {
      
      public Type baseType;
      
-   
-       public c_TArray(Type baseType) {
+     public c_TArray(Type baseType) {
+      
+        this.baseType = baseType;  
         
-          this.baseType = baseType;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_baseType = baseType.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_baseType 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_baseType 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           baseType.getVallangConstructor()
+         baseType.getVallangConstructor()
        };
      }
     
@@ -423,25 +410,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TVoid extends Type {
      
-   
-       public c_TVoid() {
-          
-       } 
-     
+     public c_TVoid() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -454,25 +439,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TString extends Type {
      
-   
-       public c_TString() {
-          
-       } 
-     
+     public c_TString() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -485,25 +468,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TMethodValue extends Type {
      
-   
-       public c_TMethodValue() {
-          
-       } 
-     
+     public c_TMethodValue() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -516,25 +497,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TClassValue extends Type {
      
-   
-       public c_TClassValue() {
-          
-       } 
-     
+     public c_TClassValue() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -547,25 +526,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TMethodHandle extends Type {
      
-   
-       public c_TMethodHandle() {
-          
-       } 
-     
+     public c_TMethodHandle() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -578,25 +555,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TFieldHandle extends Type {
      
-   
-       public c_TFieldHandle() {
-          
-       } 
-     
+     public c_TFieldHandle() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -609,25 +584,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TNull extends Type {
      
-   
-       public c_TNull() {
-          
-       } 
-     
+     public c_TNull() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
@@ -640,25 +613,23 @@ public abstract class Type extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_TUnknown extends Type {
      
-   
-       public c_TUnknown() {
-          
-       } 
-     
+     public c_TUnknown() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     
