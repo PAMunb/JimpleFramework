@@ -72,6 +72,30 @@ test bool testDoWhileStatement() {
   }
 }
 
+test bool testWhileStatement() {
+  loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/WhileStatement.class|;
+  ClassOrInterfaceDeclaration c = processJimpleLabels(decompile(pathDoWhile));
+  list[Statement] expected = [
+    identity("r0","@this",TObject("samples.controlStatements.WhileStatement")),
+    assign(localVariable("r1"),immediate(iValue(intValue(0)))),
+    assign(localVariable("r2"),immediate(iValue(intValue(0)))),
+   label("label1"),
+    ifStmt(cmpge(local("r1"),iValue(intValue(10))),"label2"),
+    assign(localVariable("$r1"),plus(local("r2"),local("r1"))), 
+    assign(localVariable("r2"),immediate(local("$r1"))),
+    assign(localVariable("r1"),plus(local("r1"),iValue(intValue(1)))),
+    gotoStmt("label1"),
+   label("label2"),
+    returnStmt(local("r2"))];  
+  switch(c) {
+    case classDecl(_, _, _, _, _, methods): { 
+      list[Statement] ss = methods[1].body.stmts; 
+      return expected == ss; 
+    }
+    default: return false; 
+  }
+}
+
 test bool testSolveLabels() {
   ClassOrInterfaceDeclaration c = decompile(whileLocation);
   c = processJimpleLabels(c);
