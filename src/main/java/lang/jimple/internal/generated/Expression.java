@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the Expression construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class Expression extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "Expression";
    } 
-
    
    
    public static Expression newInstance(Type instanceType)  {
@@ -156,38 +164,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      return new c_immediate(immediate);
    }
     
-
    
    @EqualsAndHashCode
    public static class c_newInstance extends Expression {
      
      public Type instanceType;
      
-   
-       public c_newInstance(Type instanceType) {
+     public c_newInstance(Type instanceType) {
+      
+        this.instanceType = instanceType;  
         
-          this.instanceType = instanceType;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_instanceType = instanceType.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_instanceType 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_instanceType 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           instanceType.getVallangConstructor()
+         instanceType.getVallangConstructor()
        };
      }
     
@@ -204,18 +209,16 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public List<ArrayDescriptor> dims;
      
-   
-       public c_newArray(Type baseType, List<ArrayDescriptor> dims) {
+     public c_newArray(Type baseType, List<ArrayDescriptor> dims) {
+      
+        this.baseType = baseType;  
+      
+        this.dims = dims;  
         
-          this.baseType = baseType;  
-        
-          this.dims = dims;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_baseType = baseType.createVallangInstance(vf);
        
@@ -227,19 +230,19 @@ public abstract class Expression extends JimpleAbstractDataType {
                  
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_baseType 
-               
-                , iv_dims 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_baseType 
+          
+            , iv_dims 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           baseType.getVallangConstructor(), tf.listType(tf.valueType())
+         baseType.getVallangConstructor(), tf.listType(tf.valueType())
        };
      }
     
@@ -256,37 +259,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immeadiate;
      
-   
-       public c_cast(Type toType, Immediate immeadiate) {
+     public c_cast(Type toType, Immediate immeadiate) {
+      
+        this.toType = toType;  
+      
+        this.immeadiate = immeadiate;  
         
-          this.toType = toType;  
-        
-          this.immeadiate = immeadiate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_toType = toType.createVallangInstance(vf);
        
          IValue iv_immeadiate = immeadiate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_toType 
-               
-                , iv_immeadiate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_toType 
+          
+            , iv_immeadiate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           toType.getVallangConstructor(), immeadiate.getVallangConstructor()
+         toType.getVallangConstructor(), immeadiate.getVallangConstructor()
        };
      }
     
@@ -303,37 +304,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_instanceOf(Type baseType, Immediate immediate) {
+     public c_instanceOf(Type baseType, Immediate immediate) {
+      
+        this.baseType = baseType;  
+      
+        this.immediate = immediate;  
         
-          this.baseType = baseType;  
-        
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_baseType = baseType.createVallangInstance(vf);
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_baseType 
-               
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_baseType 
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           baseType.getVallangConstructor(), immediate.getVallangConstructor()
+         baseType.getVallangConstructor(), immediate.getVallangConstructor()
        };
      }
     
@@ -348,31 +347,29 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public InvokeExp expression;
      
-   
-       public c_invokeExp(InvokeExp expression) {
+     public c_invokeExp(InvokeExp expression) {
+      
+        this.expression = expression;  
         
-          this.expression = expression;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_expression = expression.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_expression 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_expression 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           expression.getVallangConstructor()
+         expression.getVallangConstructor()
        };
      }
     
@@ -389,37 +386,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_arraySubscript(String name, Immediate immediate) {
+     public c_arraySubscript(String name, Immediate immediate) {
+      
+        this.name = name;  
+      
+        this.immediate = immediate;  
         
-          this.name = name;  
-        
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_name = vf.string(name);
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_name 
-               
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_name 
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), immediate.getVallangConstructor()
+         tf.stringType(), immediate.getVallangConstructor()
        };
      }
     
@@ -436,37 +431,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_stringSubscript(String string, Immediate immediate) {
+     public c_stringSubscript(String string, Immediate immediate) {
+      
+        this.string = string;  
+      
+        this.immediate = immediate;  
         
-          this.string = string;  
-        
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_string = vf.string(string);
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_string 
-               
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_string 
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), immediate.getVallangConstructor()
+         tf.stringType(), immediate.getVallangConstructor()
        };
      }
     
@@ -487,22 +480,20 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public String fieldName;
      
-   
-       public c_localFieldRef(String local, String className, Type fieldType, String fieldName) {
+     public c_localFieldRef(String local, String className, Type fieldType, String fieldName) {
+      
+        this.local = local;  
+      
+        this.className = className;  
+      
+        this.fieldType = fieldType;  
+      
+        this.fieldName = fieldName;  
         
-          this.local = local;  
-        
-          this.className = className;  
-        
-          this.fieldType = fieldType;  
-        
-          this.fieldName = fieldName;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_local = vf.string(local);
        
@@ -513,23 +504,23 @@ public abstract class Expression extends JimpleAbstractDataType {
          IValue iv_fieldName = vf.string(fieldName);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_local 
-               
-                , iv_className 
-               
-                , iv_fieldType 
-               
-                , iv_fieldName 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_local 
+          
+            , iv_className 
+          
+            , iv_fieldType 
+          
+            , iv_fieldName 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
+         tf.stringType(), tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
        };
      }
     
@@ -548,20 +539,18 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public String fieldName;
      
-   
-       public c_fieldRef(String className, Type fieldType, String fieldName) {
+     public c_fieldRef(String className, Type fieldType, String fieldName) {
+      
+        this.className = className;  
+      
+        this.fieldType = fieldType;  
+      
+        this.fieldName = fieldName;  
         
-          this.className = className;  
-        
-          this.fieldType = fieldType;  
-        
-          this.fieldName = fieldName;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_className = vf.string(className);
        
@@ -570,21 +559,21 @@ public abstract class Expression extends JimpleAbstractDataType {
          IValue iv_fieldName = vf.string(fieldName);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_className 
-               
-                , iv_fieldType 
-               
-                , iv_fieldName 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_className 
+          
+            , iv_fieldType 
+          
+            , iv_fieldName 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
+         tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
        };
      }
     
@@ -601,37 +590,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_and(Immediate lhs, Immediate rhs) {
+     public c_and(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -648,37 +635,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_or(Immediate lhs, Immediate rhs) {
+     public c_or(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -695,37 +680,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_xor(Immediate lhs, Immediate rhs) {
+     public c_xor(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -742,37 +725,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_reminder(Immediate lhs, Immediate rhs) {
+     public c_reminder(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -787,31 +768,29 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_isNull(Immediate immediate) {
+     public c_isNull(Immediate immediate) {
+      
+        this.immediate = immediate;  
         
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor()
+         immediate.getVallangConstructor()
        };
      }
     
@@ -826,31 +805,29 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_isNotNull(Immediate immediate) {
+     public c_isNotNull(Immediate immediate) {
+      
+        this.immediate = immediate;  
         
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor()
+         immediate.getVallangConstructor()
        };
      }
     
@@ -867,37 +844,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmp(Immediate lhs, Immediate rhs) {
+     public c_cmp(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -914,37 +889,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmpg(Immediate lhs, Immediate rhs) {
+     public c_cmpg(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -961,37 +934,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmpl(Immediate lhs, Immediate rhs) {
+     public c_cmpl(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1008,37 +979,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmpeq(Immediate lhs, Immediate rhs) {
+     public c_cmpeq(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1055,37 +1024,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmpne(Immediate lhs, Immediate rhs) {
+     public c_cmpne(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1102,37 +1069,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmpgt(Immediate lhs, Immediate rhs) {
+     public c_cmpgt(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1149,37 +1114,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmpge(Immediate lhs, Immediate rhs) {
+     public c_cmpge(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1196,37 +1159,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmplt(Immediate lhs, Immediate rhs) {
+     public c_cmplt(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1243,37 +1204,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_cmple(Immediate lhs, Immediate rhs) {
+     public c_cmple(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1290,37 +1249,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_shl(Immediate lhs, Immediate rhs) {
+     public c_shl(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1337,37 +1294,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_shr(Immediate lhs, Immediate rhs) {
+     public c_shr(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1384,37 +1339,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_ushr(Immediate lhs, Immediate rhs) {
+     public c_ushr(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1431,37 +1384,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_plus(Immediate lhs, Immediate rhs) {
+     public c_plus(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1478,37 +1429,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_minus(Immediate lhs, Immediate rhs) {
+     public c_minus(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1525,37 +1474,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_mult(Immediate lhs, Immediate rhs) {
+     public c_mult(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1572,37 +1519,35 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate rhs;
      
-   
-       public c_div(Immediate lhs, Immediate rhs) {
+     public c_div(Immediate lhs, Immediate rhs) {
+      
+        this.lhs = lhs;  
+      
+        this.rhs = rhs;  
         
-          this.lhs = lhs;  
-        
-          this.rhs = rhs;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_lhs = lhs.createVallangInstance(vf);
        
          IValue iv_rhs = rhs.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_lhs 
-               
-                , iv_rhs 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_lhs 
+          
+            , iv_rhs 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+         lhs.getVallangConstructor(), rhs.getVallangConstructor()
        };
      }
     
@@ -1617,31 +1562,29 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_lengthOf(Immediate immediate) {
+     public c_lengthOf(Immediate immediate) {
+      
+        this.immediate = immediate;  
         
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor()
+         immediate.getVallangConstructor()
        };
      }
     
@@ -1656,31 +1599,29 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_neg(Immediate immediate) {
+     public c_neg(Immediate immediate) {
+      
+        this.immediate = immediate;  
         
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor()
+         immediate.getVallangConstructor()
        };
      }
     
@@ -1695,31 +1636,29 @@ public abstract class Expression extends JimpleAbstractDataType {
      
      public Immediate immediate;
      
-   
-       public c_immediate(Immediate immediate) {
+     public c_immediate(Immediate immediate) {
+      
+        this.immediate = immediate;  
         
-          this.immediate = immediate;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_immediate = immediate.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_immediate 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_immediate 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           immediate.getVallangConstructor()
+         immediate.getVallangConstructor()
        };
      }
     

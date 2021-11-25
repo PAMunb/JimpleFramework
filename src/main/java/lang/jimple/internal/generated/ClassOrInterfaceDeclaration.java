@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the ClassOrInterfaceDeclaration construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "ClassOrInterfaceDeclaration";
    } 
-
    
    
    public static ClassOrInterfaceDeclaration classDecl(List<Modifier> modifiers, Type classType, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods)  {
@@ -28,7 +36,6 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      return new c_interfaceDecl(modifiers, interfaceType, interfaces, fields, methods);
    }
     
-
    
    @EqualsAndHashCode
    public static class c_classDecl extends ClassOrInterfaceDeclaration {
@@ -45,26 +52,24 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      
      public List<Method> methods;
      
-   
-       public c_classDecl(List<Modifier> modifiers, Type classType, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods) {
+     public c_classDecl(List<Modifier> modifiers, Type classType, Type superClass, List<Type> interfaces, List<Field> fields, List<Method> methods) {
+      
+        this.modifiers = modifiers;  
+      
+        this.classType = classType;  
+      
+        this.superClass = superClass;  
+      
+        this.interfaces = interfaces;  
+      
+        this.fields = fields;  
+      
+        this.methods = methods;  
         
-          this.modifiers = modifiers;  
-        
-          this.classType = classType;  
-        
-          this.superClass = superClass;  
-        
-          this.interfaces = interfaces;  
-        
-          this.fields = fields;  
-        
-          this.methods = methods;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IList iv_modifiers = vf.list();
          
@@ -99,27 +104,27 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
                  
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_modifiers 
-               
-                , iv_classType 
-               
-                , iv_superClass 
-               
-                , iv_interfaces 
-               
-                , iv_fields 
-               
-                , iv_methods 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_modifiers 
+          
+            , iv_classType 
+          
+            , iv_superClass 
+          
+            , iv_interfaces 
+          
+            , iv_fields 
+          
+            , iv_methods 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.listType(tf.valueType()), classType.getVallangConstructor(), superClass.getVallangConstructor(), tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
+         tf.listType(tf.valueType()), classType.getVallangConstructor(), superClass.getVallangConstructor(), tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
        };
      }
     
@@ -142,24 +147,22 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
      
      public List<Method> methods;
      
-   
-       public c_interfaceDecl(List<Modifier> modifiers, Type interfaceType, List<Type> interfaces, List<Field> fields, List<Method> methods) {
+     public c_interfaceDecl(List<Modifier> modifiers, Type interfaceType, List<Type> interfaces, List<Field> fields, List<Method> methods) {
+      
+        this.modifiers = modifiers;  
+      
+        this.interfaceType = interfaceType;  
+      
+        this.interfaces = interfaces;  
+      
+        this.fields = fields;  
+      
+        this.methods = methods;  
         
-          this.modifiers = modifiers;  
-        
-          this.interfaceType = interfaceType;  
-        
-          this.interfaces = interfaces;  
-        
-          this.fields = fields;  
-        
-          this.methods = methods;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IList iv_modifiers = vf.list();
          
@@ -192,25 +195,25 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
                  
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_modifiers 
-               
-                , iv_interfaceType 
-               
-                , iv_interfaces 
-               
-                , iv_fields 
-               
-                , iv_methods 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_modifiers 
+          
+            , iv_interfaceType 
+          
+            , iv_interfaces 
+          
+            , iv_fields 
+          
+            , iv_methods 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.listType(tf.valueType()), interfaceType.getVallangConstructor(), tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
+         tf.listType(tf.valueType()), interfaceType.getVallangConstructor(), tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
        };
      }
     

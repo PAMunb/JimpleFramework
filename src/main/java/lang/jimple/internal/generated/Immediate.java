@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the Immediate construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class Immediate extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "Immediate";
    } 
-
    
    
    public static Immediate local(String localName)  {
@@ -32,38 +40,35 @@ public abstract class Immediate extends JimpleAbstractDataType {
      return new c_caughtException();
    }
     
-
    
    @EqualsAndHashCode
    public static class c_local extends Immediate {
      
      public String localName;
      
-   
-       public c_local(String localName) {
+     public c_local(String localName) {
+      
+        this.localName = localName;  
         
-          this.localName = localName;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_localName = vf.string(localName);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_localName 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_localName 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType()
+         tf.stringType()
        };
      }
     
@@ -78,31 +83,29 @@ public abstract class Immediate extends JimpleAbstractDataType {
      
      public Value v;
      
-   
-       public c_iValue(Value v) {
+     public c_iValue(Value v) {
+      
+        this.v = v;  
         
-          this.v = v;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_v = v.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_v 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_v 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           v.getVallangConstructor()
+         v.getVallangConstructor()
        };
      }
     
@@ -115,25 +118,23 @@ public abstract class Immediate extends JimpleAbstractDataType {
    @EqualsAndHashCode
    public static class c_caughtException extends Immediate {
      
-   
-       public c_caughtException() {
-          
-       } 
-     
+     public c_caughtException() {
+        
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           
+         
        };
      }
     

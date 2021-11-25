@@ -10,14 +10,22 @@ import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
 
+/**
+ * This class has been automatically generated from 
+ * the JIMPLE AST definitions. It corresponds to a 
+ * Java representation of the Variable construct. 
+ * 
+ * @see lang::jimple::core::Syntax
+ * @see lang::jimple::decompiler::internal::RascalJavaConverter
+ */ 
 
 @EqualsAndHashCode
 public abstract class Variable extends JimpleAbstractDataType {
+  
    @Override 
    public String getBaseType() { 
      return "Variable";
    } 
-
    
    
    public static Variable localVariable(String local)  {
@@ -36,38 +44,35 @@ public abstract class Variable extends JimpleAbstractDataType {
      return new c_staticFieldRef(field);
    }
     
-
    
    @EqualsAndHashCode
    public static class c_localVariable extends Variable {
      
      public String local;
      
-   
-       public c_localVariable(String local) {
+     public c_localVariable(String local) {
+      
+        this.local = local;  
         
-          this.local = local;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_local = vf.string(local);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_local 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_local 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType()
+         tf.stringType()
        };
      }
     
@@ -84,37 +89,35 @@ public abstract class Variable extends JimpleAbstractDataType {
      
      public Immediate idx;
      
-   
-       public c_arrayRef(String reference, Immediate idx) {
+     public c_arrayRef(String reference, Immediate idx) {
+      
+        this.reference = reference;  
+      
+        this.idx = idx;  
         
-          this.reference = reference;  
-        
-          this.idx = idx;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_reference = vf.string(reference);
        
          IValue iv_idx = idx.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_reference 
-               
-                , iv_idx 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_reference 
+          
+            , iv_idx 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), idx.getVallangConstructor()
+         tf.stringType(), idx.getVallangConstructor()
        };
      }
     
@@ -131,37 +134,35 @@ public abstract class Variable extends JimpleAbstractDataType {
      
      public FieldSignature field;
      
-   
-       public c_fieldRef(String reference, FieldSignature field) {
+     public c_fieldRef(String reference, FieldSignature field) {
+      
+        this.reference = reference;  
+      
+        this.field = field;  
         
-          this.reference = reference;  
-        
-          this.field = field;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_reference = vf.string(reference);
        
          IValue iv_field = field.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_reference 
-               
-                , iv_field 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_reference 
+          
+            , iv_field 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           tf.stringType(), field.getVallangConstructor()
+         tf.stringType(), field.getVallangConstructor()
        };
      }
     
@@ -176,31 +177,29 @@ public abstract class Variable extends JimpleAbstractDataType {
      
      public FieldSignature field;
      
-   
-       public c_staticFieldRef(FieldSignature field) {
+     public c_staticFieldRef(FieldSignature field) {
+      
+        this.field = field;  
         
-          this.field = field;  
-          
-       } 
-     
+     } 
+    
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-     
        
          IValue iv_field = field.createVallangInstance(vf);
        
          
-       return vf.constructor(getVallangConstructor()
-                
-                , iv_field 
-               
-                ); 
+          return vf.constructor(getVallangConstructor()
+          
+            , iv_field 
+          
+          ); 
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-           field.getVallangConstructor()
+         field.getVallangConstructor()
        };
      }
     
