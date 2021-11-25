@@ -1,4 +1,4 @@
-package samples.ssa.sort;
+package samples;
 
 // Source: https://www.geeksforgeeks.org/java-program-for-quicksort/
 
