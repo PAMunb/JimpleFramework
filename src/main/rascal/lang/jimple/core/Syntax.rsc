@@ -74,7 +74,7 @@ data Variable
  | staticFieldRef(FieldSignature field)
  ;  
  
-data Statement //(String methodSignature = "", int startLine = -1, int endLine = -1)  
+data Statement(int stmtId = -1, loc sourceCodeLocation = |file:///|)  
   = label(Label label)  
   | breakpoint()
   | enterMonitor(Immediate immediate)

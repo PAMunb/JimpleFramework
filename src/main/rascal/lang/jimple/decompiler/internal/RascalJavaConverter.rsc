@@ -34,7 +34,7 @@ private map[str, str] collectAliases(Module m) {
 
 private void generateCode(Module m, map[str, str] aliases) {
 	top-down visit(m) {
-	  case (Declaration)`<Visibility _> data <UserType t> = <{Variant "|"}+ variants>;`: generateClass(aliases, t, variants);
+	  case (Declaration)`<Visibility _> data <UserType t> <CommonKeywordParameters _> = <{Variant "|"}+ variants>;`: generateClass(aliases, t, variants);
 	}
 }
 
