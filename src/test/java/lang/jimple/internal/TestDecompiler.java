@@ -361,12 +361,12 @@ public class TestDecompiler {
 	}
 
 	private void assertExecuteMethodStmts(IConstructor c, int size) {
-		IList methods = (IList) c.get(5);
+		IList methods = (IList) c.asWithKeywordParameters().getParameter("methods");
 
 		assertTrue(methods.size() == 2);
 
 		IConstructor executeMethod = (IConstructor)methods.get(1);
-		IList stmts = (IList) ((IConstructor)executeMethod.get(5)).get(1);
+		IList stmts = (IList) ((IConstructor)executeMethod.asWithKeywordParameters().getParameter("body")).asWithKeywordParameters().getParameter("stmts");
 		assertEquals(size, stmts.size());
 	}
 }

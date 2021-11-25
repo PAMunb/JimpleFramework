@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -51,23 +53,17 @@ public  class FieldSignature extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
+      HashMap<String, IValue> map = new HashMap<>(); 
       
-        IValue iv_className = vf.string(className);
       
-        IValue iv_fieldType = fieldType.createVallangInstance(vf);
+      map.put("className", vf.string(className));
       
-        IValue iv_fieldName = vf.string(fieldName);
+      map.put("fieldType", fieldType.createVallangInstance(vf));
+      
+      map.put("fieldName", vf.string(fieldName));
       
         
-         return vf.constructor(getVallangConstructor()
-         
-           , iv_className 
-         
-           , iv_fieldType 
-         
-           , iv_fieldName 
-         
-         ); 
+      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
     }
    
    

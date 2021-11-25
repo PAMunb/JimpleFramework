@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -47,19 +49,15 @@ public  class LocalVariableDeclaration extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
+      HashMap<String, IValue> map = new HashMap<>(); 
       
-        IValue iv_varType = varType.createVallangInstance(vf);
       
-        IValue iv_local = vf.string(local);
+      map.put("varType", varType.createVallangInstance(vf));
+      
+      map.put("local", vf.string(local));
       
         
-         return vf.constructor(getVallangConstructor()
-         
-           , iv_varType 
-         
-           , iv_local 
-         
-         ); 
+      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
     }
    
    

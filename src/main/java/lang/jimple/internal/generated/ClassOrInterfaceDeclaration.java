@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -70,55 +72,47 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IList iv_modifiers = vf.list();
+       
+       IList iv_modifiers = vf.list();
+       
+       for(Modifier v: modifiers) {
+        iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
+       }
+       map.put("modifiers", iv_modifiers);
+               
+       
+       map.put("classType", classType.createVallangInstance(vf));
+       
+       map.put("superClass", superClass.createVallangInstance(vf));
+       
+       IList iv_interfaces = vf.list();
+       
+       for(Type v: interfaces) {
+        iv_interfaces = iv_interfaces.append(v.createVallangInstance(vf));   
+       }
+       map.put("interfaces", iv_interfaces);
+               
+       
+       IList iv_fields = vf.list();
+       
+       for(Field v: fields) {
+        iv_fields = iv_fields.append(v.createVallangInstance(vf));   
+       }
+       map.put("fields", iv_fields);
+               
+       
+       IList iv_methods = vf.list();
+       
+       for(Method v: methods) {
+        iv_methods = iv_methods.append(v.createVallangInstance(vf));   
+       }
+       map.put("methods", iv_methods);
+               
+       
          
-         for(Modifier v: modifiers) {
-          iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IValue iv_classType = classType.createVallangInstance(vf);
-       
-         IValue iv_superClass = superClass.createVallangInstance(vf);
-       
-         IList iv_interfaces = vf.list();
-         
-         for(Type v: interfaces) {
-          iv_interfaces = iv_interfaces.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IList iv_fields = vf.list();
-         
-         for(Field v: fields) {
-          iv_fields = iv_fields.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IList iv_methods = vf.list();
-         
-         for(Method v: methods) {
-          iv_methods = iv_methods.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_modifiers 
-          
-            , iv_classType 
-          
-            , iv_superClass 
-          
-            , iv_interfaces 
-          
-            , iv_fields 
-          
-            , iv_methods 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
@@ -163,51 +157,45 @@ public abstract class ClassOrInterfaceDeclaration extends JimpleAbstractDataType
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IList iv_modifiers = vf.list();
+       
+       IList iv_modifiers = vf.list();
+       
+       for(Modifier v: modifiers) {
+        iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
+       }
+       map.put("modifiers", iv_modifiers);
+               
+       
+       map.put("interfaceType", interfaceType.createVallangInstance(vf));
+       
+       IList iv_interfaces = vf.list();
+       
+       for(Type v: interfaces) {
+        iv_interfaces = iv_interfaces.append(v.createVallangInstance(vf));   
+       }
+       map.put("interfaces", iv_interfaces);
+               
+       
+       IList iv_fields = vf.list();
+       
+       for(Field v: fields) {
+        iv_fields = iv_fields.append(v.createVallangInstance(vf));   
+       }
+       map.put("fields", iv_fields);
+               
+       
+       IList iv_methods = vf.list();
+       
+       for(Method v: methods) {
+        iv_methods = iv_methods.append(v.createVallangInstance(vf));   
+       }
+       map.put("methods", iv_methods);
+               
+       
          
-         for(Modifier v: modifiers) {
-          iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IValue iv_interfaceType = interfaceType.createVallangInstance(vf);
-       
-         IList iv_interfaces = vf.list();
-         
-         for(Type v: interfaces) {
-          iv_interfaces = iv_interfaces.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IList iv_fields = vf.list();
-         
-         for(Field v: fields) {
-          iv_fields = iv_fields.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IList iv_methods = vf.list();
-         
-         for(Method v: methods) {
-          iv_methods = iv_methods.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_modifiers 
-          
-            , iv_interfaceType 
-          
-            , iv_interfaces 
-          
-            , iv_fields 
-          
-            , iv_methods 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override

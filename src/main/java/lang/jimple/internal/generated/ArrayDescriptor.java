@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -50,15 +52,13 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IValue iv_size = vf.integer(size);
+       
+       map.put("size", vf.integer(size));
        
          
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_size 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
@@ -83,11 +83,11 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
+       
        
          
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override

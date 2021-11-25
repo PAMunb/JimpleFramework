@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -70,28 +72,23 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IValue iv_local = vf.string(local);
        
-         IValue iv_sig = sig.createVallangInstance(vf);
+       map.put("local", vf.string(local));
        
-         IList iv_args = vf.list();
+       map.put("sig", sig.createVallangInstance(vf));
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+       map.put("args", iv_args);
+               
+       
          
-         for(Immediate v: args) {
-          iv_args = iv_args.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_local 
-          
-            , iv_sig 
-          
-            , iv_args 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
@@ -128,28 +125,23 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IValue iv_local = vf.string(local);
        
-         IValue iv_sig = sig.createVallangInstance(vf);
+       map.put("local", vf.string(local));
        
-         IList iv_args = vf.list();
+       map.put("sig", sig.createVallangInstance(vf));
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+       map.put("args", iv_args);
+               
+       
          
-         for(Immediate v: args) {
-          iv_args = iv_args.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_local 
-          
-            , iv_sig 
-          
-            , iv_args 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
@@ -186,28 +178,23 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IValue iv_local = vf.string(local);
        
-         IValue iv_sig = sig.createVallangInstance(vf);
+       map.put("local", vf.string(local));
        
-         IList iv_args = vf.list();
+       map.put("sig", sig.createVallangInstance(vf));
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+       map.put("args", iv_args);
+               
+       
          
-         for(Immediate v: args) {
-          iv_args = iv_args.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_local 
-          
-            , iv_sig 
-          
-            , iv_args 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
@@ -240,24 +227,21 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IValue iv_sig = sig.createVallangInstance(vf);
        
-         IList iv_args = vf.list();
+       map.put("sig", sig.createVallangInstance(vf));
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+       map.put("args", iv_args);
+               
+       
          
-         for(Immediate v: args) {
-          iv_args = iv_args.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_sig 
-          
-            , iv_args 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
@@ -298,37 +282,31 @@ public abstract class InvokeExp extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       HashMap<String, IValue> map = new HashMap<>(); 
        
-         IValue iv_bsmSig = bsmSig.createVallangInstance(vf);
        
-         IList iv_bsmArgs = vf.list();
+       map.put("bsmSig", bsmSig.createVallangInstance(vf));
+       
+       IList iv_bsmArgs = vf.list();
+       
+       for(Immediate v: bsmArgs) {
+        iv_bsmArgs = iv_bsmArgs.append(v.createVallangInstance(vf));   
+       }
+       map.put("bsmArgs", iv_bsmArgs);
+               
+       
+       map.put("sig", sig.createVallangInstance(vf));
+       
+       IList iv_args = vf.list();
+       
+       for(Immediate v: args) {
+        iv_args = iv_args.append(v.createVallangInstance(vf));   
+       }
+       map.put("args", iv_args);
+               
+       
          
-         for(Immediate v: bsmArgs) {
-          iv_bsmArgs = iv_bsmArgs.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         IValue iv_sig = sig.createVallangInstance(vf);
-       
-         IList iv_args = vf.list();
-         
-         for(Immediate v: args) {
-          iv_args = iv_args.append(v.createVallangInstance(vf));   
-         }
-                 
-       
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_bsmSig 
-          
-            , iv_bsmArgs 
-          
-            , iv_sig 
-          
-            , iv_args 
-          
-          ); 
+       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
      }
    
      @Override
