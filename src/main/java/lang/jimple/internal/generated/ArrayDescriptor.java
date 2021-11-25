@@ -57,6 +57,13 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.integerType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "fixedSize";
      }
@@ -80,6 +87,13 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "variableSize";

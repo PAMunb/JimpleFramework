@@ -106,6 +106,14 @@ private str generateSingleton(map[str, str] aliases, str base, Variant v) {
               ' <generateConstructor(aliases, base, [arg | TypeArg arg <- arguments])> 
               ' <generateVallangInstance(aliases, [arg | TypeArg arg <- arguments])>
               '
+              '
+              ' @Override
+              ' public io.usethesource.vallang.type.Type[] children() {
+              '   return new io.usethesource.vallang.type.Type[] { 
+              '       <intercalate(", ", [extractTypeFactoryFromArgument(aliases, arg) | TypeArg arg <- arguments])>
+              '   };
+              ' } 
+              '
               ' @Override
               ' public String getConstructor() {
               '    return \"<n>\";
@@ -130,6 +138,13 @@ private str generateSubClass(map[str, str] aliases, str base, Variant v) {
               '  
               '  <generateVallangInstance(aliases, [arg | TypeArg arg <- arguments])>
               '
+              '  @Override
+              '  public io.usethesource.vallang.type.Type[] children() {
+              '    return new io.usethesource.vallang.type.Type[] { 
+              '        <intercalate(", ", [extractTypeFactoryFromArgument(aliases, arg) | TypeArg arg <- arguments])>
+              '    };
+              '  }
+              ' 
               '  @Override
               '  public String getConstructor() {
               '    return \"<n>\";
@@ -176,6 +191,41 @@ private str generateAttributeName(TypeArg arg) {
     default: return ""; 
   } 
 }
+
+private str extractTypeFactoryFromArgument(map[str, str] aliases, TypeArg arg) {
+  switch(arg) {
+    case (TypeArg)`<Type t> <Name n>`: return callTypeFactory(aliases, t, n);
+    default: return ""; 
+  } 
+}
+
+private str callTypeFactory(map[str, str] aliases, Type t, Name n) {
+  str namedType = unparse(t); 
+  str field = unparse(n);
+  switch(t) {
+     case (Type)`str` : return "tf.stringType()"; 
+     case (Type)`int` : return "tf.integerType()";
+     case (Type)`bool`: return "tf.boolType()";
+     case (Type)`real`: return "tf.realType()"; 
+     case (Type)`list[<TypeArg arg>]` : { 
+       return "tf.listType(tf.valueType())";
+     }
+     default: return callTypeFactoryFromUserDefinedType(aliases, namedType, field);
+  }
+}
+
+private str callTypeFactoryFromUserDefinedType(map[str, str] aliases, str base, str field) {
+  switch(resolve(aliases, base)) {
+    case "String"  : return "tf.stringType()";
+    case "Integer" : return "tf.integerType()";
+    case "Boolean" : return "tf.boolType()";
+    case "Float"   : return "tf.realType()";
+    case "Double"  : return "tf.realType()";
+    case "Long"    : return "tf.integerType()";
+    default        : return "<field>.getVallangConstructor()"; 
+  }
+}
+
 
 private str populateMap(map[str, str] aliases, TypeArg arg) {
   switch(arg) {

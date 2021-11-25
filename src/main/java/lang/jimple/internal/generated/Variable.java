@@ -65,6 +65,13 @@ public abstract class Variable extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "localVariable";
      }
@@ -104,6 +111,13 @@ public abstract class Variable extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), idx.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "arrayRef";
@@ -145,6 +159,13 @@ public abstract class Variable extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), field.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "fieldRef";
      }
@@ -176,6 +197,13 @@ public abstract class Variable extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           field.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "staticFieldRef";

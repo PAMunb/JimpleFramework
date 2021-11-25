@@ -65,6 +65,13 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.integerType(), tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "caseOption";
      }
@@ -96,6 +103,13 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "defaultOption";

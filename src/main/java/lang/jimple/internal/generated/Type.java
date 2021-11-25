@@ -113,6 +113,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TByte";
      }
@@ -136,6 +143,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TBoolean";
@@ -161,6 +175,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TShort";
      }
@@ -184,6 +205,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TCharacter";
@@ -209,6 +237,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TInteger";
      }
@@ -232,6 +267,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TFloat";
@@ -257,6 +299,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TDouble";
      }
@@ -280,6 +329,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TLong";
@@ -313,6 +369,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TObject";
      }
@@ -345,6 +408,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           baseType.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TArray";
      }
@@ -368,6 +438,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TVoid";
@@ -393,6 +470,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TString";
      }
@@ -416,6 +500,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TMethodValue";
@@ -441,6 +532,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TClassValue";
      }
@@ -464,6 +562,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TMethodHandle";
@@ -489,6 +594,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TFieldHandle";
      }
@@ -513,6 +625,13 @@ public abstract class Type extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "TNull";
      }
@@ -536,6 +655,13 @@ public abstract class Type extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "TUnknown";

@@ -66,12 +66,7 @@ test bool testDoWhileStatement() {
   switch(c) {
     case classDecl(_, _, _, _, _, methods): { 
       list[Statement] ss = methods[1].body.stmts; 
-      Statement s1 = expected[0]; 
-      Statement s2 = ss[0]; 
-      Statement s3 = identity("r0","@this",TObject("samples.controlStatements.DoWhileStatement"));
-      println(s1);
-      println(s2);
-      return s1 := s2;
+      return expected == ss; 
     }
     default: return false; 
   }

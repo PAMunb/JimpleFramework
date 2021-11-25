@@ -97,6 +97,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Public";
      }
@@ -120,6 +127,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Protected";
@@ -145,6 +159,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Private";
      }
@@ -168,6 +189,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Abstract";
@@ -193,6 +221,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Static";
      }
@@ -216,6 +251,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Final";
@@ -241,6 +283,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Synchronized";
      }
@@ -264,6 +313,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Native";
@@ -289,6 +345,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Strictfp";
      }
@@ -312,6 +375,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Transient";
@@ -337,6 +407,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Volatile";
      }
@@ -360,6 +437,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Enum";
@@ -385,6 +469,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "Annotation";
      }
@@ -408,6 +499,13 @@ public abstract class Modifier extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "Synthetic";

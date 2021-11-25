@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 
 import io.usethesource.vallang.IList;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import io.usethesource.vallang.IConstructor;
@@ -124,7 +123,6 @@ public class TestDecompiler {
 		}
 	}
 	
-	@Ignore
 	@Test 
 	public void decompileSlf4JMDCClass() {
 		try {
@@ -162,7 +160,6 @@ public class TestDecompiler {
 	}	
 	
 	@Test 
-	@Ignore
 	public void decompileStreamAPI() {
 		try {
 			File classFile = new File("./target/test-classes/samples/StreamAPI.class"); 			
@@ -353,6 +350,5 @@ public class TestDecompiler {
 		IConstructor executeMethod = (IConstructor)methods.get(1);
 		IList stmts = (IList) ((IConstructor)executeMethod.get(5)).get(1);
 		assertEquals(size, stmts.size());
-		System.out.println(stmts);
 	}
 }

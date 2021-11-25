@@ -185,6 +185,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           instanceType.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "newInstance";
      }
@@ -230,6 +237,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           baseType.getVallangConstructor(), tf.listType(tf.valueType())
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "newArray";
      }
@@ -269,6 +283,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           toType.getVallangConstructor(), immeadiate.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "cast";
@@ -310,6 +331,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           baseType.getVallangConstructor(), immediate.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "instanceOf";
      }
@@ -341,6 +369,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           expression.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "invokeExp";
@@ -382,6 +417,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), immediate.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "arraySubscript";
      }
@@ -421,6 +463,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), immediate.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "stringSubscript";
@@ -478,6 +527,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "localFieldRef";
      }
@@ -526,6 +582,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType(), fieldType.getVallangConstructor(), tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "fieldRef";
      }
@@ -565,6 +628,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "and";
@@ -606,6 +676,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "or";
      }
@@ -645,6 +722,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "xor";
@@ -686,6 +770,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "reminder";
      }
@@ -718,6 +809,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           immediate.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "isNull";
      }
@@ -749,6 +847,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           immediate.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "isNotNull";
@@ -790,6 +895,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "cmp";
      }
@@ -829,6 +941,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "cmpg";
@@ -870,6 +989,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "cmpl";
      }
@@ -909,6 +1035,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "cmpeq";
@@ -950,6 +1083,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "cmpne";
      }
@@ -989,6 +1129,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "cmpgt";
@@ -1030,6 +1177,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "cmpge";
      }
@@ -1069,6 +1223,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "cmplt";
@@ -1110,6 +1271,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "cmple";
      }
@@ -1149,6 +1317,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "shl";
@@ -1190,6 +1365,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "shr";
      }
@@ -1229,6 +1411,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "ushr";
@@ -1270,6 +1459,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "plus";
      }
@@ -1309,6 +1505,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "minus";
@@ -1350,6 +1553,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "mult";
      }
@@ -1390,6 +1600,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           lhs.getVallangConstructor(), rhs.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "div";
      }
@@ -1421,6 +1638,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           immediate.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "lengthOf";
@@ -1454,6 +1678,13 @@ public abstract class Expression extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           immediate.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "neg";
      }
@@ -1485,6 +1716,13 @@ public abstract class Expression extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           immediate.getVallangConstructor()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "immediate";

@@ -93,6 +93,13 @@ public abstract class Value extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.integerType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "intValue";
      }
@@ -124,6 +131,13 @@ public abstract class Value extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.integerType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "longValue";
@@ -157,6 +171,13 @@ public abstract class Value extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.realType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "floatValue";
      }
@@ -188,6 +209,13 @@ public abstract class Value extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.realType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "doubleValue";
@@ -221,6 +249,13 @@ public abstract class Value extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "stringValue";
      }
@@ -252,6 +287,13 @@ public abstract class Value extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.boolType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "booleanValue";
@@ -298,6 +340,13 @@ public abstract class Value extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           returnType.getVallangConstructor(), tf.listType(tf.valueType())
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "methodValue";
      }
@@ -329,6 +378,13 @@ public abstract class Value extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.stringType()
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "classValue";
@@ -362,6 +418,13 @@ public abstract class Value extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           methodSig.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "methodHandle";
      }
@@ -394,6 +457,13 @@ public abstract class Value extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           fieldSig.getVallangConstructor()
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "fieldHandle";
      }
@@ -417,6 +487,13 @@ public abstract class Value extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "nullValue";

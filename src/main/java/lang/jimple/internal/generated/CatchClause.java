@@ -71,6 +71,14 @@ public  class CatchClause extends JimpleAbstractDataType {
                  ); 
       }
      
+     
+      @Override
+      public io.usethesource.vallang.type.Type[] children() {
+        return new io.usethesource.vallang.type.Type[] { 
+            exception.getVallangConstructor(), tf.stringType(), tf.stringType(), tf.stringType()
+        };
+      } 
+     
       @Override
       public String getConstructor() {
          return "catchClause";

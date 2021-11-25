@@ -55,6 +55,14 @@ public  class LocalVariableDeclaration extends JimpleAbstractDataType {
                  ); 
       }
      
+     
+      @Override
+      public io.usethesource.vallang.type.Type[] children() {
+        return new io.usethesource.vallang.type.Type[] { 
+            varType.getVallangConstructor(), tf.stringType()
+        };
+      } 
+     
       @Override
       public String getConstructor() {
          return "localVariableDeclaration";

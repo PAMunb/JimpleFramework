@@ -88,6 +88,13 @@ public abstract class MethodBody extends JimpleAbstractDataType {
      }
    
      @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           tf.listType(tf.valueType()), tf.listType(tf.valueType()), tf.listType(tf.valueType())
+       };
+     }
+    
+     @Override
      public String getConstructor() {
        return "methodBody";
      }
@@ -111,6 +118,13 @@ public abstract class MethodBody extends JimpleAbstractDataType {
                 ); 
      }
    
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+           
+       };
+     }
+    
      @Override
      public String getConstructor() {
        return "signatureOnly";
