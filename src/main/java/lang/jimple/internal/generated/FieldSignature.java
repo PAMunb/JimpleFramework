@@ -53,17 +53,21 @@ public  class FieldSignature extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
-      HashMap<String, IValue> map = new HashMap<>(); 
+      
+      IValue iv_className = vf.string(className);
+      
+      IValue iv_fieldType = fieldType.createVallangInstance(vf);
+      
+      IValue iv_fieldName = vf.string(fieldName);
       
       
-      map.put("className", vf.string(className));
+      IValue[] children = new IValue[] { 
+        iv_className, iv_fieldType, iv_fieldName   
+      };
+    
       
-      map.put("fieldType", fieldType.createVallangInstance(vf));
-      
-      map.put("fieldName", vf.string(fieldName));
-      
-        
-      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    

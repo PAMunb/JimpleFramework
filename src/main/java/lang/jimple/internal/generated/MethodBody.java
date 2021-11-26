@@ -60,15 +60,13 @@ public abstract class MethodBody extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
-       
        
        IList iv_localVariableDecls = vf.list();
        
        for(LocalVariableDeclaration v: localVariableDecls) {
         iv_localVariableDecls = iv_localVariableDecls.append(v.createVallangInstance(vf));   
        }
-       map.put("localVariableDecls", iv_localVariableDecls);
+       
                
        
        IList iv_stmts = vf.list();
@@ -76,7 +74,7 @@ public abstract class MethodBody extends JimpleAbstractDataType {
        for(Statement v: stmts) {
         iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
        }
-       map.put("stmts", iv_stmts);
+       
                
        
        IList iv_catchClauses = vf.list();
@@ -84,11 +82,17 @@ public abstract class MethodBody extends JimpleAbstractDataType {
        for(CatchClause v: catchClauses) {
         iv_catchClauses = iv_catchClauses.append(v.createVallangInstance(vf));   
        }
-       map.put("catchClauses", iv_catchClauses);
+       
                
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       
+       IValue[] children = new IValue[] { 
+         iv_localVariableDecls, iv_stmts, iv_catchClauses   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -113,11 +117,15 @@ public abstract class MethodBody extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

@@ -180,13 +180,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_instanceType = instanceType.createVallangInstance(vf);
        
        
-       map.put("instanceType", instanceType.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_instanceType   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -219,21 +223,25 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
-       
-       map.put("baseType", baseType.createVallangInstance(vf));
+       IValue iv_baseType = baseType.createVallangInstance(vf);
        
        IList iv_dims = vf.list();
        
        for(ArrayDescriptor v: dims) {
         iv_dims = iv_dims.append(v.createVallangInstance(vf));   
        }
-       map.put("dims", iv_dims);
+       
                
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       
+       IValue[] children = new IValue[] { 
+         iv_baseType, iv_dims   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -266,15 +274,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_toType = toType.createVallangInstance(vf);
+       
+       IValue iv_immeadiate = immeadiate.createVallangInstance(vf);
        
        
-       map.put("toType", toType.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_toType, iv_immeadiate   
+       };
+     
        
-       map.put("immeadiate", immeadiate.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -307,15 +319,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_baseType = baseType.createVallangInstance(vf);
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("baseType", baseType.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_baseType, iv_immediate   
+       };
+     
        
-       map.put("immediate", immediate.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -344,13 +360,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_expression = expression.createVallangInstance(vf);
        
        
-       map.put("expression", expression.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_expression   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -383,15 +403,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_name = vf.string(name);
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("name", vf.string(name));
+       IValue[] children = new IValue[] { 
+         iv_name, iv_immediate   
+       };
+     
        
-       map.put("immediate", immediate.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -424,15 +448,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_string = vf.string(string);
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("string", vf.string(string));
+       IValue[] children = new IValue[] { 
+         iv_string, iv_immediate   
+       };
+     
        
-       map.put("immediate", immediate.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -473,19 +501,23 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_local = vf.string(local);
+       
+       IValue iv_className = vf.string(className);
+       
+       IValue iv_fieldType = fieldType.createVallangInstance(vf);
+       
+       IValue iv_fieldName = vf.string(fieldName);
        
        
-       map.put("local", vf.string(local));
+       IValue[] children = new IValue[] { 
+         iv_local, iv_className, iv_fieldType, iv_fieldName   
+       };
+     
        
-       map.put("className", vf.string(className));
-       
-       map.put("fieldType", fieldType.createVallangInstance(vf));
-       
-       map.put("fieldName", vf.string(fieldName));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -522,17 +554,21 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_className = vf.string(className);
+       
+       IValue iv_fieldType = fieldType.createVallangInstance(vf);
+       
+       IValue iv_fieldName = vf.string(fieldName);
        
        
-       map.put("className", vf.string(className));
+       IValue[] children = new IValue[] { 
+         iv_className, iv_fieldType, iv_fieldName   
+       };
+     
        
-       map.put("fieldType", fieldType.createVallangInstance(vf));
-       
-       map.put("fieldName", vf.string(fieldName));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -565,15 +601,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -606,15 +646,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -647,15 +691,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -688,15 +736,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -725,13 +777,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -760,13 +816,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -799,15 +859,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -840,15 +904,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -881,15 +949,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -922,15 +994,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -963,15 +1039,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1004,15 +1084,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1045,15 +1129,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1086,15 +1174,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1127,15 +1219,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1168,15 +1264,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1209,15 +1309,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1250,15 +1354,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1291,15 +1399,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1332,15 +1444,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1373,15 +1489,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1414,15 +1534,19 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_lhs = lhs.createVallangInstance(vf);
+       
+       IValue iv_rhs = rhs.createVallangInstance(vf);
        
        
-       map.put("lhs", lhs.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_lhs, iv_rhs   
+       };
+     
        
-       map.put("rhs", rhs.createVallangInstance(vf));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1451,13 +1575,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1486,13 +1614,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -1521,13 +1653,17 @@ public abstract class Expression extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

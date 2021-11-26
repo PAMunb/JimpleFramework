@@ -52,13 +52,17 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_size = vf.integer(size);
        
        
-       map.put("size", vf.integer(size));
+       IValue[] children = new IValue[] { 
+         iv_size   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -83,11 +87,15 @@ public abstract class ArrayDescriptor extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

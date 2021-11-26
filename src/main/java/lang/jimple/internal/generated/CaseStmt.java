@@ -56,15 +56,19 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_option = vf.integer(option);
+       
+       IValue iv_targetStmt = vf.string(targetStmt);
        
        
-       map.put("option", vf.integer(option));
+       IValue[] children = new IValue[] { 
+         iv_option, iv_targetStmt   
+       };
+     
        
-       map.put("targetStmt", vf.string(targetStmt));
-       
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -93,13 +97,17 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
+       
+       IValue iv_targetStmt = vf.string(targetStmt);
        
        
-       map.put("targetStmt", vf.string(targetStmt));
+       IValue[] children = new IValue[] { 
+         iv_targetStmt   
+       };
+     
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

@@ -53,23 +53,27 @@ public  class Field extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
-      HashMap<String, IValue> map = new HashMap<>(); 
-      
       
       IList iv_modifiers = vf.list();
       
       for(Modifier v: modifiers) {
        iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
       }
-      map.put("modifiers", iv_modifiers);
+      
               
       
-      map.put("fieldType", fieldType.createVallangInstance(vf));
+      IValue iv_fieldType = fieldType.createVallangInstance(vf);
       
-      map.put("name", vf.string(name));
+      IValue iv_name = vf.string(name);
       
-        
-      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+      
+      IValue[] children = new IValue[] { 
+        iv_modifiers, iv_fieldType, iv_name   
+      };
+    
+      
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    

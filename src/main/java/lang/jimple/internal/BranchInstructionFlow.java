@@ -25,6 +25,7 @@ public class BranchInstructionFlow implements InstructionFlow {
 
 	private String methodSignature;
 	private int sourceLineNumber;
+	private int stmtId;
 	
 	enum BranchState {
 		LEFT,
@@ -32,11 +33,12 @@ public class BranchInstructionFlow implements InstructionFlow {
 		ReadyToMerge
 	}
 	
-	public BranchInstructionFlow(Expression condition, String target, int sourceLineNumber, String methodSignature) {
+	public BranchInstructionFlow(Expression condition, String target, int stmtId, String methodSignature, int sourceLineNumber) {
 		this.condition = condition;
 		this.targetStatement = target;
-		this.sourceLineNumber = sourceLineNumber;
+		this.stmtId = stmtId;
 		this.methodSignature = methodSignature;
+		this.sourceLineNumber = sourceLineNumber;
 		left = new Environment();
 		right = new Environment();
 		status = BranchState.LEFT;
@@ -48,18 +50,18 @@ public class BranchInstructionFlow implements InstructionFlow {
 	public Collection<Statement> merge() {
 		List<Statement> res = new ArrayList<>();
 		
-		res.add(Statement.ifStmt(condition, targetStatement, sourceLineNumber, methodSignature));
+		res.add(Statement.ifStmt(condition, targetStatement, stmtId, methodSignature, sourceLineNumber));
 		res.addAll(left.instructions);
 
 		if(gotoMergeStmt != null) {
 			res.add(gotoMergeStmt);
 		}
 
-		res.add(Statement.label(targetStatement, sourceLineNumber, methodSignature));
+		res.add(Statement.label(targetStatement, stmtId, methodSignature, sourceLineNumber));
 		res.addAll(right.instructions);
 
 		if(mergeStatement != null) {
-			res.add(Statement.label(mergeStatement, sourceLineNumber, methodSignature));
+			res.add(Statement.label(mergeStatement, stmtId, methodSignature, sourceLineNumber));
 		}
 		
 		return res; 

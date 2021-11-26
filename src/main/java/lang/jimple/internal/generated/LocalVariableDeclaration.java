@@ -49,15 +49,19 @@ public  class LocalVariableDeclaration extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
-      HashMap<String, IValue> map = new HashMap<>(); 
+      
+      IValue iv_varType = varType.createVallangInstance(vf);
+      
+      IValue iv_local = vf.string(local);
       
       
-      map.put("varType", varType.createVallangInstance(vf));
+      IValue[] children = new IValue[] { 
+        iv_varType, iv_local   
+      };
+    
       
-      map.put("local", vf.string(local));
-      
-        
-      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    

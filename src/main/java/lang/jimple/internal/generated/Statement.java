@@ -30,76 +30,76 @@ public abstract class Statement extends JimpleAbstractDataType {
    } 
    
    
-   public static Statement label(String label, Integer stmtId, String methodSignature)  {
-     return new c_label(label, stmtId, methodSignature);
+   public static Statement label(String label, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_label(label, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement breakpoint(Integer stmtId, String methodSignature)  {
-     return new c_breakpoint(stmtId, methodSignature);
+   public static Statement breakpoint(Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_breakpoint(stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement enterMonitor(Immediate immediate, Integer stmtId, String methodSignature)  {
-     return new c_enterMonitor(immediate, stmtId, methodSignature);
+   public static Statement enterMonitor(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_enterMonitor(immediate, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement exitMonitor(Immediate immediate, Integer stmtId, String methodSignature)  {
-     return new c_exitMonitor(immediate, stmtId, methodSignature);
+   public static Statement exitMonitor(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_exitMonitor(immediate, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement tableSwitch(Immediate immediate, Integer min, Integer max, List<CaseStmt> stmts, Integer stmtId, String methodSignature)  {
-     return new c_tableSwitch(immediate, min, max, stmts, stmtId, methodSignature);
+   public static Statement tableSwitch(Immediate immediate, Integer min, Integer max, List<CaseStmt> stmts, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_tableSwitch(immediate, min, max, stmts, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement lookupSwitch(Immediate immediate, List<CaseStmt> stmts, Integer stmtId, String methodSignature)  {
-     return new c_lookupSwitch(immediate, stmts, stmtId, methodSignature);
+   public static Statement lookupSwitch(Immediate immediate, List<CaseStmt> stmts, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_lookupSwitch(immediate, stmts, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement identity(String local, String identifier, Type idType, Integer stmtId, String methodSignature)  {
-     return new c_identity(local, identifier, idType, stmtId, methodSignature);
+   public static Statement identity(String local, String identifier, Type idType, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_identity(local, identifier, idType, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement identityNoType(String local, String identifier, Integer stmtId, String methodSignature)  {
-     return new c_identityNoType(local, identifier, stmtId, methodSignature);
+   public static Statement identityNoType(String local, String identifier, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_identityNoType(local, identifier, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement assign(Variable var, Expression expression, Integer stmtId, String methodSignature)  {
-     return new c_assign(var, expression, stmtId, methodSignature);
+   public static Statement assign(Variable var, Expression expression, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_assign(var, expression, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement ifStmt(Expression exp, String target, Integer stmtId, String methodSignature)  {
-     return new c_ifStmt(exp, target, stmtId, methodSignature);
+   public static Statement ifStmt(Expression exp, String target, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_ifStmt(exp, target, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement retEmptyStmt(Integer stmtId, String methodSignature)  {
-     return new c_retEmptyStmt(stmtId, methodSignature);
+   public static Statement retEmptyStmt(Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_retEmptyStmt(stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement retStmt(Immediate immediate, Integer stmtId, String methodSignature)  {
-     return new c_retStmt(immediate, stmtId, methodSignature);
+   public static Statement retStmt(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_retStmt(immediate, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement returnEmptyStmt(Integer stmtId, String methodSignature)  {
-     return new c_returnEmptyStmt(stmtId, methodSignature);
+   public static Statement returnEmptyStmt(Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_returnEmptyStmt(stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement returnStmt(Immediate immediate, Integer stmtId, String methodSignature)  {
-     return new c_returnStmt(immediate, stmtId, methodSignature);
+   public static Statement returnStmt(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_returnStmt(immediate, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement throwStmt(Immediate immediate, Integer stmtId, String methodSignature)  {
-     return new c_throwStmt(immediate, stmtId, methodSignature);
+   public static Statement throwStmt(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_throwStmt(immediate, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement invokeStmt(InvokeExp invokeExpression, Integer stmtId, String methodSignature)  {
-     return new c_invokeStmt(invokeExpression, stmtId, methodSignature);
+   public static Statement invokeStmt(InvokeExp invokeExpression, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_invokeStmt(invokeExpression, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement gotoStmt(String target, Integer stmtId, String methodSignature)  {
-     return new c_gotoStmt(target, stmtId, methodSignature);
+   public static Statement gotoStmt(String target, Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_gotoStmt(target, stmtId, methodSignature, sourceCodeLine);
    }
    
-   public static Statement nop(Integer stmtId, String methodSignature)  {
-     return new c_nop(stmtId, methodSignature);
+   public static Statement nop(Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_nop(stmtId, methodSignature, sourceCodeLine);
    }
     
    
@@ -112,35 +112,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_label(String label, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_label(String label, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.label = label;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_label = vf.string(label);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_label   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("label", vf.string(label));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.stringType(), tf.integerType(), tf.stringType()
+         tf.stringType(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -157,31 +169,43 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_breakpoint(Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_breakpoint(Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       HashMap<String, IValue> map = new HashMap<>(); 
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.integerType(), tf.stringType()
+         tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -200,35 +224,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_enterMonitor(Immediate immediate, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_enterMonitor(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("immediate", immediate.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -247,35 +283,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_exitMonitor(Immediate immediate, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_exitMonitor(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("immediate", immediate.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -300,7 +348,9 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_tableSwitch(Immediate immediate, Integer min, Integer max, List<CaseStmt> stmts, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_tableSwitch(Immediate immediate, Integer min, Integer max, List<CaseStmt> stmts, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
@@ -313,40 +363,50 @@ public abstract class Statement extends JimpleAbstractDataType {
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue iv_min = vf.integer(min);
        
-       map.put("min", vf.integer(min));
-       
-       map.put("max", vf.integer(max));
+       IValue iv_max = vf.integer(max);
        
        IList iv_stmts = vf.list();
        
        for(CaseStmt v: stmts) {
         iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
        }
-       map.put("stmts", iv_stmts);
+       
                
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate, iv_min, iv_max, iv_stmts   
+       };
+     
+       
+       HashMap<String, IValue> map = new HashMap<>(); 
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.integerType(), tf.integerType(), tf.listType(tf.valueType()), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.integerType(), tf.integerType(), tf.listType(tf.valueType()), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -367,7 +427,9 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_lookupSwitch(Immediate immediate, List<CaseStmt> stmts, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_lookupSwitch(Immediate immediate, List<CaseStmt> stmts, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
@@ -376,36 +438,46 @@ public abstract class Statement extends JimpleAbstractDataType {
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
-       
-       map.put("immediate", immediate.createVallangInstance(vf));
+       IValue iv_immediate = immediate.createVallangInstance(vf);
        
        IList iv_stmts = vf.list();
        
        for(CaseStmt v: stmts) {
         iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
        }
-       map.put("stmts", iv_stmts);
+       
                
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate, iv_stmts   
+       };
+     
+       
+       HashMap<String, IValue> map = new HashMap<>(); 
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.listType(tf.valueType()), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.listType(tf.valueType()), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -428,7 +500,9 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_identity(String local, String identifier, Type idType, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_identity(String local, String identifier, Type idType, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.local = local;  
       
@@ -439,32 +513,42 @@ public abstract class Statement extends JimpleAbstractDataType {
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_local = vf.string(local);
+       
+       IValue iv_identifier = vf.string(identifier);
+       
+       IValue iv_idType = idType.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_local, iv_identifier, iv_idType   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("local", vf.string(local));
-       
-       map.put("identifier", vf.string(identifier));
-       
-       map.put("idType", idType.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.stringType(), tf.stringType(), idType.getVallangConstructor(), tf.integerType(), tf.stringType()
+         tf.stringType(), tf.stringType(), idType.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -485,7 +569,9 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_identityNoType(String local, String identifier, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_identityNoType(String local, String identifier, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.local = local;  
       
@@ -494,30 +580,40 @@ public abstract class Statement extends JimpleAbstractDataType {
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_local = vf.string(local);
+       
+       IValue iv_identifier = vf.string(identifier);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_local, iv_identifier   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("local", vf.string(local));
-       
-       map.put("identifier", vf.string(identifier));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.stringType(), tf.stringType(), tf.integerType(), tf.stringType()
+         tf.stringType(), tf.stringType(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -538,7 +634,9 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_assign(Variable var, Expression expression, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_assign(Variable var, Expression expression, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.var = var;  
       
@@ -547,30 +645,40 @@ public abstract class Statement extends JimpleAbstractDataType {
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_var = var.createVallangInstance(vf);
+       
+       IValue iv_expression = expression.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_var, iv_expression   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("var", var.createVallangInstance(vf));
-       
-       map.put("expression", expression.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         var.getVallangConstructor(), expression.getVallangConstructor(), tf.integerType(), tf.stringType()
+         var.getVallangConstructor(), expression.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -591,7 +699,9 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_ifStmt(Expression exp, String target, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_ifStmt(Expression exp, String target, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.exp = exp;  
       
@@ -600,30 +710,40 @@ public abstract class Statement extends JimpleAbstractDataType {
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_exp = exp.createVallangInstance(vf);
+       
+       IValue iv_target = vf.string(target);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_exp, iv_target   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("exp", exp.createVallangInstance(vf));
-       
-       map.put("target", vf.string(target));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         exp.getVallangConstructor(), tf.stringType(), tf.integerType(), tf.stringType()
+         exp.getVallangConstructor(), tf.stringType(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -640,31 +760,43 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_retEmptyStmt(Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_retEmptyStmt(Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       HashMap<String, IValue> map = new HashMap<>(); 
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.integerType(), tf.stringType()
+         tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -683,35 +815,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_retStmt(Immediate immediate, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_retStmt(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("immediate", immediate.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -728,31 +872,43 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_returnEmptyStmt(Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_returnEmptyStmt(Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       HashMap<String, IValue> map = new HashMap<>(); 
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.integerType(), tf.stringType()
+         tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -771,35 +927,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_returnStmt(Immediate immediate, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_returnStmt(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("immediate", immediate.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -818,35 +986,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_throwStmt(Immediate immediate, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_throwStmt(Immediate immediate, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.immediate = immediate;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_immediate = immediate.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_immediate   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("immediate", immediate.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         immediate.getVallangConstructor(), tf.integerType(), tf.stringType()
+         immediate.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -865,35 +1045,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_invokeStmt(InvokeExp invokeExpression, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_invokeStmt(InvokeExp invokeExpression, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.invokeExpression = invokeExpression;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_invokeExpression = invokeExpression.createVallangInstance(vf);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_invokeExpression   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("invokeExpression", invokeExpression.createVallangInstance(vf));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         invokeExpression.getVallangConstructor(), tf.integerType(), tf.stringType()
+         invokeExpression.getVallangConstructor(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -912,35 +1104,47 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_gotoStmt(String target, Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_gotoStmt(String target, Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.target = target;  
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_target = vf.string(target);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_target   
+       };
+     
+       
        HashMap<String, IValue> map = new HashMap<>(); 
-       
-       
-       map.put("target", vf.string(target));
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.stringType(), tf.integerType(), tf.stringType()
+         tf.stringType(), tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     
@@ -957,31 +1161,43 @@ public abstract class Statement extends JimpleAbstractDataType {
      
      public String methodSignature;
      
-     public c_nop(Integer stmtId, String methodSignature) {
+     public Integer sourceCodeLine;
+     
+     public c_nop(Integer stmtId, String methodSignature, Integer sourceCodeLine) {
       
         this.stmtId = stmtId;  
       
         this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
         
      } 
     
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
-       HashMap<String, IValue> map = new HashMap<>(); 
        
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       HashMap<String, IValue> map = new HashMap<>(); 
        
        map.put("stmtId", vf.integer(stmtId));
        
        map.put("methodSignature", vf.string(methodSignature));
        
-         
-       return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+       map.put("sourceCodeLine", vf.integer(sourceCodeLine));
+       
+       return vf.constructor(getVallangConstructor(), children, map); 
+        
      }
    
      @Override
      public io.usethesource.vallang.type.Type[] children() {
        return new io.usethesource.vallang.type.Type[] { 
-         tf.integerType(), tf.stringType()
+         tf.integerType(), tf.stringType(), tf.integerType()
        };
      }
     

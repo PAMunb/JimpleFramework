@@ -57,19 +57,23 @@ public  class CatchClause extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
-      HashMap<String, IValue> map = new HashMap<>(); 
+      
+      IValue iv_exception = exception.createVallangInstance(vf);
+      
+      IValue iv_from = vf.string(from);
+      
+      IValue iv_to = vf.string(to);
+      
+      IValue iv_with = vf.string(with);
       
       
-      map.put("exception", exception.createVallangInstance(vf));
+      IValue[] children = new IValue[] { 
+        iv_exception, iv_from, iv_to, iv_with   
+      };
+    
       
-      map.put("from", vf.string(from));
-      
-      map.put("to", vf.string(to));
-      
-      map.put("with", vf.string(with));
-      
-        
-      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    

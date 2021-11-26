@@ -49,21 +49,25 @@ public  class UnnamedMethodSignature extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
-      HashMap<String, IValue> map = new HashMap<>(); 
       
-      
-      map.put("returnType", returnType.createVallangInstance(vf));
+      IValue iv_returnType = returnType.createVallangInstance(vf);
       
       IList iv_formals = vf.list();
       
       for(Type v: formals) {
        iv_formals = iv_formals.append(v.createVallangInstance(vf));   
       }
-      map.put("formals", iv_formals);
+      
               
       
-        
-      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+      
+      IValue[] children = new IValue[] { 
+        iv_returnType, iv_formals   
+      };
+    
+      
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    

@@ -116,7 +116,7 @@ private str generateSingleton(map[str, str] aliases, str base, CommonKeywordPara
               ' }
               ' 
               ' <generateConstructor(aliases, base, [arg | TypeArg arg <- args])> 
-              ' <generateVallangInstance(aliases, [arg | TypeArg arg <- args])>
+              ' <generateVallangInstance(aliases, [arg | TypeArg arg <- arguments], fromCommonArguments(commons))>
               '
               '
               ' @Override
@@ -149,7 +149,7 @@ private str generateSubClass(map[str, str] aliases, str base, CommonKeywordParam
               '  <}>
               '  <generateConstructor(aliases, "c_" + unparse(n), [arg | TypeArg arg <- args])> 
               ' 
-              '  <generateVallangInstance(aliases, [arg | TypeArg arg <- args])>
+              '  <generateVallangInstance(aliases, [arg | TypeArg arg <- arguments], fromCommonArguments(commons))>
               '
               '  @Override
               '  public io.usethesource.vallang.type.Type[] children() {
@@ -176,16 +176,26 @@ private str generateConstructor(map[str, str] aliases, str cn, list[TypeArg] arg
    '}";
  
 
-private str generateVallangInstance(map[str, str] aliases, list[TypeArg] arguments) 
+private str generateVallangInstance(map[str, str] aliases, list[TypeArg] arguments, list[TypeArg] commons) 
  = "@Override
    'public IConstructor createVallangInstance(IValueFactory vf) {
-   '  HashMap\<String, IValue\> map = new HashMap\<\>(); 
-   '  
    '  <for(TypeArg arg <- arguments){>
-   '  <populateMap(aliases, arg)>
+   '  <populateChildren(aliases, arg, false)>
    '  <}>
-   '    
-   '  return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+   '  
+   '  IValue[] children = new IValue[] { 
+   '    <intercalate(", ", ["iv_" + generateAttributeName(arg) | arg <- arguments])>   
+   '  };
+   '
+   '  <if(size(commons) > 0) {>
+   '  HashMap\<String, IValue\> map = new HashMap\<\>(); 
+   '  <for(TypeArg arg <- commons){>
+   '  <populateChildren(aliases, arg, true)>
+   '  <}>
+   '  return vf.constructor(getVallangConstructor(), children, map); 
+   '  <} else {>
+   '  return vf.constructor(getVallangConstructor(), children);
+   '  <}> 
    '}";  
  
 private str generateAttribute(map[str, str] aliases, TypeArg arg, bool isPublic) {
@@ -239,17 +249,16 @@ private str callTypeFactoryFromUserDefinedType(map[str, str] aliases, str base, 
 }
 
 
-private str populateMap(map[str, str] aliases, TypeArg arg) {
+private str populateChildren(map[str, str] aliases, TypeArg arg, bool isMap) {
   switch(arg) {
     case (TypeArg)`<Type t> <Name n>`: 
       switch(t) {
-        case (Type)`str` : return populateBasicType("str", unparse(n));
-        case (Type)`int` : return populateBasicType("int", unparse(n));
-        case (Type)`bool`: return populateBasicType("bool", unparse(n));
-        case (Type)`real`: return populateBasicType("real", unparse(n));
-        case (Type)`loc` : return populateBasicType("loc", unparse(n));
-        case (Type)`list[<TypeArg base>]`: return populateListType(aliases, unparse(base), unparse(n)); 
-        default: return populateUserDefinedType(aliases, unparse(t), unparse(n)); 
+        case (Type)`str` : return populateBasicType("str", unparse(n), isMap);
+        case (Type)`int` : return populateBasicType("int", unparse(n), isMap);
+        case (Type)`bool`: return populateBasicType("bool", unparse(n), isMap);
+        case (Type)`real`: return populateBasicType("real", unparse(n), isMap);
+        case (Type)`list[<TypeArg base>]`: return populateListType(aliases, unparse(base), unparse(n), isMap); 
+        default: return populateUserDefinedType(aliases, unparse(t), unparse(n), isMap); 
       }
     default: {
       println(arg);
@@ -258,30 +267,29 @@ private str populateMap(map[str, str] aliases, TypeArg arg) {
   }
 }
 
-private str populateBasicType("str", str n)     = "map.put(\"<n>\", vf.string(<n>));";
-private str populateBasicType("int", str n)     = "map.put(\"<n>\", vf.integer(<n>));";
-private str populateBasicType("bool", str n)    = "map.put(\"<n>\", vf.bool(<n>));";
-private str populateBasicType("real", str n)    = "map.put(\"<n>\", vf.real(<n>));";
-private str populateBasicType("loc", str n)     = "map.put(\"<n>\", <n>);";
-private str populateBasicType("Double", str n)  = "map.put(\"<n>\", vf.real(<n>));";
-private str populateBasicType("Long", str n)    = "map.put(\"<n>\", vf.integer(<n>));";
+private str populateBasicType("str", str n, bool isMap)    { return if(!isMap) "IValue iv_<n> = vf.string(<n>);"; else "map.put(\"<n>\", vf.string(<n>));"; }
+private str populateBasicType("int", str n, bool isMap)    { return if(!isMap) "IValue iv_<n> = vf.integer(<n>);"; else "map.put(\"<n>\", vf.integer(<n>));"; }
+private str populateBasicType("bool", str n, bool isMap)   { return if(!isMap) "IValue iv_<n> = vf.bool(<n>);"; else "map.put(\"<n>\", vf.bool(<n>));"; }
+private str populateBasicType("real", str n, bool isMap)   { return if(!isMap) "IValue iv_<n> = vf.real(<n>);"; else "map.put(\"<n>\", vf.real(<n>));"; }
+private str populateBasicType("Double", str n, bool isMap) { return if(!isMap) "IValue iv_<n> = vf.real(<n>);"; else "map.put(\"<n>\", vf.real(<n>));"; }
+private str populateBasicType("Long", str n, bool isMap)   { return if(!isMap) "IValue iv_<n> = vf.integer(<n>);"; else "map.put(\"<n>\", vf.integer(<n>));"; }
 
 
-private str populateUserDefinedType(map[str, str] aliases, str base, str n) {
+private str populateUserDefinedType(map[str, str] aliases, str base, str n, bool isMap) {
  str val = ""; 
  switch(resolve(aliases, base)) {
    case "String"  : val = "vf.string(<n>)";
    case "Integer" : val = "vf.integer(<n>)";
    case "Boolean" : val = "vf.boolean(<n>)";
-   case "Float"    : val = "vf.real(<n>)";
+   case "Float"   : val = "vf.real(<n>)";
    case "Double"  : val = "vf.real(<n>)";
    case "Long"    : val = "vf.integer(<n>)";
    default        : val = "<n>.createVallangInstance(vf)"; 
  }
- return "map.put(\"<n>\", <val>);"; 
+ return if(!isMap) "IValue iv_<n> = <val>;";  else "map.put(\"<n>\", <val>);"; 
 }
 
-private str populateListType(map[str, str] aliases, str base, str n) {
+private str populateListType(map[str, str] aliases, str base, str n, bool isMap) {
  str val = ""; 
  switch(resolve(aliases, base)) {
    case "String"  : val = "vf.string(v)";
@@ -297,7 +305,9 @@ private str populateListType(map[str, str] aliases, str base, str n) {
         'for(<base> v: <n>) {
         ' iv_<n> = iv_<n>.append(<val>);   
         '}
+        '<if(isMap){>
         'map.put(\"<n>\", iv_<n>);
+        '<}>
         "; 
 }
 

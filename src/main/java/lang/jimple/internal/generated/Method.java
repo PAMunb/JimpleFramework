@@ -65,27 +65,25 @@ public  class Method extends JimpleAbstractDataType {
     } 
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
-      HashMap<String, IValue> map = new HashMap<>(); 
-      
       
       IList iv_modifiers = vf.list();
       
       for(Modifier v: modifiers) {
        iv_modifiers = iv_modifiers.append(v.createVallangInstance(vf));   
       }
-      map.put("modifiers", iv_modifiers);
+      
               
       
-      map.put("returnType", returnType.createVallangInstance(vf));
+      IValue iv_returnType = returnType.createVallangInstance(vf);
       
-      map.put("name", vf.string(name));
+      IValue iv_name = vf.string(name);
       
       IList iv_formals = vf.list();
       
       for(Type v: formals) {
        iv_formals = iv_formals.append(v.createVallangInstance(vf));   
       }
-      map.put("formals", iv_formals);
+      
               
       
       IList iv_exceptions = vf.list();
@@ -93,13 +91,19 @@ public  class Method extends JimpleAbstractDataType {
       for(Type v: exceptions) {
        iv_exceptions = iv_exceptions.append(v.createVallangInstance(vf));   
       }
-      map.put("exceptions", iv_exceptions);
+      
               
       
-      map.put("body", body.createVallangInstance(vf));
+      IValue iv_body = body.createVallangInstance(vf);
       
-        
-      return vf.constructor(getVallangConstructor()).asWithKeywordParameters().setParameters(map); 
+      
+      IValue[] children = new IValue[] { 
+        iv_modifiers, iv_returnType, iv_name, iv_formals, iv_exceptions, iv_body   
+      };
+    
+      
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    
