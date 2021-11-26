@@ -2,9 +2,128 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>br.unb.cic</groupId>
 	<artifactId>JimpleFramework</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<!-- <name>JimpleFramework</name> -->
+	<description>PAMunb - JimpleFramework</description>
+
+	<organization>
+		<name>Universidade de Brasília</name>
+		<url>http://www.cic.unb.br/</url>
+	</organization>
+	<inceptionYear>2020</inceptionYear>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- dependencies versions -->
+		<rascal.version>0.18.0</rascal.version>
+		<!-- <rascal.version>0.19.2</rascal.version> -->
+		<junit.version>4.13.2</junit.version>
+		<lombok.version>1.18.20</lombok.version>
+
+		<!-- plugins versions -->
+		<rascal-maven-plugin.version>0.3.4</rascal-maven-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.rascalmpl</groupId>
+			<artifactId>rascal</artifactId>
+			<version>${rascal.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<defaultGoal>clean install</defaultGoal>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<debug>true</debug>
+					<parameters>false</parameters>
+					<verbose>false</verbose>
+					<optimize>true</optimize>
+					<showWarnings>false</showWarnings>
+					<showDeprecation>false</showDeprecation>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>rascal</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.rascalmpl</groupId>
+						<artifactId>rascal-maven-plugin</artifactId>
+						<version>${rascal-maven-plugin.version}</version>
+						<configuration>
+							<bin>${project.build.outputDirectory}</bin>
+							<errorsAsWarnings>true</errorsAsWarnings>
+							<enableStandardLibrary>true</enableStandardLibrary>
+							<srcs>
+								<src>${project.basedir}/src/main/rascal</src>
+							</srcs>
+							<srcIgnores>
+								<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/GraphUtil.rsc</ignore>
+								<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/CallGraph.rsc</ignore>
+							</srcIgnores>
+						</configuration>
+						<executions>
+							<execution>
+								<id>it-compile</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 
 	<repositories>
 		<repository>
@@ -20,70 +139,5 @@
 			<url>https://nexus.usethesource.io/content/repositories/public/</url>
 		</pluginRepository>
 	</pluginRepositories>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.rascalmpl</groupId>
-			<artifactId>rascal</artifactId>
-			<version>0.18.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
-			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.12</version>
-			<scope>provided</scope>
-		</dependency>
-
-	</dependencies>
-	<build>
-		<sourceDirectory>src/main/java</sourceDirectory>
-		<testSourceDirectory>src/test/java</testSourceDirectory>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.rascalmpl</groupId>
-				<artifactId>rascal-maven-plugin</artifactId>
-				<version>0.3.4</version>
-				<configuration>
-					<bin>${project.build.outputDirectory}</bin>
-					<errorsAsWarnings>true</errorsAsWarnings>
-					<enableStandardLibrary>true</enableStandardLibrary>
-					<srcs>
-						<src>${project.basedir}/src/main/rascal</src>
-					</srcs>
-					<srcIgnores>
-						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/GraphUtil.rsc</ignore>
-						<ignore>${project.basedir}/src/main/rascal/lang/jimple/toolkit/CallGraph.rsc</ignore>
-					</srcIgnores>
-				</configuration>
-				<executions>
-					<execution>
-						<id>it-compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-		</plugins>
-	</build>
 
 </project>

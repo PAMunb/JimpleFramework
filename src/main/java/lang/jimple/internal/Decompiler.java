@@ -84,6 +84,8 @@ public class Decompiler {
 
 	private final IValueFactory vf;
 	private IConstructor _class;
+	
+	private boolean keepOriginalVarNames = true;
 
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
@@ -161,7 +163,8 @@ public class Decompiler {
 			}
 
 			if (isInterface) {
-				_class = ClassOrInterfaceDeclaration.interfaceDecl(classModifiers, type, interfaces, fields, methods)
+				_class = ClassOrInterfaceDeclaration
+						.interfaceDecl(classModifiers, type, interfaces, fields, methods)
 						.createVallangInstance(vf);
 			} else {
 				_class = ClassOrInterfaceDeclaration
@@ -200,9 +203,11 @@ public class Decompiler {
 			List<Statement> stmts = new ArrayList<>();
 			List<CatchClause> catchClauses = visitTryCatchBlocks(mn.tryCatchBlocks);
 
+			//TODO por que mudou a versao do asm???
 			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables, catchClauses);
 
-			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
+			//insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
+			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs, mn.localVariables);
 
 			mn.instructions.accept(insVisitor);
 
@@ -238,6 +243,7 @@ public class Decompiler {
 			return super.visitField(access, name, descriptor, signature, value);
 		}
 
+		//TODO remover: int formals
 		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals,
 				List<LocalVariableNode> nodes) {
 			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
@@ -252,7 +258,11 @@ public class Decompiler {
 					if (!isStatic && i == 0 && var.name.equals(THIS_VARIABLE)) { // being really conservative here.
 						name = LOCAL_NAME_FOR_IMPLICIT_PARAMETER; // DO NOT INCREMENT idx here
 					} else {
-						name = JimpleObjectFactory.localVariableName(false, type.getConstructor(), idx++);
+						if(keepOriginalVarNames) {
+							name = var.name;
+						}else {
+							name = JimpleObjectFactory.localVariableName(false, type.getConstructor(), idx++);
+						}
 					}
 					localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name));
 				}
@@ -1672,7 +1682,11 @@ public class Decompiler {
 		}
 
 		public void initFormalArgs(boolean staticMethod, Type classType, boolean emptyLocalVariableTable,
-				List<Type> formals) {
+				List<Type> formals, List<LocalVariableNode> nodes) {
+			
+//			System.out.println("************** initFormalArgs");
+//			nodes.forEach(System.out::println);
+			
 			if (emptyLocalVariableTable) {
 				assert localVariables.isEmpty(); // we expect an empty list of local variables here.
 				if (!staticMethod) {
@@ -1695,8 +1709,22 @@ public class Decompiler {
 				}
 				int idx = 0;
 				for (Type t : formals) {
+					//TODO o primeiro parametro deve ser o nome da variavel
+					//TODO da um erro estranho no teste TestDecompiler.decompileAndroidClass() se nao tiver a segunda condicao
+//					if(keepOriginalVarNames && idx < nodes.size()) {
+//						System.err.println("FORMAL "+t.toString() + " ::: nodes="+nodes);	
+//						nodes.forEach(v -> System.out.println(v.name));
+//						String name = (!staticMethod) ? nodes.get(idx+1).name : nodes.get(idx).name;
+//						System.err.println("\t\t >>>> "+name);
+//						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
+//					}else {
+//						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
+//								LOCAL_PARAMETER_PREFIX + idx, t));
+//					}
+					
 					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
 							LOCAL_PARAMETER_PREFIX + idx, t));
+					
 					idx++;
 				}
 			}

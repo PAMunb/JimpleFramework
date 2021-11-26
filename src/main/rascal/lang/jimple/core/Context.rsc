@@ -32,7 +32,7 @@ data ClassType = ApplicationClass()
                
 data DeclaredMethod = Method(Method method, bool entryPoint); 
                
-data DeclaredClass = Class(ClassOrInterfaceDeclaration, ClassType); 
+data DeclaredClass = Class(ClassOrInterfaceDeclaration dec, ClassType \type); 
 
 alias ClassTable = map[Type, DeclaredClass];
 alias MethodTable = map[Name, DeclaredMethod];
