@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import lang.jimple.internal.generated.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -39,25 +40,7 @@ import org.rascalmpl.uri.URIResolverRegistry;
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IValueFactory;
-import lang.jimple.internal.generated.ArrayDescriptor;
-import lang.jimple.internal.generated.CaseStmt;
-import lang.jimple.internal.generated.CatchClause;
-import lang.jimple.internal.generated.ClassOrInterfaceDeclaration;
-import lang.jimple.internal.generated.Expression;
-import lang.jimple.internal.generated.Field;
-import lang.jimple.internal.generated.FieldSignature;
-import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.Immediate.c_iValue;
-import lang.jimple.internal.generated.InvokeExp;
-import lang.jimple.internal.generated.LocalVariableDeclaration;
-import lang.jimple.internal.generated.Method;
-import lang.jimple.internal.generated.MethodBody;
-import lang.jimple.internal.generated.MethodSignature;
-import lang.jimple.internal.generated.Modifier;
-import lang.jimple.internal.generated.Statement;
-import lang.jimple.internal.generated.Type;
-import lang.jimple.internal.generated.Value;
-import lang.jimple.internal.generated.Variable;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -78,6 +61,8 @@ public class Decompiler {
 
 	private final IValueFactory vf;
 	private IConstructor _class;
+	private int currentLineNumber  = -1;
+	private int stmtId = 0;
 
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
@@ -99,7 +84,7 @@ public class Decompiler {
 			ClassReader reader = new ClassReader(classLoc);
 			ClassNode cn = new ClassNode();
 			reader.accept(cn, 0);
-			reader.accept(new GenerateJimpleClassVisitor(cn), 0);
+			reader.accept(new GenerateJimpleClassVisitor(cn, this), 0);
 			return _class;
 		} catch (IOException e) {
 			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
@@ -119,10 +104,12 @@ public class Decompiler {
 		private List<Field> fields;
 		private List<Method> methods;
 		private boolean isInterface;
+		private Decompiler decompiler;
 
-		public GenerateJimpleClassVisitor(ClassNode cn) {
+		public GenerateJimpleClassVisitor(ClassNode cn, Decompiler decompiler) {
 			super(Opcodes.ASM5);
 			this.cn = cn;
+			this.decompiler = decompiler;
 		}
 
 		@Override
@@ -194,7 +181,7 @@ public class Decompiler {
 			List<Statement> stmts = new ArrayList<>();
 			List<CatchClause> catchClauses = visitTryCatchBlocks(mn.tryCatchBlocks);
 
-			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, methodSignature(cn.name,
+			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, decompiler, methodSignature(cn.name,
 					mn.name, mn.desc), localVariables, catchClauses);
 
 			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
@@ -284,7 +271,13 @@ public class Decompiler {
 
 	}
 
+	public int getCurrentLineNumber() {
+		return currentLineNumber;
+	}
 
+	public int computeStmtId() {
+		return ++stmtId;
+	}
 
 	class InstructionSetVisitor extends org.objectweb.asm.MethodVisitor {
 		
@@ -303,21 +296,23 @@ public class Decompiler {
 
 		HashMap<String, CatchClause> catchClauses = new HashMap<>();
 		
-		String methodSignature = ""; 
-		int currentLineNumber  = -1;
-		int stmtId = 0;
+		String methodSignature = "";
 
-		public InstructionSetVisitor(int version, String methodSignature, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
+		Decompiler decompiler;
+
+		public InstructionSetVisitor(int version, Decompiler decompiler, String methodSignature, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
 			super(version);
 			this.methodSignature = methodSignature;
 			this.localVariables = localVariables;
 			auxiliarlyLocalVariables = new ArrayList<>();
-			locals = 1; 
-			
+			locals = 1;
+			stmtId = 0;
+			currentLineNumber  = -1;
 			catchClauses.forEach(c -> this.catchClauses.put(c.with, c));
-			
+
+			this.decompiler = decompiler;
 			stack = new Stack<>();
-			stack.push(new SingleInstructionFlow());
+			stack.push(new SingleInstructionFlow(decompiler));
 		}
 
 		public List<Statement> instructions() {
@@ -374,7 +369,7 @@ public class Decompiler {
 			}
 			else {
 				for(Environment env: stack.peek().environments()) {
-					env.instructions.add(Statement.label(label.toString(), ++stmtId, methodSignature, currentLineNumber));
+					env.instructions.add(Statement.label(label.toString(), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				}
 			}
 		}
@@ -437,7 +432,7 @@ public class Decompiler {
 			Expression expression = newPlusExpression(lhs, rhs);
 
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.assign(Variable.localVariable(var), expression, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(var), expression, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 
 			super.visitIincInsn(idx, increment);
@@ -921,10 +916,10 @@ public class Decompiler {
 				InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
 
 				if (methodType.equals(Type.TVoid())) {
-					env.instructions.add(Statement.invokeStmt(exp, ++stmtId, methodSignature, currentLineNumber));
+					env.instructions.add(Statement.invokeStmt(exp, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				} else {
 					LocalVariableDeclaration local = createLocal(methodType);
-					env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.invokeExp(exp), ++stmtId, methodSignature, currentLineNumber));
+					env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.invokeExp(exp), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 					env.operands.push(new Operand(local));
 				}
 			}
@@ -954,7 +949,7 @@ public class Decompiler {
 				if (dflt != null) {
 					caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
 				}
-				env.instructions.add(Statement.lookupSwitch(key, caseStmts, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.lookupSwitch(key, caseStmts, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 			super.visitLookupSwitchInsn(dflt, keys, labels);
 		}
@@ -970,7 +965,7 @@ public class Decompiler {
 			}
 			for(Environment env: stack.peek().environments()) {
 				Immediate key = env.operands.pop().immediate;
-				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 			super.visitTableSwitchInsn(min, max, dflt, labels);
 		}
@@ -979,10 +974,10 @@ public class Decompiler {
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
 				if(!visitedLabels.contains(label.toString())) {
-					notifyGotoStmt(Statement.gotoStmt(label.toString(), ++stmtId, methodSignature, currentLineNumber), label.toString()); // TODO: investigate this decision here.
+					notifyGotoStmt(Statement.gotoStmt(label.toString(), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)), label.toString()); // TODO: investigate this decision here.
 				} else {
 					for(Environment env: stack.peek().environments()) {
-						env.instructions.add(Statement.gotoStmt(label.toString(), ++stmtId, methodSignature, currentLineNumber));
+						env.instructions.add(Statement.gotoStmt(label.toString(), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 					}
 				}
 			} else if (opcode == Opcodes.JSR) {
@@ -1055,10 +1050,10 @@ public class Decompiler {
 									null);
 					}
 					if(visitedLabels.contains(label.toString())) {
-						env.instructions.add(Statement.ifStmt(exp, label.toString(), ++stmtId, methodSignature, currentLineNumber));
+						env.instructions.add(Statement.ifStmt(exp, label.toString(), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 					}
 					else {
-						stack.push(new BranchInstructionFlow(exp, label.toString(), ++stmtId, methodSignature, currentLineNumber));
+						stack.push(new BranchInstructionFlow(decompiler, exp, label.toString(), decompiler.computeStmtId(), methodSignature));
 					}
 				}
 			}
@@ -1091,10 +1086,10 @@ public class Decompiler {
 				}
 
 				if (signature.returnType.equals(Type.TVoid())) {
-					env.instructions.add(Statement.invokeStmt(exp, ++stmtId, methodSignature, currentLineNumber));
+					env.instructions.add(Statement.invokeStmt(exp, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				} else {
 					LocalVariableDeclaration local = createLocal(signature.returnType);
-					env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.invokeExp(exp), ++stmtId, methodSignature, currentLineNumber));
+					env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.invokeExp(exp), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 					env.operands.push(new Operand(local));
 				}
 			}
@@ -1138,7 +1133,7 @@ public class Decompiler {
 
 			for (Environment env : stack.peek().environments()) {
 				Immediate immediate = env.operands.pop().immediate;
-				env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.immediate(immediate), ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.immediate(immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
@@ -1150,14 +1145,14 @@ public class Decompiler {
 		private void retIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.retStmt(Immediate.local(local.local), ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.retStmt(Immediate.local(local.local), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
 		private void newInstanceIns(Type type) {
 			LocalVariableDeclaration newLocal = createLocal(type);
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), Expression.newInstance(type), ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), Expression.newInstance(type), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1175,7 +1170,7 @@ public class Decompiler {
 				List<ArrayDescriptor> dims = new ArrayList<>();
 				dims.add(ArrayDescriptor.fixedSize(size));
 
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), Expression.newArray(type, dims), ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), Expression.newArray(type, dims), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1185,7 +1180,7 @@ public class Decompiler {
 		 */
 		private void nopIns() {
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.nop(++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.nop(StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
@@ -1227,7 +1222,7 @@ public class Decompiler {
 
 				Expression expression = Expression.neg(operand.immediate);
 
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), expression, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), expression, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1245,7 +1240,7 @@ public class Decompiler {
 
 				Expression expression = factory.createExpression(lhs.immediate, rhs.immediate);
 
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), expression, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), expression, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1256,7 +1251,7 @@ public class Decompiler {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(targetType);
 				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local),
-						Expression.cast(targetType, operand.immediate), ++stmtId, methodSignature, currentLineNumber));
+						Expression.cast(targetType, operand.immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1266,7 +1261,7 @@ public class Decompiler {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(Type.TBoolean());
 				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local),
-						Expression.instanceOf(type, operand.immediate), ++stmtId, methodSignature, currentLineNumber));
+						Expression.instanceOf(type, operand.immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1274,7 +1269,7 @@ public class Decompiler {
 		private void returnIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand operand = env.operands.pop();
-				env.instructions.add(Statement.returnStmt(operand.immediate, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.returnStmt(operand.immediate, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				// TODO: perhaps we should call an exit monitor here.
 				notifyReturn();
 			}
@@ -1282,7 +1277,7 @@ public class Decompiler {
 
 		private void returnVoidIns() {
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.returnEmptyStmt(++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.returnEmptyStmt(StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				// TODO: perhaps we should call an exit monitor here.
 				notifyReturn();
 			}
@@ -1293,7 +1288,7 @@ public class Decompiler {
 				Operand arrayRef = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal("I");
 				env.instructions.add(
-						Statement.assign(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate), ++stmtId, methodSignature, currentLineNumber));
+						Statement.assign(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1301,7 +1296,7 @@ public class Decompiler {
 		private void throwIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand reference = env.operands.pop();
-				env.instructions.add(Statement.throwStmt(reference.immediate, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.throwStmt(reference.immediate, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				notifyReturn();
 				env.operands.push(reference);
 			}
@@ -1310,14 +1305,14 @@ public class Decompiler {
 		private void monitorEnterIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand reference = env.operands.pop();
-				env.instructions.add(Statement.enterMonitor(reference.immediate, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.enterMonitor(reference.immediate, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
 		private void monitorExitIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand reference = env.operands.pop();
-				env.instructions.add(Statement.exitMonitor(reference.immediate, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.exitMonitor(reference.immediate, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
@@ -1340,7 +1335,7 @@ public class Decompiler {
 				LocalVariableDeclaration newLocal = createLocal(baseType);
 
 				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local),
-						newArraySubscript(((Immediate.c_local) ref.immediate).localName, idx.immediate), ++stmtId, methodSignature, currentLineNumber));
+						newArraySubscript(((Immediate.c_local) ref.immediate).localName, idx.immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1362,7 +1357,7 @@ public class Decompiler {
 
 				Variable var = Variable.arrayRef(((Immediate.c_local) arrayRef).localName, idx);
 
-				env.instructions.add(Statement.assign(var, Expression.immediate(value), ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(var, Expression.immediate(value), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
@@ -1565,7 +1560,7 @@ public class Decompiler {
 			Expression fieldRef = Expression.fieldRef(owner.replace("/", "."), fieldType, field);
 
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1576,7 +1571,7 @@ public class Decompiler {
 
 			for(Environment env: stack.peek().environments()) {
 				Operand value = env.operands.pop();
-				env.instructions.add(Statement.assign(Variable.staticFieldRef(signature), Expression.immediate(value.immediate), ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.staticFieldRef(signature), Expression.immediate(value.immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
@@ -1591,7 +1586,7 @@ public class Decompiler {
 
 
 				env.instructions.add(
-						Statement.assign(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate), ++stmtId, methodSignature, currentLineNumber));
+						Statement.assign(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate), StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 			}
 		}
 
@@ -1618,7 +1613,7 @@ public class Decompiler {
 				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner, fieldType,
 						field);
 
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, ++stmtId, methodSignature, currentLineNumber));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1710,12 +1705,12 @@ public class Decompiler {
 			}
 			for(Environment env: stack.peek().environments()) {
 				if (!staticMethod) {
-					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType, ++stmtId, methodSignature, currentLineNumber));
+					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 				}
 				int idx = 0;
 				for (Type t : formals) {
 					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-							LOCAL_PARAMETER_PREFIX + idx, t, ++stmtId, methodSignature, currentLineNumber));
+							LOCAL_PARAMETER_PREFIX + idx, t, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, currentLineNumber)));
 					idx++;
 				}
 			}

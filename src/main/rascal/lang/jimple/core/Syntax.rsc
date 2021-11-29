@@ -74,7 +74,7 @@ data Variable
  | staticFieldRef(FieldSignature field)
  ;  
  
-data Statement(int stmtId = -1, str methodSignature = "", int sourceCodeLine = -1)  
+data Statement(StmtContext context = noContext())  
   = label(Label label)  
   | breakpoint()
   | enterMonitor(Immediate immediate)
@@ -205,3 +205,6 @@ data Type
   ;  
   
 Type object() = TObject("java.lang.Object");
+
+data StmtContext = noContext()
+                 | stmtContext(int stmtId, str methodSignature, int sourceCodeLine);

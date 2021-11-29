@@ -7,11 +7,12 @@ import java.util.Stack;
 
 import lang.jimple.internal.generated.Statement;
 
-public class SingleInstructionFlow implements InstructionFlow {
+public class SingleInstructionFlow extends InstructionFlow {
 	
 	Environment environment;
 
-	public SingleInstructionFlow() {
+	public SingleInstructionFlow(Decompiler decompiler) {
+		super(decompiler);
 		environment = new Environment();
 	}
 
