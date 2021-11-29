@@ -19,6 +19,10 @@ public class FooBarStatic {
 		return s.next;
 	}
 	
+	private static void multipleArgs(int x, Node x1, double y, Node y1, Node s[], Double d) {
+		
+	}
+	
 }
 
 /* JIMPLE (SOOT)

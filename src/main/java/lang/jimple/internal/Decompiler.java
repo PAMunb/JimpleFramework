@@ -54,6 +54,7 @@ import lang.jimple.internal.generated.Field;
 import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.Immediate.c_iValue;
+import lang.jimple.internal.generated.Type.c_TObject;
 import lang.jimple.internal.generated.InvokeExp;
 import lang.jimple.internal.generated.LocalVariableDeclaration;
 import lang.jimple.internal.generated.Method;
@@ -183,6 +184,7 @@ public class Decompiler {
 
 			for (org.objectweb.asm.Type t : org.objectweb.asm.Type.getArgumentTypes(mn.desc)) {
 				methodFormalArgs.add(type(t.getDescriptor()));
+//				System.err.println("t.getDescriptor()="+t.getDescriptor());
 			}
 
 			if (mn.exceptions != null) {
@@ -1684,6 +1686,7 @@ public class Decompiler {
 		public void initFormalArgs(boolean staticMethod, Type classType, boolean emptyLocalVariableTable,
 				List<Type> formals, List<LocalVariableNode> nodes) {
 			
+//			System.err.println("********** initFormalArgs="+ ((c_TObject)classType).name);
 //			System.out.println("************** initFormalArgs");
 //			nodes.forEach(System.out::println);
 			
@@ -1707,23 +1710,35 @@ public class Decompiler {
 				if (!staticMethod) {
 					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));
 				}
+				
+//				nodes.forEach(v -> System.err.println("VAR="+v.desc+", idx="+v.index+", name="+v.name+", sig="+v.signature));
+				
 				int idx = 0;
 				for (Type t : formals) {
-					//TODO o primeiro parametro deve ser o nome da variavel
-					//TODO da um erro estranho no teste TestDecompiler.decompileAndroidClass() se nao tiver a segunda condicao
-//					if(keepOriginalVarNames && idx < nodes.size()) {
-//						System.err.println("FORMAL "+t.toString() + " ::: nodes="+nodes);	
-//						nodes.forEach(v -> System.out.println(v.name));
+//					System.err.println("FORMAL "+t.toString() +"=="+t.getBaseType()+" ... "+t.getConstructor()+" ... "+t.getVallangType()+" :: "+t.children());
+//					System.err.println(">>> "+(t instanceof c_TObject));
+//					if(t instanceof c_TObject) {
+//						c_TObject obj = (c_TObject) t;
+//						System.err.println("==="+obj.name);
+//						
 //						String name = (!staticMethod) ? nodes.get(idx+1).name : nodes.get(idx).name;
 //						System.err.println("\t\t >>>> "+name);
-//						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
-//					}else {
-//						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-//								LOCAL_PARAMETER_PREFIX + idx, t));
 //					}
+					//TODO o primeiro parametro deve ser o nome da variavel
+					//TODO da um erro estranho no teste TestDecompiler.decompileAndroidClass() se nao tiver a segunda condicao
+					if(keepOriginalVarNames && idx < nodes.size()) {
+//						System.err.println("FORMAL "+t.toString() + " ::: nodes="+nodes);	
+//						nodes.forEach(v -> System.out.println(v.name));
+						String name = (!staticMethod) ? nodes.get(idx+1).name : nodes.get(idx).name;
+//						System.err.println("\t\t >>>> "+name);
+						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
+					}else {
+						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
+								LOCAL_PARAMETER_PREFIX + idx, t));
+					}
 					
-					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-							LOCAL_PARAMETER_PREFIX + idx, t));
+//					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
+//							LOCAL_PARAMETER_PREFIX + idx, t));
 					
 					idx++;
 				}

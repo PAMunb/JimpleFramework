@@ -27,15 +27,15 @@ tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
     return <files, es>;
 }
 tuple[list[loc] classPath, list[str] entryPoints] fooBarStatic() {
-	files = [|project://JimpleFramework/target/test-classes/samples/pointsto/simple/|];
-    es = ["samples.pointsto.simple.FooBarStatic.foo()", "samples.pointsto.simple.FooBar.bar(samples.pointsto.simple.Node)"];
+	files = [|project://JimpleFramework/target/test-classes/samples/pointsto/simple/FooBarStatic.class|];
+    es = ["samples.pointsto.simple.FooBarStatic.foo()", "samples.pointsto.simple.FooBarStatic.bar(samples.pointsto.simple.Node)"];
     return <files, es>;
 }
 
 public void executar(){
 	//tuple[list[loc] cp, list[str] e] t = iris();
-	tuple[list[loc] cp, list[str] e] t = fooBar();
-	//tuple[list[loc] cp, list[str] e] t = fooBarStatic();
+	//tuple[list[loc] cp, list[str] e] t = fooBar();
+	tuple[list[loc] cp, list[str] e] t = fooBarStatic();
 
     classPath = t.cp;
     entryPoints = t.e;
@@ -43,12 +43,19 @@ public void executar(){
     ExecutionContext ctx =  createExecutionContext(classPath, entryPoints, true);	
     
     //show(ctx);
-    toJimple(ctx);
+    //toPrettyPrint(ctx);
+	toJimple(ctx);
+}
+
+void toPrettyPrint(ExecutionContext ctx){
+	for(className <- ctx.ct){		
+		println(prettyPrint(ctx.ct[className].dec));	
+	}
 }
 
 void toJimple(ExecutionContext ctx){
 	for(className <- ctx.ct){		
-		println(prettyPrint(ctx.ct[className].dec));	
+		println(ctx.ct[className].dec);	
 	}
 }
 

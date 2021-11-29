@@ -12,6 +12,7 @@ import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.IValueFactory;
 import io.usethesource.vallang.impl.persistent.ValueFactory;
 
+@Deprecated
 public class TestDecompilerVariableNames {
 
 	@Test
