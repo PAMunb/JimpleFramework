@@ -12,7 +12,7 @@ loc fooBarStatic = |project://JimpleFramework/target/test-classes/samples/points
 
 
 test bool testFooBar(){
-	ClassOrInterfaceDeclaration c = decompile(fooBar);
+	ClassOrInterfaceDeclaration c = decompile(fooBar,true);
 	
 	Method bar = getMethodByName(c,"bar");
 	
@@ -33,7 +33,7 @@ test bool testFooBar(){
 }
 
 test bool testFooBarStatic(){
-	ClassOrInterfaceDeclaration c = decompile(fooBarStatic);
+	ClassOrInterfaceDeclaration c = decompile(fooBarStatic,true);
 	
 	Method bar = getMethodByName(c,"bar");
 	
@@ -52,7 +52,7 @@ test bool testFooBarStatic(){
 }
 
 test bool testFooBarStaticMultipleArgs(){
-	ClassOrInterfaceDeclaration c = decompile(fooBarStatic);
+	ClassOrInterfaceDeclaration c = decompile(fooBarStatic,true);
 	
 	//multipleArgs(int x, Node x1, double y, Node y1, Node s[])
 	Method bar = getMethodByName(c,"multipleArgs");
