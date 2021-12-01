@@ -23,7 +23,7 @@ public class TestDecompilerVariableNames {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), vf.bool(true), null);
 
 			assertNotNull(c);
 			

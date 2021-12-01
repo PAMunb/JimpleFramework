@@ -42,6 +42,7 @@ import org.rascalmpl.interpreter.IEvaluatorContext;
 import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 import org.rascalmpl.uri.URIResolverRegistry;
 
+import io.usethesource.vallang.IBool;
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IValueFactory;
@@ -54,7 +55,6 @@ import lang.jimple.internal.generated.Field;
 import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.Immediate.c_iValue;
-import lang.jimple.internal.generated.Type.c_TObject;
 import lang.jimple.internal.generated.InvokeExp;
 import lang.jimple.internal.generated.LocalVariableDeclaration;
 import lang.jimple.internal.generated.Method;
@@ -77,7 +77,7 @@ public class Decompiler {
 
 	private static final String LOCAL_VARIABLE_PARAMETER_PREFIX = "i";
 	private static final String LOCAL_VARIABLE_PREFIX = "i";
-	private static final String SATCK_BASED_LOCAL_VARIABLE_PREFIX = "$r";
+	private static final String STACK_BASED_LOCAL_VARIABLE_PREFIX = "$r";
 	private static final String THIS_VARIABLE = "this";
 	private static final String LOCAL_PARAMETER_PREFIX = "@parameter";
 	private static final String IMPLICIT_PARAMETER_NAME = "@this";
@@ -86,25 +86,36 @@ public class Decompiler {
 	private final IValueFactory vf;
 	private IConstructor _class;
 	
-	private boolean keepOriginalVarNames = true;
+	private boolean keepOriginalVarNames = false;
+	private final IBool defaultKeepOriginalVarNames;
 
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
+		defaultKeepOriginalVarNames = vf.bool(keepOriginalVarNames);
 	}
 
 	/*
 	 * decompiles a Java byte code at <i>classLoc</i> into a Jimple representation.
 	 */
 	public IConstructor decompile(ISourceLocation classLoc, IEvaluatorContext ctx) {
+		return decompile(classLoc, defaultKeepOriginalVarNames, ctx);
+	}
+
+	public IConstructor decompile(ISourceLocation classLoc, IBool keepVarNames, IEvaluatorContext ctx) {
 		try {
-			return decompile(URIResolverRegistry.getInstance().getInputStream(classLoc), ctx);
+			return decompile(URIResolverRegistry.getInstance().getInputStream(classLoc), keepVarNames, ctx);
 		} catch (IOException e) {
 			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
 		}
 	}
 
 	public IConstructor decompile(InputStream classLoc, IEvaluatorContext ctx) {
+		return decompile(classLoc, defaultKeepOriginalVarNames, ctx);
+	}
+
+	public IConstructor decompile(InputStream classLoc, IBool keepVarNames, IEvaluatorContext ctx) {		
 		try {
+			this.keepOriginalVarNames = keepVarNames.getValue();
 			ClassReader reader = new ClassReader(classLoc);
 			ClassNode cn = new ClassNode();
 			reader.accept(cn, 0);
@@ -184,7 +195,6 @@ public class Decompiler {
 
 			for (org.objectweb.asm.Type t : org.objectweb.asm.Type.getArgumentTypes(mn.desc)) {
 				methodFormalArgs.add(type(t.getDescriptor()));
-//				System.err.println("t.getDescriptor()="+t.getDescriptor());
 			}
 
 			if (mn.exceptions != null) {
@@ -198,6 +208,7 @@ public class Decompiler {
 
 			boolean isStatic = methodModifiers.contains(Modifier.Static());
 
+			//TODO use interfaces (Map)
 			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic,
 					methodFormalArgs.size(), mn.localVariables);
 
@@ -205,7 +216,7 @@ public class Decompiler {
 			List<Statement> stmts = new ArrayList<>();
 			List<CatchClause> catchClauses = visitTryCatchBlocks(mn.tryCatchBlocks);
 
-			//TODO por que mudou a versao do asm???
+			//TODO why asm version has changed???
 			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables, catchClauses);
 
 			//insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
@@ -245,7 +256,7 @@ public class Decompiler {
 			return super.visitField(access, name, descriptor, signature, value);
 		}
 
-		//TODO remover: int formals
+		//TODO remove: int formals ... not used
 		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals,
 				List<LocalVariableNode> nodes) {
 			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
@@ -273,7 +284,7 @@ public class Decompiler {
 		}
 
 		private List<CatchClause> visitTryCatchBlocks(List<TryCatchBlockNode> nodes) {
-			List<CatchClause> tryCatchBlocks = new ArrayList<>();
+			List<CatchClause> tryCatchBlocks = new ArrayList<>(nodes.size());
 			for (TryCatchBlockNode node : nodes) {
 				String from = node.start.getLabel().toString();
 				String to = node.end.getLabel().toString();
@@ -1684,11 +1695,7 @@ public class Decompiler {
 		}
 
 		public void initFormalArgs(boolean staticMethod, Type classType, boolean emptyLocalVariableTable,
-				List<Type> formals, List<LocalVariableNode> nodes) {
-			
-//			System.err.println("********** initFormalArgs="+ ((c_TObject)classType).name);
-//			System.out.println("************** initFormalArgs");
-//			nodes.forEach(System.out::println);
+				List<Type> formals, List<LocalVariableNode> localVariableNodes) {
 			
 			if (emptyLocalVariableTable) {
 				assert localVariables.isEmpty(); // we expect an empty list of local variables here.
@@ -1710,9 +1717,7 @@ public class Decompiler {
 				if (!staticMethod) {
 					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));
 				}
-				
-//				nodes.forEach(v -> System.err.println("VAR="+v.desc+", idx="+v.index+", name="+v.name+", sig="+v.signature));
-				
+								
 				int idx = 0;
 				for (Type t : formals) {
 //					System.err.println("FORMAL "+t.toString() +"=="+t.getBaseType()+" ... "+t.getConstructor()+" ... "+t.getVallangType()+" :: "+t.children());
@@ -1724,21 +1729,17 @@ public class Decompiler {
 //						String name = (!staticMethod) ? nodes.get(idx+1).name : nodes.get(idx).name;
 //						System.err.println("\t\t >>>> "+name);
 //					}
-					//TODO o primeiro parametro deve ser o nome da variavel
 					//TODO da um erro estranho no teste TestDecompiler.decompileAndroidClass() se nao tiver a segunda condicao
-					if(keepOriginalVarNames && idx < nodes.size()) {
+					if(keepOriginalVarNames && idx < localVariableNodes.size()) {
 //						System.err.println("FORMAL "+t.toString() + " ::: nodes="+nodes);	
 //						nodes.forEach(v -> System.out.println(v.name));
-						String name = (!staticMethod) ? nodes.get(idx+1).name : nodes.get(idx).name;
+						String name = (!staticMethod) ? localVariableNodes.get(idx+1).name : localVariableNodes.get(idx).name;
 //						System.err.println("\t\t >>>> "+name);
 						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
 					}else {
 						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
 								LOCAL_PARAMETER_PREFIX + idx, t));
 					}
-					
-//					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-//							LOCAL_PARAMETER_PREFIX + idx, t));
 					
 					idx++;
 				}

@@ -24,7 +24,7 @@
 		<rascal.version>0.18.0</rascal.version>
 		<!-- <rascal.version>0.19.2</rascal.version> -->
 		<junit.version>4.13.2</junit.version>
-		<lombok.version>1.18.20</lombok.version>
+		<lombok.version>1.18.22</lombok.version>
 
 		<!-- plugins versions -->
 		<rascal-maven-plugin.version>0.3.4</rascal-maven-plugin.version>
@@ -128,7 +128,6 @@
 	<repositories>
 		<repository>
 			<id>usethesource</id>
-			<name>your custom repo</name>
 			<url>https://nexus.usethesource.io/content/repositories/public/</url>
 		</repository>
 	</repositories>
