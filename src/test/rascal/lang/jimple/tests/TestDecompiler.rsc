@@ -98,6 +98,17 @@ test bool testWhileStatement() {
   }
 }
 
+test bool testStaticBlock() {
+  loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/StaticBlock.class|;
+  ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  switch(c) {
+    case classDecl(_, _, _, _, _, methods): {  
+      return {m.name | m <- methods} == {"sum", "\<init\>", "\<clinit\>" } && size(methods) == 3; 
+    }
+    default: return false; 
+  }
+} 
+
 test bool testSolveLabels() {
   ClassOrInterfaceDeclaration c = decompile(whileLocation);
   c = processJimpleLabels(c);

@@ -341,6 +341,25 @@ public class TestDecompiler {
 			fail(e.getLocalizedMessage());
 		}
 	}
+
+	@Test
+	public void decompileStaticBlock() {
+		try {
+			File classFile = new File("./target/test-classes/samples/controlStatements/StaticBlock.class");
+			assertNotNull(classFile);
+
+			IValueFactory vf = ValueFactory.getInstance();
+			Decompiler decompiler = new Decompiler(vf);
+			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+
+			assertNotNull(c);
+			assertExecuteMethodStmts(c, 9);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
 	
 	@Test
 	public void decompileQuickSort() {
@@ -363,7 +382,6 @@ public class TestDecompiler {
 	private void assertExecuteMethodStmts(IConstructor c, int size) {
 		IList methods = (IList) c.get(5);
 
-		assertTrue(methods.size() == 2);
 
 		IConstructor executeMethod = (IConstructor)methods.get(1);
 		IList stmts = (IList) ((IConstructor)executeMethod.get(5)).get(1);
