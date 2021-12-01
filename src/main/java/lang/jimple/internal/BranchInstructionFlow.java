@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import lang.jimple.InstructionContext;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.StmtContext;

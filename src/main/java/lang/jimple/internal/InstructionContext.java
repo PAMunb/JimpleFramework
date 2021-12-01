@@ -1,4 +1,4 @@
-package lang.jimple;
+package lang.jimple.internal;
 
 public class InstructionContext {
 

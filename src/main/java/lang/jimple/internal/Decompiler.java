@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import lang.jimple.InstructionContext;
 import lang.jimple.internal.generated.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
