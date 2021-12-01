@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -208,16 +209,14 @@ public class Decompiler {
 
 			boolean isStatic = methodModifiers.contains(Modifier.Static());
 
-			//TODO use interfaces (Map)
-			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic,
+			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic,
 					methodFormalArgs.size(), mn.localVariables);
 
 			List<LocalVariableDeclaration> decls = new ArrayList<>();
 			List<Statement> stmts = new ArrayList<>();
 			List<CatchClause> catchClauses = visitTryCatchBlocks(mn.tryCatchBlocks);
 
-			//TODO why asm version has changed???
-			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables, catchClauses);
+			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM5, localVariables, catchClauses);
 
 			//insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
 			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs, mn.localVariables);
@@ -257,9 +256,9 @@ public class Decompiler {
 		}
 
 		//TODO remove: int formals ... not used
-		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals,
+		private Map<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals,
 				List<LocalVariableNode> nodes) {
-			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
+			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
 
 			int idx = 1;
 
@@ -306,7 +305,7 @@ public class Decompiler {
 		Stack<InstructionFlow> stack; 
 		
 		List<LocalVariableDeclaration> auxiliarlyLocalVariables;
-		HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables;
+		Map<LocalVariableNode, LocalVariableDeclaration> localVariables;
 		int locals;
 
 		Set<String> visitedLabels = new HashSet<>();
@@ -316,9 +315,9 @@ public class Decompiler {
 		// not refered to in the bytecode.
 		Set<String> referencedLabels = new HashSet<>();
 
-		HashMap<String, CatchClause> catchClauses = new HashMap<>();
+		Map<String, CatchClause> catchClauses = new HashMap<>();
 
-		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
+		public InstructionSetVisitor(int version, Map<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
 			super(version);
 			this.localVariables = localVariables;
 			auxiliarlyLocalVariables = new ArrayList<>();
@@ -1720,27 +1719,14 @@ public class Decompiler {
 								
 				int idx = 0;
 				for (Type t : formals) {
-//					System.err.println("FORMAL "+t.toString() +"=="+t.getBaseType()+" ... "+t.getConstructor()+" ... "+t.getVallangType()+" :: "+t.children());
-//					System.err.println(">>> "+(t instanceof c_TObject));
-//					if(t instanceof c_TObject) {
-//						c_TObject obj = (c_TObject) t;
-//						System.err.println("==="+obj.name);
-//						
-//						String name = (!staticMethod) ? nodes.get(idx+1).name : nodes.get(idx).name;
-//						System.err.println("\t\t >>>> "+name);
-//					}
 					//TODO da um erro estranho no teste TestDecompiler.decompileAndroidClass() se nao tiver a segunda condicao
 					if(keepOriginalVarNames && idx < localVariableNodes.size()) {
-//						System.err.println("FORMAL "+t.toString() + " ::: nodes="+nodes);	
-//						nodes.forEach(v -> System.out.println(v.name));
 						String name = (!staticMethod) ? localVariableNodes.get(idx+1).name : localVariableNodes.get(idx).name;
-//						System.err.println("\t\t >>>> "+name);
 						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
 					}else {
 						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
 								LOCAL_PARAMETER_PREFIX + idx, t));
-					}
-					
+					}					
 					idx++;
 				}
 			}
