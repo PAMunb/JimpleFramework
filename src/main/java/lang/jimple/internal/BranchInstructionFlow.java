@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import lang.jimple.InstructionContext;
 import lang.jimple.internal.generated.Expression;
 import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.StmtContext;
 
-public class BranchInstructionFlow extends InstructionFlow {
+public class BranchInstructionFlow implements InstructionFlow {
 
 	private Environment left;
 	private Environment right;
@@ -36,12 +37,11 @@ public class BranchInstructionFlow extends InstructionFlow {
 		ReadyToMerge
 	}
 	
-	public BranchInstructionFlow(Decompiler decompiler, Expression condition, String target, int stmtId, String methodSignature) {
-		super(decompiler);
+	public BranchInstructionFlow(Expression condition, String target, String methodSignature) {
 		this.condition = condition;
 		this.targetStatement = target;
 		this.methodSignature = methodSignature;
-		this.branchLineNumber = decompiler.getCurrentLineNumber();
+		this.branchLineNumber = InstructionContext.instance().getLineNumber();
 		left = new Environment();
 		right = new Environment();
 		status = BranchState.LEFT;
@@ -52,18 +52,18 @@ public class BranchInstructionFlow extends InstructionFlow {
 	public Collection<Statement> merge() {
 		List<Statement> res = new ArrayList<>();
 		
-		res.add(Statement.ifStmt(condition, targetStatement, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, branchLineNumber)));
+		res.add(Statement.ifStmt(condition, targetStatement, StmtContext.stmtContext(InstructionContext.instance().generateStmtId(), methodSignature, branchLineNumber)));
 		res.addAll(left.instructions);
 
 		if(gotoMergeStmt != null) {
 			res.add(gotoMergeStmt);
 		}
 
-		res.add(Statement.label(targetStatement, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, targetLineNumber)));
+		res.add(Statement.label(targetStatement, StmtContext.stmtContext(InstructionContext.instance().generateStmtId(), methodSignature, targetLineNumber)));
 		res.addAll(right.instructions);
 
 		if(mergeStatement != null) {
-			res.add(Statement.label(mergeStatement, StmtContext.stmtContext(decompiler.computeStmtId(), methodSignature, mergeLineNumber)));
+			res.add(Statement.label(mergeStatement, StmtContext.stmtContext(InstructionContext.instance().generateStmtId(), methodSignature, mergeLineNumber)));
 		}
 		
 		return res; 
@@ -72,11 +72,11 @@ public class BranchInstructionFlow extends InstructionFlow {
 	@Override
 	public boolean matchMergePoint(String label) {
 		if(status.equals(BranchState.LEFT)) {
-			targetLineNumber = decompiler.getCurrentLineNumber();
+			targetLineNumber = InstructionContext.instance().getLineNumber();
 			return this.targetStatement.equals(label);
 		}
 		else if(status.equals(BranchState.RIGHT)) {
-			mergeLineNumber = decompiler.getCurrentLineNumber();
+			mergeLineNumber = InstructionContext.instance().getLineNumber();
 			return this.mergeStatement.equals(label);
 		}
 		return false;
