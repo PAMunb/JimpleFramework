@@ -60,6 +60,7 @@ public ClassDecompiler safeDecompile(loc classFile) {
  */ 
 data Analysis[&T] = Analysis(&T (ExecutionContext) run);
 
+//TODO not used yet ...
 alias Transformation = Analysis[ExecutionContext];
 
 /*
