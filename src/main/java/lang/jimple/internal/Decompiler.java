@@ -147,11 +147,11 @@ public class Decompiler {
 		}
 
 		@Override
-		public void visit(int version, int access, String name, String signature, String superClass,
-				String[] interfaces) {
+		public void visit(int version, int access, String name, String signature, String superClass, String[] interfaces) {
 			this.classModifiers = modifiers(access);
 			this.type = objectConstructor(name);
-			this.superClass = superClass != null ? objectConstructor(superClass)
+			this.superClass = superClass != null 
+					? objectConstructor(superClass)
 					: objectConstructor("java.lang.Object");
 			this.interfaces = new ArrayList<>();
 
@@ -221,13 +221,6 @@ public class Decompiler {
 
 			mn.instructions.accept(insVisitor);
 
-			// TODO: we commented this line because we want to
-			//  solve this issue using a Jimple transformation.
-			//  we will keep the commented implementation here just while
-			//  we review the new strategy.
-			//
-			//  insVisitor.clearUnusedLabelInstructions();
-
 			stmts = insVisitor.instructions();
 
 			for (LocalVariableDeclaration var : localVariables.values()) {
@@ -239,8 +232,7 @@ public class Decompiler {
 
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses);
 
-			methods.add(Method.method(methodModifiers, methodReturnType, methodName, methodFormalArgs, methodExceptions,
-					methodBody));
+			methods.add(Method.method(methodModifiers, methodReturnType, methodName, methodFormalArgs, methodExceptions, methodBody));
 		}
 
 		@Override
@@ -1716,11 +1708,12 @@ public class Decompiler {
 				int idx = 0;
 				for (Type t : formals) {
 					if(keepOriginalVarNames && idx < localVariableNodes.size()) {
-						String name = (!staticMethod) ? localVariableNodes.get(idx+1).name : localVariableNodes.get(idx).name;
+						String name = (!staticMethod) 
+								? localVariableNodes.get(idx+1).name 
+								: localVariableNodes.get(idx).name;
 						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
 					}else {
-						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-								LOCAL_PARAMETER_PREFIX + idx, t));
+						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1), LOCAL_PARAMETER_PREFIX + idx, t));
 					}					
 					idx++;
 				}
