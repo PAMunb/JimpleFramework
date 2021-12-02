@@ -209,8 +209,7 @@ public class Decompiler {
 
 			boolean isStatic = methodModifiers.contains(Modifier.Static());
 
-			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic,
-					methodFormalArgs.size(), mn.localVariables);
+			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic, mn.localVariables);
 
 			List<LocalVariableDeclaration> decls = new ArrayList<>();
 			List<Statement> stmts = new ArrayList<>();
@@ -218,7 +217,6 @@ public class Decompiler {
 
 			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM5, localVariables, catchClauses);
 
-			//insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
 			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs, mn.localVariables);
 
 			mn.instructions.accept(insVisitor);
@@ -255,9 +253,7 @@ public class Decompiler {
 			return super.visitField(access, name, descriptor, signature, value);
 		}
 
-		//TODO remove: int formals ... not used
-		private Map<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals,
-				List<LocalVariableNode> nodes) {
+		private Map<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, List<LocalVariableNode> nodes) {
 			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
 
 			int idx = 1;
@@ -1719,7 +1715,6 @@ public class Decompiler {
 								
 				int idx = 0;
 				for (Type t : formals) {
-					//TODO da um erro estranho no teste TestDecompiler.decompileAndroidClass() se nao tiver a segunda condicao
 					if(keepOriginalVarNames && idx < localVariableNodes.size()) {
 						String name = (!staticMethod) ? localVariableNodes.get(idx+1).name : localVariableNodes.get(idx).name;
 						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t));
