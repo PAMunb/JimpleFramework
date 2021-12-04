@@ -70,9 +70,9 @@ public tuple[list[loc] classPath, list[str] entryPoints] simpleWithCycle() {
 
 public void main() {
 	// possible tests
-	//tuple[list[loc] cp, list[str] e] t = polymorphism();
+	tuple[list[loc] cp, list[str] e] t = polymorphism();
 	//tuple[list[loc] cp, list[str] e] t = simple();
-	tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
+	//tuple[list[loc] cp, list[str] e] t = simpleWithRecursion();
 	//tuple[list[loc] cp, list[str] e] t = simpleWithCycle();
 	//tuple[list[loc] cp, list[str] e] t = iris();
 	//tuple[list[loc] cp, list[str] e] t = slf4j();
@@ -82,8 +82,8 @@ public void main() {
     es = t.e;
    
     // EXECUTION
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(full(), RA())));
-    CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
+    CGModel model = execute(files, es, Analysis(generateCallGraph(full(), RA())));
+    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
     //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), CHA())));
     //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RTA())));
     //println(model.cg);        

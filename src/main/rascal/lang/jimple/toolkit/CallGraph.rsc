@@ -11,10 +11,6 @@ import String;
 import analysis::graphs::Graph;
 import Exception;
 
-//TODO remover qdo remover o metodo usado para teste (testePolimorfismo)
-import Type;
-import IO;
-import vis::Render;
 
 //TODO redefinir nomes ...
 data EntryPointsStrategy = full() 
@@ -24,12 +20,15 @@ data EntryPointsStrategy = full()
 						| j2se();
 
 // the algorithm used to build the call graph
-// - 
-// - Class Hierarychy Analysis
-// - Rapid Type Analysis				
+// - Name-Based Resolution (RA)
+// - Class Hierarychy Analysis (CHA)
+// - Rapid Type Analysis (RTA)	
+// SEE: 	
+// - Scalable Propagation-Based Call Graph Construction Algorithms; Frank Tip, Jens Palsberg		
 data CallGraphType = RA()
 					| CHA() 
-					| RTA();						
+					| RTA();
+					//TODO: VTA, DTA, SPARK, etc						
 
 /* 
  * a map from method signatures 
@@ -114,7 +113,7 @@ private list[MethodSignature] selectEntryPoints(ExecutionContext ctx, EntryPoint
 		
 	//visit all methods of all classes
 	top-down visit(ctx) {
-     	case classDecl(TObject(cn), _, _, _, _, mss): {
+     	case classDecl(_, TObject(cn), _, _, _, mss): {
          	for(m: method(_,r,mn,args,_,_) <- mss) {
          		// if the method is an entry point (depending on the strategy specified)         		
          		if(isEntryPoint(cn, m, ctx, strategy)) {
@@ -259,17 +258,13 @@ private list[str] computeClasses(ms: methodSignature(cn, r, mn, args), rt: callG
 	methodsList = [];
 	classList = hierarchy_types(ht, cn);
 	
-	for (c <- classList) {
-		instanciations = getProgramInstanciations(ctx);
-		print("instances: ");
-		println(instanciations);
+	instanciations = getProgramInstanciations(ctx);
+	for (c <- classList) {		
 		if (TObject(c) in instanciations) {
 			methodsList = methodsList + signature(c, mn, args);
 		}
 	}
-	
-	print("methodList: ");
-	println(methodsList);
+
 	return methodsList;
 }
 
@@ -278,14 +273,14 @@ private HT createHT(ExecutionContext ctx){
 	HT ht = {};
 	
 	top-down visit(ctx) {
-     	case classDecl(TObject(t), _, TObject(superClass), interfaces, _, _ ): {
+     	case classDecl(_,TObject(t), TObject(superClass), interfaces, _, _ ): {
      		ht = ht + <superClass, t>;     		
      		names = [name | TObject(name) <- interfaces];
      		for(n <- names){
      			ht = ht + <n, t>;	
      		}
      	}  
-     	case interfaceDecl(TObject(t), _, interfaces, _, _ ): {
+     	case interfaceDecl(_, TObject(t), interfaces, _, _ ): {
      		names = [name | TObject(name) <- interfaces];
      		for(n <- names){
      			ht = ht + <n, t>;	
@@ -302,14 +297,14 @@ private HT createHT(ExecutionContext ctx){
 // - criar o mapa dinamicamente ... o mapa seria global mas seria criada uma entrada sob demanda ... tipo memoizacao
 // - ver o uso de @memo ... como funciona isso?
 private list[str] hierarchy_types(HT ht, str name) {
-	hierarquia = [name];
+	hierarchy = [name];
 	
 	types = successors(ht,name);
 	for(t <- types){
-		hierarquia = hierarquia + hierarchy_types(ht, t);
+		hierarchy = hierarchy + hierarchy_types(ht, t);
 	}
 
-	return hierarquia;
+	return hierarchy;
 }
 
 
@@ -339,43 +334,4 @@ private list[Type] getProgramInstanciations(ExecutionContext ctx) {
 		}
 	}
 	return instanciations;
-}
-
-
-//TODO remover metodos abaixo
-public void testePolimorfismo(){
-	//polymorphism
-    files = findClassFiles(|project://JimpleFramework/target/test-classes/samples/callgraph/polymorphism|);
-    //es = ["samples.callgraph.polymorphism.Main.execute2()"];
-    es = ["samples.callgraph.polymorphism.Main.execute(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
-    //es = ["samples.callgraph.polymorphism.Main.execute3(TObject(\"samples.callgraph.polymorphism.service.factory.ServiceFactory\"))"];
-    
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(full())));
-    CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RA())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), CHA())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(context(), RTA())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(given(["samples.callgraph.simple.SimpleCallGraph.B()","samples.callgraph.simple.SimpleCallGraph.C()"]))));
-    //TODO nao esta funcionando::::CGModel model = execute(files, es, Analysis(generateCallGraph(publicMethods())));
-    //CGModel model = execute(files, es, Analysis(generateCallGraph(j2se())));
-    
-    CG cg = model.cg;
-    mm = invertUnique(model.methodMap);
-
-    mm = (simpleName : replaceAll(mm[simpleName],"samples.callgraph.polymorphism.","s.c.p.") | simpleName <- mm);
-
-    //render(toFigure(cg));
-    //render(toFigure(cg,mm));   
-    
-    //println("DOT:");
-    //println(toDot(cg,mm));
-}
-
-public void testeNomeClasse(){
-	//nome = "samples.callgraph.simple.SimpleCallGraph.A()";
-	nome = "samples.callgraph.simple.SimpleCallGraph.log(TObject(\"java.lang.String\"))";
-	
-	
-	untilMethodName = substring(nome,0,findFirst(nome,"("));
-	
-	println(substring(untilMethodName,0,findLast(untilMethodName,".")));
 }
