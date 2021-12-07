@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -56,26 +58,22 @@ public  class CatchClause extends JimpleAbstractDataType {
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
       
-        IValue iv_exception = exception.createVallangInstance(vf);
+      IValue iv_exception = exception.createVallangInstance(vf);
       
-        IValue iv_from = vf.string(from);
+      IValue iv_from = vf.string(from);
       
-        IValue iv_to = vf.string(to);
+      IValue iv_to = vf.string(to);
       
-        IValue iv_with = vf.string(with);
+      IValue iv_with = vf.string(with);
       
-        
-         return vf.constructor(getVallangConstructor()
-         
-           , iv_exception 
-         
-           , iv_from 
-         
-           , iv_to 
-         
-           , iv_with 
-         
-         ); 
+      
+      IValue[] children = new IValue[] { 
+        iv_exception, iv_from, iv_to, iv_with   
+      };
+    
+      
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    
