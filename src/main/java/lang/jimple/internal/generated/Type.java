@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -111,10 +113,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -140,10 +146,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -169,10 +179,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -198,10 +212,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -227,10 +245,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -256,10 +278,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -285,10 +311,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -314,10 +344,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -347,14 +381,16 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_name = vf.string(name);
+       IValue iv_name = vf.string(name);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_name 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_name   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -384,14 +420,16 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_baseType = baseType.createVallangInstance(vf);
+       IValue iv_baseType = baseType.createVallangInstance(vf);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_baseType 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_baseType   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -417,10 +455,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -446,10 +488,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -475,10 +521,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -504,10 +554,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -533,10 +587,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -562,10 +620,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -591,10 +653,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -620,10 +686,14 @@ public abstract class Type extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

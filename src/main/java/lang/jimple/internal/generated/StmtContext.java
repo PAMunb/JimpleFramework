@@ -15,116 +15,34 @@ import io.usethesource.vallang.IValueFactory;
 /**
  * This class has been automatically generated from 
  * the JIMPLE AST definitions. It corresponds to a 
- * Java representation of the Immediate construct. 
+ * Java representation of the StmtContext construct. 
  * 
  * @see lang::jimple::core::Syntax
  * @see lang::jimple::decompiler::internal::RascalJavaConverter
  */ 
 
 @EqualsAndHashCode
-public abstract class Immediate extends JimpleAbstractDataType {
+public abstract class StmtContext extends JimpleAbstractDataType {
   
    @Override 
    public String getBaseType() { 
-     return "Immediate";
+     return "StmtContext";
    } 
    
    
-   public static Immediate local(String localName)  {
-     return new c_local(localName);
+   public static StmtContext noContext()  {
+     return new c_noContext();
    }
    
-   public static Immediate iValue(Value v)  {
-     return new c_iValue(v);
-   }
-   
-   public static Immediate caughtException()  {
-     return new c_caughtException();
+   public static StmtContext stmtContext(Integer stmtId, String methodSignature, Integer sourceCodeLine)  {
+     return new c_stmtContext(stmtId, methodSignature, sourceCodeLine);
    }
     
    
    @EqualsAndHashCode
-   public static class c_local extends Immediate {
+   public static class c_noContext extends StmtContext {
      
-     public String localName;
-     
-     public c_local(String localName) {
-      
-        this.localName = localName;  
-        
-     } 
-    
-     @Override
-     public IConstructor createVallangInstance(IValueFactory vf) {
-       
-       IValue iv_localName = vf.string(localName);
-       
-       
-       IValue[] children = new IValue[] { 
-         iv_localName   
-       };
-     
-       
-       return vf.constructor(getVallangConstructor(), children);
-        
-     }
-   
-     @Override
-     public io.usethesource.vallang.type.Type[] children() {
-       return new io.usethesource.vallang.type.Type[] { 
-         tf.stringType()
-       };
-     }
-    
-     @Override
-     public String getConstructor() {
-       return "local";
-     }
-   }
-   
-   @EqualsAndHashCode
-   public static class c_iValue extends Immediate {
-     
-     public Value v;
-     
-     public c_iValue(Value v) {
-      
-        this.v = v;  
-        
-     } 
-    
-     @Override
-     public IConstructor createVallangInstance(IValueFactory vf) {
-       
-       IValue iv_v = v.createVallangInstance(vf);
-       
-       
-       IValue[] children = new IValue[] { 
-         iv_v   
-       };
-     
-       
-       return vf.constructor(getVallangConstructor(), children);
-        
-     }
-   
-     @Override
-     public io.usethesource.vallang.type.Type[] children() {
-       return new io.usethesource.vallang.type.Type[] { 
-         v.getVallangConstructor()
-       };
-     }
-    
-     @Override
-     public String getConstructor() {
-       return "iValue";
-     }
-   }
-   
-   @EqualsAndHashCode
-   public static class c_caughtException extends Immediate {
-     
-     public c_caughtException() {
+     public c_noContext() {
         
      } 
     
@@ -150,7 +68,58 @@ public abstract class Immediate extends JimpleAbstractDataType {
     
      @Override
      public String getConstructor() {
-       return "caughtException";
+       return "noContext";
+     }
+   }
+   
+   @EqualsAndHashCode
+   public static class c_stmtContext extends StmtContext {
+     
+     public Integer stmtId;
+     
+     public String methodSignature;
+     
+     public Integer sourceCodeLine;
+     
+     public c_stmtContext(Integer stmtId, String methodSignature, Integer sourceCodeLine) {
+      
+        this.stmtId = stmtId;  
+      
+        this.methodSignature = methodSignature;  
+      
+        this.sourceCodeLine = sourceCodeLine;  
+        
+     } 
+    
+     @Override
+     public IConstructor createVallangInstance(IValueFactory vf) {
+       
+       IValue iv_stmtId = vf.integer(stmtId);
+       
+       IValue iv_methodSignature = vf.string(methodSignature);
+       
+       IValue iv_sourceCodeLine = vf.integer(sourceCodeLine);
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_stmtId, iv_methodSignature, iv_sourceCodeLine   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
+     }
+   
+     @Override
+     public io.usethesource.vallang.type.Type[] children() {
+       return new io.usethesource.vallang.type.Type[] { 
+         tf.integerType(), tf.stringType(), tf.integerType()
+       };
+     }
+    
+     @Override
+     public String getConstructor() {
+       return "stmtContext";
      }
    }
     

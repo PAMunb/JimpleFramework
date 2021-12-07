@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -59,14 +61,16 @@ public abstract class Variable extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_local = vf.string(local);
+       IValue iv_local = vf.string(local);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_local 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_local   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -100,18 +104,18 @@ public abstract class Variable extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_reference = vf.string(reference);
+       IValue iv_reference = vf.string(reference);
        
-         IValue iv_idx = idx.createVallangInstance(vf);
+       IValue iv_idx = idx.createVallangInstance(vf);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_reference 
-          
-            , iv_idx 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_reference, iv_idx   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -145,18 +149,18 @@ public abstract class Variable extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_reference = vf.string(reference);
+       IValue iv_reference = vf.string(reference);
        
-         IValue iv_field = field.createVallangInstance(vf);
+       IValue iv_field = field.createVallangInstance(vf);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_reference 
-          
-            , iv_field 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_reference, iv_field   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -186,14 +190,16 @@ public abstract class Variable extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_field = field.createVallangInstance(vf);
+       IValue iv_field = field.createVallangInstance(vf);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_field 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_field   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
