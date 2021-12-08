@@ -20,16 +20,30 @@ loc fooBar = |project://JimpleFramework/target/test-classes/samples/pointsto/sim
 loc fooBarStatic = |project://JimpleFramework/target/test-classes/samples/pointsto/simple/FooBarStatic.class|;
 
 public void executar(){
-	ClassOrInterfaceDeclaration c = jimplify(decompile(fooBar,true));	
+	//ClassOrInterfaceDeclaration c = jimplify(decompile(fooBar,true));	
+	ClassOrInterfaceDeclaration c = decompile(fooBarStatic,true);
     
-    toPrettyPrint(c);
-	//toJimple(c);
+    //toPrettyPrint(c);
+	toJimple(c);
 }
 
 void toPrettyPrint(ClassOrInterfaceDeclaration c){	
 	println(prettyPrint(c));	
 }
 
-void toJimple(ClassOrInterfaceDeclaration c){	
-	println(c);	
+void toJimple(classDecl(_, TObject(name), _, _, _, list[Method] methods)){	
+	println("***** CLASS: <name>");	
+	toJimple(methods);
+}
+
+void toJimple(interfaceDecl(_, TObject(name), _, _, list[Method] methods)){	
+	println("***** INTERFACE: <name>");	
+	toJimple(methods);
+}
+
+void toJimple(list[Method] methods){	
+	for(Method m <- methods){
+		println("***** METHOD: <m.name>");
+		println(m);
+	}
 }

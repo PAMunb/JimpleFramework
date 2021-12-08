@@ -43,14 +43,6 @@ data ExecutionContext = ExecutionContext(ClassTable ct, MethodTable mt);
 
 data ClassDecompiler  = Success(CID) 
                       | Error(str message); 
-
-                      
-public ClassDecompiler safeDecompile(loc classFile) {
-  try 
-    return Success(decompile(classFile)); 
-  catch : 
-    return Error(classFile.path);
-}   
                
 /* 
  * The generic definition of an Analysis. 
@@ -86,8 +78,8 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 		println(errors); 
 	}
 		
-	ClassTable ct  = (n : Class(jimplify(classDecl(ms, n, s, is, fs, mss)), ApplicationClass()) | Success(classDecl(ms, n, s, is, fs, mss)) <- classes);
-	ct = ct + (n : Class(jimplify(interfaceDecl(ms, n, is, fs, mss)), ApplicationClass()) | Success(interfaceDecl(ms, n, is, fs, mss)) <- classes);
+	ClassTable ct  = (n : Class(classDecl(ms, n, s, is, fs, mss), ApplicationClass()) | Success(classDecl(ms, n, s, is, fs, mss)) <- classes);
+	ct = ct + (n : Class(interfaceDecl(ms, n, is, fs, mss), ApplicationClass()) | Success(interfaceDecl(ms, n, is, fs, mss)) <- classes);
 	
 	MethodTable mt = ();
 
@@ -97,15 +89,6 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
    	}  
 	return ExecutionContext(ct, mt);
 }
-
-private CID jimplify(CID c) = jimplify([processJimpleLabels, fixSignature, fixSignature], c); 
-
-private CID jimplify(list[CID (CID)] fs, CID c) { 
-  switch(fs) {
-    case [h, *t]: return jimplify(t, h(c));
-    default: return c; 
-  }
-} 
 
 private map[Name, DeclaredMethod] toMethodsTable(Name cn, list[Method] methods, list[str] entryPoints) {
 	return (signature(cn, mn, args) : Method(method(ms, r, mn, args, es, b), signature(cn, mn, args) in entryPoints) | /method(ms, r, mn, args, es, b) <- methods);
@@ -135,6 +118,13 @@ public &T execute(list[str] classPath, list[str] entryPoints, Analysis[&T] analy
 	bool r1 = verbose;
 	return execute(locations, entryPoints, analysis, r1); 
 }
+
+public ClassDecompiler safeDecompile(loc classFile) {
+  try 
+    return Success(decompile(classFile)); 
+  catch : 
+    return Error(classFile.path);
+}   
 
 /* some auxiliarly functions to load all classes on a given class path */ 
 public list[ClassDecompiler] loadClasses([]) = [];

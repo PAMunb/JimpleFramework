@@ -21,7 +21,7 @@ public class TestDecompiler {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 
 			assertNotNull(c);
 		}
@@ -40,7 +40,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -58,7 +58,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -76,7 +76,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -94,7 +94,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -112,7 +112,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			
 			assertNotNull(c);
@@ -131,7 +131,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -149,7 +149,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -167,7 +167,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -185,7 +185,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -203,7 +203,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -221,7 +221,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -239,7 +239,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -257,7 +257,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 			assertExecuteMethodStmts(c, 17);
@@ -276,7 +276,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -294,7 +294,7 @@ public class TestDecompiler {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
@@ -312,7 +312,7 @@ public class TestDecompiler {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 
 			assertNotNull(c);
 			assertExecuteMethodStmts(c, 15);
@@ -331,7 +331,7 @@ public class TestDecompiler {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 
 			assertNotNull(c);
 			assertExecuteMethodStmts(c, 16);
@@ -350,7 +350,7 @@ public class TestDecompiler {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 
 			assertNotNull(c);
 			assertExecuteMethodStmts(c, 9);
@@ -369,7 +369,7 @@ public class TestDecompiler {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 
 			assertNotNull(c);
 		}
@@ -387,7 +387,7 @@ public class TestDecompiler {
 
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), vf.bool(true), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), vf.bool(true), null);
 
 			assertNotNull(c);			
 		} catch (Exception e) {

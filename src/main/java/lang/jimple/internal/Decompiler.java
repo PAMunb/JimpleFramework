@@ -77,23 +77,23 @@ public class Decompiler {
 	/*
 	 * decompiles a Java byte code at <i>classLoc</i> into a Jimple representation.
 	 */
-	public IConstructor decompile(ISourceLocation classLoc, IEvaluatorContext ctx) {
-		return decompile(classLoc, defaultKeepOriginalVarNames, ctx);
+	public IConstructor bytecodeToJimple(ISourceLocation classLoc, IEvaluatorContext ctx) {
+		return bytecodeToJimple(classLoc, defaultKeepOriginalVarNames, ctx);
 	}
 
-	public IConstructor decompile(ISourceLocation classLoc, IBool keepVarNames, IEvaluatorContext ctx) {
+	public IConstructor bytecodeToJimple(ISourceLocation classLoc, IBool keepVarNames, IEvaluatorContext ctx) {
 		try {
-			return decompile(URIResolverRegistry.getInstance().getInputStream(classLoc), keepVarNames, ctx);
+			return bytecodeToJimple(URIResolverRegistry.getInstance().getInputStream(classLoc), keepVarNames, ctx);
 		} catch (IOException e) {
 			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
 		}
 	}
 
-	public IConstructor decompile(InputStream classLoc, IEvaluatorContext ctx) {
-		return decompile(classLoc, defaultKeepOriginalVarNames, ctx);
+	public IConstructor bytecodeToJimple(InputStream classLoc, IEvaluatorContext ctx) {
+		return bytecodeToJimple(classLoc, defaultKeepOriginalVarNames, ctx);
 	}
 
-	public IConstructor decompile(InputStream classLoc, IBool keepVarNames, IEvaluatorContext ctx) {		
+	public IConstructor bytecodeToJimple(InputStream classLoc, IBool keepVarNames, IEvaluatorContext ctx) {		
 		try {
 			this.keepOriginalVarNames = keepVarNames.getValue();
 			ClassReader reader = new ClassReader(classLoc);

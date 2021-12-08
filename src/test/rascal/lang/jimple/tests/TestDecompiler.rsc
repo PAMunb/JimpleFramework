@@ -52,7 +52,8 @@ test bool testInterface() {
 
 test bool testDoWhileStatement() {
   loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/DoWhileStatement.class|;
-  ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  //ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  ClassOrInterfaceDeclaration c = decompile(pathDoWhile);
   list[Statement] expected = [
       identity("r0","@this",TObject("samples.controlStatements.DoWhileStatement"),context=stmtContext(1,"TObject(\"samples.controlStatements.DoWhileStatement\").execute()",-1)),
       assign(localVariable("r1"),immediate(iValue(intValue(0))),context=stmtContext(2,"TObject(\"samples.controlStatements.DoWhileStatement\").execute()",5)),
@@ -75,7 +76,8 @@ test bool testDoWhileStatement() {
 
 test bool testWhileStatement() {
   loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/WhileStatement.class|;
-  ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  //ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  ClassOrInterfaceDeclaration c = decompile(pathDoWhile);
   list[Statement] expected = [
      identity("r0","@this",TObject("samples.controlStatements.WhileStatement"),context=stmtContext(1,"TObject(\"samples.controlStatements.WhileStatement\").execute()",-1)),
      assign(localVariable("r1"),immediate(iValue(intValue(0))),context=stmtContext(2,"TObject(\"samples.controlStatements.WhileStatement\").execute()",5)),
@@ -100,7 +102,8 @@ test bool testWhileStatement() {
 
 test bool testStaticBlock() {
   loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/StaticBlock.class|;
-  ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  //ClassOrInterfaceDeclaration c = fixStmtId(fixSignature(processJimpleLabels(decompile(pathDoWhile))));
+  ClassOrInterfaceDeclaration c = decompile(pathDoWhile);
   switch(c) {
     case classDecl(_, _, _, _, _, methods): {  
       return {m.name | m <- methods} == {"sum", "\<init\>", "\<clinit\>" } && size(methods) == 3; 

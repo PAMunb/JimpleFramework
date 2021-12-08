@@ -15,6 +15,7 @@ test bool testFooBar(){
 	ClassOrInterfaceDeclaration c = decompile(fooBar,true);
 	
 	Method bar = getMethodByName(c,"bar");
+	println("bar=<bar>");
 	
 	list[LocalVariableDeclaration] localVarsExpected = [
 		localVariableDeclaration(TObject("samples.pointsto.simple.Node"),"s"),
@@ -23,10 +24,10 @@ test bool testFooBar(){
 	];
 	
 	list[Statement] stmtsExpected = [
-		identity("r0","@this",TObject("samples.pointsto.simple.FooBar")),
-		identity("s","@parameter0",TObject("samples.pointsto.simple.Node")),
-		assign(localVariable("$r1"),localFieldRef("s","samples/pointsto/simple/Node",TObject("samples.pointsto.simple.Node"),"next")),
-		returnStmt(local("$r1"))
+		identity("r0","@this",TObject("samples.pointsto.simple.FooBar"),context=stmtContext(1,"TObject(\"samples.pointsto.simple.FooBar\").bar(samples.pointsto.simple.Node)",-1)),
+		identity("s","@parameter0",TObject("samples.pointsto.simple.Node"),context=stmtContext(2,"TObject(\"samples.pointsto.simple.FooBar\").bar(samples.pointsto.simple.Node)",-1)),
+		assign(localVariable("$r1"),localFieldRef("s","samples/pointsto/simple/Node",TObject("samples.pointsto.simple.Node"),"next"),context=stmtContext(3,"TObject(\"samples.pointsto.simple.FooBar\").bar(samples.pointsto.simple.Node)",19)),
+		returnStmt(local("$r1"),context=stmtContext(4,"TObject(\"samples.pointsto.simple.FooBar\").bar(samples.pointsto.simple.Node)",19))
 	];
 	
 	return check(localVarsExpected,stmtsExpected,bar);
@@ -43,9 +44,9 @@ test bool testFooBarStatic(){
 	];
 	
 	list[Statement] stmtsExpected = [
-		identity("s","@parameter0",TObject("samples.pointsto.simple.Node")),
-		assign(localVariable("$r1"),localFieldRef("s","samples/pointsto/simple/Node",TObject("samples.pointsto.simple.Node"),"next")),
-		returnStmt(local("$r1"))
+		identity("s","@parameter0",TObject("samples.pointsto.simple.Node"),context=stmtContext(1,"TObject(\"samples.pointsto.simple.FooBarStatic\").bar(samples.pointsto.simple.Node)",-1)),
+		assign(localVariable("$r1"),localFieldRef("s","samples/pointsto/simple/Node",TObject("samples.pointsto.simple.Node"),"next"),context=stmtContext(2,"TObject(\"samples.pointsto.simple.FooBarStatic\").bar(samples.pointsto.simple.Node)",19)),
+		returnStmt(local("$r1"),context=stmtContext(3,"TObject(\"samples.pointsto.simple.FooBarStatic\").bar(samples.pointsto.simple.Node)",19))
 	];
 
 	return check(localVarsExpected,stmtsExpected,bar);
@@ -67,13 +68,13 @@ test bool testFooBarStaticMultipleArgs(){
 	];	
 	
 	list[Statement] stmtsExpected = [
-		identity("x","@parameter0",TInteger()),
-		identity("x1","@parameter1",TObject("samples.pointsto.simple.Node")),
-		identity("y","@parameter2",TDouble()),
-		identity("y1","@parameter3",TObject("samples.pointsto.simple.Node")),
-		identity("s","@parameter4",TArray(TObject("samples.pointsto.simple.Node"))),
-		identity("d","@parameter5",TObject("java.lang.Double")),
-		returnEmptyStmt()
+		identity("x","@parameter0",TInteger(),context=stmtContext(1,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",-1)),
+		identity("x1","@parameter1",TObject("samples.pointsto.simple.Node"),context=stmtContext(2,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",-1)),
+		identity("y","@parameter2",TDouble(),context=stmtContext(3,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",-1)),
+		identity("y1","@parameter3",TObject("samples.pointsto.simple.Node"),context=stmtContext(4,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",-1)),
+		identity("s","@parameter4",TArray(TObject("samples.pointsto.simple.Node")),context=stmtContext(5,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",-1)),
+		identity("d","@parameter5",TObject("java.lang.Double"),context=stmtContext(6,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",-1)),
+		returnEmptyStmt(context=stmtContext(7,"TObject(\"samples.pointsto.simple.FooBarStatic\").multipleArgs(int,samples.pointsto.simple.Node,double,samples.pointsto.simple.Node,samples.pointsto.simple.Node[],java.lang.Double)",24))
 	];
 
 	return check(localVarsExpected,stmtsExpected,bar);

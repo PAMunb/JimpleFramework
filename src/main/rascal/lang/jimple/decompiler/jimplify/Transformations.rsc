@@ -2,15 +2,17 @@ module lang::jimple::decompiler::jimplify::Transformations
 
 import lang::jimple::core::Syntax; 
 import lang::jimple::decompiler::jimplify::ProcessLabels;
+import lang::jimple::decompiler::jimplify::FixStmtId;
+import lang::jimple::decompiler::jimplify::FixStmtMethodSignature;
 import lang::jimple::decompiler::jimplify::ConstantPropagator;
 
 import Map; 
 import Set;
 import List;
-
+	
 //TODO remover imports temporarios
 import Type;
-import IO;			
+import IO;	
 						
 data TransformationType = basic()
 					| optimizations() 
@@ -20,12 +22,14 @@ data TransformationType = basic()
 					
 alias CID = ClassOrInterfaceDeclaration;
 
-map[str,list[CID (CID)]] basicTransformationsMap = ("label" : [processJimpleLabels]);
+map[str,list[CID (CID)]] basicTransformationsMap = ("label" : [processJimpleLabels],
+													"stmt" : [fixSignature, fixStmtId]);
 map[str,list[CID (CID)]] optimizationTransformationsMap = ();
 
 
 public CID jimplify(CID c) = jimplify(c, basic()); 
 public CID jimplify(CID c, basic()) = jimplify(getTransformations(basicTransformationsMap), c);
+public CID jimplify(CID c, optimizations()) = jimplify(getTransformations(optimizationTransformationsMap), c);
 public CID jimplify(CID c, given(list[CID (CID)] transformations)) = jimplify(transformations, c);
 //TODO deixar assim por enquanto ... ate ter os outros casos 
 public CID jimplify(CID c, _) = jimplify(c, basic()); 
@@ -36,18 +40,17 @@ private CID jimplify(list[CID (CID)] fs, CID c) {
 		default: return c; 
 	}
 } 	
-
+ 
 private list[CID (CID)] getTransformations(map[str,list[CID (CID)]] transformationsMap){
-	set[CID (CID)] transformationsSet = {};
+	list[CID (CID)] transformationsList = [];
 	set[list[CID (CID)]] listOfLists = range(transformationsMap);
 
 	for(internalList <- listOfLists){		
-		transformationsSet += {t | t <- internalList};
+		transformationsList += [t | t <- internalList];
 	}
 	
-	return toList(transformationsSet);
+	return transformationsList;
 }	
-
 
 
 /////////////////////////////////////////////////////////////////////
@@ -55,22 +58,22 @@ private list[CID (CID)] getTransformations(map[str,list[CID (CID)]] transformati
 public void teste(){
 	map[str,list[CID (CID)]] mapa = 
 					("label" : [processJimpleLabels], 
-					"cte" : [processConstantPropagator, processJimpleLabels, novo]);
-
-	set[ClassOrInterfaceDeclaration (ClassOrInterfaceDeclaration)] retorno = {};
-	set[list[ClassOrInterfaceDeclaration (ClassOrInterfaceDeclaration)]] listaDeListas = range(mapa);
+					"stmt" : [fixSignature, fixStmtId],
+					"cte" : [processConstantPropagator, processJimpleLabels, novo, fixSignature, fixStmtId]);
+	
+	set[list[CID (CID)]] listaDeListas = range(mapa);
+	list[CID (CID)] retorno = [];
 	
 	println("listaDeListas=<listaDeListas>");
 	for(listaInterna <- listaDeListas){		
-		retorno = retorno + {t | t <- listaInterna};
+		//retorno += [t | t <- listaInterna];
+		retorno += [t | t <- listaInterna, t notin retorno];
 	}
 	
 	for(r <- retorno){
 		println("####=<r>");
 	}
-
 }
-
 public ClassOrInterfaceDeclaration novo(ClassOrInterfaceDeclaration c) { 
   return c;   
 }

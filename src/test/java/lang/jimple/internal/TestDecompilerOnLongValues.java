@@ -22,7 +22,7 @@ public class TestDecompilerOnLongValues {
 			
 			IValueFactory vf = ValueFactory.getInstance();
 			Decompiler decompiler = new Decompiler(vf);
-			IConstructor c = decompiler.decompile(new FileInputStream(classFile), null);
+			IConstructor c = decompiler.bytecodeToJimple(new FileInputStream(classFile), null);
 			
 			assertNotNull(c);
 		}
