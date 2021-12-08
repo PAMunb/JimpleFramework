@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -59,37 +61,38 @@ public abstract class MethodBody extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IList iv_localVariableDecls = vf.list();
-         
-         for(LocalVariableDeclaration v: localVariableDecls) {
-          iv_localVariableDecls = iv_localVariableDecls.append(v.createVallangInstance(vf));   
-         }
-                 
+       IList iv_localVariableDecls = vf.list();
        
-         IList iv_stmts = vf.list();
-         
-         for(Statement v: stmts) {
-          iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
-         }
-                 
+       for(LocalVariableDeclaration v: localVariableDecls) {
+        iv_localVariableDecls = iv_localVariableDecls.append(v.createVallangInstance(vf));   
+       }
        
-         IList iv_catchClauses = vf.list();
-         
-         for(CatchClause v: catchClauses) {
-          iv_catchClauses = iv_catchClauses.append(v.createVallangInstance(vf));   
-         }
-                 
+               
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_localVariableDecls 
-          
-            , iv_stmts 
-          
-            , iv_catchClauses 
-          
-          ); 
+       IList iv_stmts = vf.list();
+       
+       for(Statement v: stmts) {
+        iv_stmts = iv_stmts.append(v.createVallangInstance(vf));   
+       }
+       
+               
+       
+       IList iv_catchClauses = vf.list();
+       
+       for(CatchClause v: catchClauses) {
+        iv_catchClauses = iv_catchClauses.append(v.createVallangInstance(vf));   
+       }
+       
+               
+       
+       
+       IValue[] children = new IValue[] { 
+         iv_localVariableDecls, iv_stmts, iv_catchClauses   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -115,10 +118,14 @@ public abstract class MethodBody extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+            
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

@@ -46,10 +46,10 @@ private MethodBody processJimpleLabels(MethodBody mb) {
   // updates all labels to a more user friendly
   // string. 
   mb = top-down visit(mb) {
-    case label(aLabel): {
-     if(! (aLabel in labels)) {
+    case Statement s: {
+     if(label(aLabel):= s && ! (aLabel in labels)) {
         labels += (aLabel : count);       
-        newLabel = label(createLabel(count)); 
+        newLabel = label(createLabel(count), context = s.context); 
         count = count + 1; 
         insert newLabel;
       }
@@ -59,11 +59,11 @@ private MethodBody processJimpleLabels(MethodBody mb) {
   // updates all goto stmts to point to the 
   // new labels. 
   mb = top-down visit(mb) {
-  	case gotoStmt(aLabel)  => gotoStmt(fixReference(aLabel, labels))
-  	 when aLabel in labels 
+  	case Statement s  => gotoStmt(fixReference(aLabel, labels), context = s.context)
+  	 when gotoStmt(aLabel) := s, aLabel in labels
   	
-  	case ifStmt(c, aLabel) => ifStmt(c, fixReference(aLabel, labels))
-  	 when aLabel in labels 
+  	case Statement s => ifStmt(c, fixReference(aLabel, labels), context = s.context)
+  	 when ifStmt(c, aLabel):= s, aLabel in labels 
   	
   	case caseOption(c, aLabel) => caseOption(c, fixReference(aLabel, labels))
   	 when aLabel in labels

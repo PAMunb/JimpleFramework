@@ -13,20 +13,14 @@ import lang.jimple.internal.generated.FieldSignature;
 import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.MethodSignature;
 import lang.jimple.internal.generated.Modifier;
-import lang.jimple.internal.generated.Statement;
 import lang.jimple.internal.generated.Type;
 import lang.jimple.internal.generated.Value;
-import lang.jimple.internal.generated.Variable;
 import lang.jimple.util.Pair;
 
 public class JimpleObjectFactory {
 
 	public static Type objectConstructor(String name) {
 		return Type.TObject(name.replace("/", "."));
-	}
-	
-	public static Statement assignmentStmt(Variable var, Expression expression) {
-		return Statement.assign(var, expression);
 	}
 	
 	public static Expression newPlusExpression(Immediate lhs, Immediate rhs) {

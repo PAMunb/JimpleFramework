@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -55,18 +57,18 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_option = vf.integer(option);
+       IValue iv_option = vf.integer(option);
        
-         IValue iv_targetStmt = vf.string(targetStmt);
+       IValue iv_targetStmt = vf.string(targetStmt);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_option 
-          
-            , iv_targetStmt 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_option, iv_targetStmt   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override
@@ -96,14 +98,16 @@ public abstract class CaseStmt extends JimpleAbstractDataType {
      @Override
      public IConstructor createVallangInstance(IValueFactory vf) {
        
-         IValue iv_targetStmt = vf.string(targetStmt);
+       IValue iv_targetStmt = vf.string(targetStmt);
        
-         
-          return vf.constructor(getVallangConstructor()
-          
-            , iv_targetStmt 
-          
-          ); 
+       
+       IValue[] children = new IValue[] { 
+         iv_targetStmt   
+       };
+     
+       
+       return vf.constructor(getVallangConstructor(), children);
+        
      }
    
      @Override

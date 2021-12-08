@@ -1,6 +1,5 @@
 package lang.jimple.internal;
 
-import static lang.jimple.internal.JimpleObjectFactory.assignmentStmt;
 import static lang.jimple.internal.JimpleObjectFactory.isInterface;
 import static lang.jimple.internal.JimpleObjectFactory.methodArgumentTypes;
 import static lang.jimple.internal.JimpleObjectFactory.methodReturnType;
@@ -20,14 +19,12 @@ import static lang.jimple.internal.JimpleObjectFactory.type;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+import lang.jimple.internal.generated.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -42,28 +39,11 @@ import org.rascalmpl.interpreter.IEvaluatorContext;
 import org.rascalmpl.interpreter.utils.RuntimeExceptionFactory;
 import org.rascalmpl.uri.URIResolverRegistry;
 
+import io.usethesource.vallang.IBool;
 import io.usethesource.vallang.IConstructor;
 import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IValueFactory;
-import lang.jimple.internal.generated.ArrayDescriptor;
-import lang.jimple.internal.generated.CaseStmt;
-import lang.jimple.internal.generated.CatchClause;
-import lang.jimple.internal.generated.ClassOrInterfaceDeclaration;
-import lang.jimple.internal.generated.Expression;
-import lang.jimple.internal.generated.Field;
-import lang.jimple.internal.generated.FieldSignature;
-import lang.jimple.internal.generated.Immediate;
 import lang.jimple.internal.generated.Immediate.c_iValue;
-import lang.jimple.internal.generated.InvokeExp;
-import lang.jimple.internal.generated.LocalVariableDeclaration;
-import lang.jimple.internal.generated.Method;
-import lang.jimple.internal.generated.MethodBody;
-import lang.jimple.internal.generated.MethodSignature;
-import lang.jimple.internal.generated.Modifier;
-import lang.jimple.internal.generated.Statement;
-import lang.jimple.internal.generated.Type;
-import lang.jimple.internal.generated.Value;
-import lang.jimple.internal.generated.Variable;
 
 /**
  * Decompiler used to convert Java byte code into Jimple representation. This is
@@ -76,7 +56,7 @@ public class Decompiler {
 
 	private static final String LOCAL_VARIABLE_PARAMETER_PREFIX = "i";
 	private static final String LOCAL_VARIABLE_PREFIX = "i";
-	private static final String SATCK_BASED_LOCAL_VARIABLE_PREFIX = "$r";
+	private static final String STACK_BASED_LOCAL_VARIABLE_PREFIX = "$r";
 	private static final String THIS_VARIABLE = "this";
 	private static final String LOCAL_PARAMETER_PREFIX = "@parameter";
 	private static final String IMPLICIT_PARAMETER_NAME = "@this";
@@ -84,24 +64,38 @@ public class Decompiler {
 
 	private final IValueFactory vf;
 	private IConstructor _class;
+	
+	private boolean keepOriginalVarNames = false;
+	private final IBool defaultKeepOriginalVarNames;
+
 
 	public Decompiler(IValueFactory vf) {
 		this.vf = vf;
+		defaultKeepOriginalVarNames = vf.bool(keepOriginalVarNames);
 	}
 
 	/*
 	 * decompiles a Java byte code at <i>classLoc</i> into a Jimple representation.
 	 */
 	public IConstructor decompile(ISourceLocation classLoc, IEvaluatorContext ctx) {
+		return decompile(classLoc, defaultKeepOriginalVarNames, ctx);
+	}
+
+	public IConstructor decompile(ISourceLocation classLoc, IBool keepVarNames, IEvaluatorContext ctx) {
 		try {
-			return decompile(URIResolverRegistry.getInstance().getInputStream(classLoc), ctx);
+			return decompile(URIResolverRegistry.getInstance().getInputStream(classLoc), keepVarNames, ctx);
 		} catch (IOException e) {
 			throw RuntimeExceptionFactory.io(vf.string(e.getMessage()), null, null);
 		}
 	}
 
 	public IConstructor decompile(InputStream classLoc, IEvaluatorContext ctx) {
+		return decompile(classLoc, defaultKeepOriginalVarNames, ctx);
+	}
+
+	public IConstructor decompile(InputStream classLoc, IBool keepVarNames, IEvaluatorContext ctx) {		
 		try {
+			this.keepOriginalVarNames = keepVarNames.getValue();
 			ClassReader reader = new ClassReader(classLoc);
 			ClassNode cn = new ClassNode();
 			reader.accept(cn, 0);
@@ -126,17 +120,18 @@ public class Decompiler {
 		private List<Method> methods;
 		private boolean isInterface;
 
+
 		public GenerateJimpleClassVisitor(ClassNode cn) {
 			super(Opcodes.ASM5);
 			this.cn = cn;
 		}
 
 		@Override
-		public void visit(int version, int access, String name, String signature, String superClass,
-				String[] interfaces) {
+		public void visit(int version, int access, String name, String signature, String superClass, String[] interfaces) {
 			this.classModifiers = modifiers(access);
 			this.type = objectConstructor(name);
-			this.superClass = superClass != null ? objectConstructor(superClass)
+			this.superClass = superClass != null 
+					? objectConstructor(superClass)
 					: objectConstructor("java.lang.Object");
 			this.interfaces = new ArrayList<>();
 
@@ -161,7 +156,8 @@ public class Decompiler {
 			}
 
 			if (isInterface) {
-				_class = ClassOrInterfaceDeclaration.interfaceDecl(classModifiers, type, interfaces, fields, methods)
+				_class = ClassOrInterfaceDeclaration
+						.interfaceDecl(classModifiers, type, interfaces, fields, methods)
 						.createVallangInstance(vf);
 			} else {
 				_class = ClassOrInterfaceDeclaration
@@ -193,25 +189,20 @@ public class Decompiler {
 
 			boolean isStatic = methodModifiers.contains(Modifier.Static());
 
-			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic,
-					methodFormalArgs.size(), mn.localVariables);
+			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = visitLocalVariables(isStatic, mn.localVariables);
 
 			List<LocalVariableDeclaration> decls = new ArrayList<>();
 			List<Statement> stmts = new ArrayList<>();
 			List<CatchClause> catchClauses = visitTryCatchBlocks(mn.tryCatchBlocks);
 
-			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM4, localVariables, catchClauses);
 
-			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs);
+			InstructionSetVisitor insVisitor = new InstructionSetVisitor(Opcodes.ASM5, methodSignature(cn.name,
+					mn.name, mn.desc), localVariables, catchClauses);
+
+
+			insVisitor.initFormalArgs(isStatic, this.type, localVariables.isEmpty(), methodFormalArgs, mn.localVariables);
 
 			mn.instructions.accept(insVisitor);
-
-			// TODO: we commented this line because we want to
-			//  solve this issue using a Jimple transformation.
-			//  we will keep the commented implementation here just while
-			//  we review the new strategy.
-			//
-			//  insVisitor.clearUnusedLabelInstructions();
 
 			stmts = insVisitor.instructions();
 
@@ -224,8 +215,7 @@ public class Decompiler {
 
 			MethodBody methodBody = MethodBody.methodBody(decls, stmts, catchClauses);
 
-			methods.add(Method.method(methodModifiers, methodReturnType, methodName, methodFormalArgs, methodExceptions,
-					methodBody));
+			methods.add(Method.method(methodModifiers, methodReturnType, methodName, methodFormalArgs, methodExceptions, methodBody));
 		}
 
 		@Override
@@ -238,9 +228,8 @@ public class Decompiler {
 			return super.visitField(access, name, descriptor, signature, value);
 		}
 
-		private HashMap<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, int formals,
-				List<LocalVariableNode> nodes) {
-			HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
+		private Map<LocalVariableNode, LocalVariableDeclaration> visitLocalVariables(boolean isStatic, List<LocalVariableNode> nodes) {
+			Map<LocalVariableNode, LocalVariableDeclaration> localVariables = new HashMap<>();
 
 			int idx = 1;
 
@@ -252,7 +241,11 @@ public class Decompiler {
 					if (!isStatic && i == 0 && var.name.equals(THIS_VARIABLE)) { // being really conservative here.
 						name = LOCAL_NAME_FOR_IMPLICIT_PARAMETER; // DO NOT INCREMENT idx here
 					} else {
-						name = JimpleObjectFactory.localVariableName(false, type.getConstructor(), idx++);
+						if(keepOriginalVarNames) {
+							name = var.name;
+						}else {
+							name = JimpleObjectFactory.localVariableName(false, type.getConstructor(), idx++);
+						}
 					}
 					localVariables.put(var, LocalVariableDeclaration.localVariableDeclaration(type, name));
 				}
@@ -260,8 +253,21 @@ public class Decompiler {
 			return localVariables;
 		}
 
+		private String methodSignature(String className, String methodName, String desc) {
+			List<String> args = Arrays.asList(org.objectweb.asm.Type.getArgumentTypes(desc))
+					.stream()
+					.map(t -> type.toString())
+					.collect(Collectors.toList());
+
+			return String.format("<%s: %s %s(%s)>",
+					className.replace("/", "."),
+					org.objectweb.asm.Type.getReturnType(desc).toString(),
+					methodName == null ? "" : methodName,
+					String.join(", ", args));
+		}
+
 		private List<CatchClause> visitTryCatchBlocks(List<TryCatchBlockNode> nodes) {
-			List<CatchClause> tryCatchBlocks = new ArrayList<>();
+			List<CatchClause> tryCatchBlocks = new ArrayList<>(nodes.size());
 			for (TryCatchBlockNode node : nodes) {
 				String from = node.start.getLabel().toString();
 				String to = node.end.getLabel().toString();
@@ -276,14 +282,12 @@ public class Decompiler {
 
 	}
 
-
-
 	class InstructionSetVisitor extends org.objectweb.asm.MethodVisitor {
 		
 		Stack<InstructionFlow> stack; 
 		
 		List<LocalVariableDeclaration> auxiliarlyLocalVariables;
-		HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables;
+		Map<LocalVariableNode, LocalVariableDeclaration> localVariables;
 		int locals;
 
 		Set<String> visitedLabels = new HashSet<>();
@@ -293,16 +297,18 @@ public class Decompiler {
 		// not refered to in the bytecode.
 		Set<String> referencedLabels = new HashSet<>();
 
-		HashMap<String, CatchClause> catchClauses = new HashMap<>();
+		Map<String, CatchClause> catchClauses = new HashMap<>();
 
-		public InstructionSetVisitor(int version, HashMap<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
+		String methodSignature;
+
+		public InstructionSetVisitor(int version, String methodSignature, Map<LocalVariableNode, LocalVariableDeclaration> localVariables, List<CatchClause> catchClauses) {
 			super(version);
+			this.methodSignature = methodSignature;
 			this.localVariables = localVariables;
 			auxiliarlyLocalVariables = new ArrayList<>();
-			locals = 1; 
-			
+			locals = 1;
+			InstructionContext.instance().reset();
 			catchClauses.forEach(c -> this.catchClauses.put(c.with, c));
-			
 			stack = new Stack<>();
 			stack.push(new SingleInstructionFlow());
 		}
@@ -333,6 +339,12 @@ public class Decompiler {
 			return stack.peek().readyToMerge(label);
 		}
 		
+		
+		@Override
+		public void visitLineNumber(int line, Label start) {
+			InstructionContext.instance().setLineNumber(line);
+		}
+
 		@Override
 		public void visitLabel(Label label) {
 			visitedLabels.add(label.toString());
@@ -355,7 +367,7 @@ public class Decompiler {
 			}
 			else {
 				for(Environment env: stack.peek().environments()) {
-					env.instructions.add(Statement.label(label.toString()));
+					env.instructions.add(Statement.label(label.toString(), getStmtContext()));
 				}
 			}
 		}
@@ -418,7 +430,7 @@ public class Decompiler {
 			Expression expression = newPlusExpression(lhs, rhs);
 
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(assignmentStmt(Variable.localVariable(var), expression));
+				env.instructions.add(Statement.assign(Variable.localVariable(var), expression, getStmtContext()));
 			}
 
 			super.visitIincInsn(idx, increment);
@@ -902,10 +914,10 @@ public class Decompiler {
 				InvokeExp exp = InvokeExp.dynamicInvoke(bootstrapMethod, bootstrapArgs, method, args);
 
 				if (methodType.equals(Type.TVoid())) {
-					env.instructions.add(Statement.invokeStmt(exp));
+					env.instructions.add(Statement.invokeStmt(exp, getStmtContext()));
 				} else {
 					LocalVariableDeclaration local = createLocal(methodType);
-					env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+					env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.invokeExp(exp), getStmtContext()));
 					env.operands.push(new Operand(local));
 				}
 			}
@@ -935,7 +947,7 @@ public class Decompiler {
 				if (dflt != null) {
 					caseStmts.add(CaseStmt.defaultOption(dflt.toString()));
 				}
-				env.instructions.add(Statement.lookupSwitch(key, caseStmts));
+				env.instructions.add(Statement.lookupSwitch(key, caseStmts, getStmtContext()));
 			}
 			super.visitLookupSwitchInsn(dflt, keys, labels);
 		}
@@ -951,7 +963,7 @@ public class Decompiler {
 			}
 			for(Environment env: stack.peek().environments()) {
 				Immediate key = env.operands.pop().immediate;
-				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts));
+				env.instructions.add(Statement.tableSwitch(key, min, max, caseStmts, getStmtContext()));
 			}
 			super.visitTableSwitchInsn(min, max, dflt, labels);
 		}
@@ -960,10 +972,10 @@ public class Decompiler {
 		public void visitJumpInsn(int opcode, Label label) {
 			if (opcode == Opcodes.GOTO) {
 				if(!visitedLabels.contains(label.toString())) {
-					notifyGotoStmt(Statement.gotoStmt(label.toString()), label.toString()); // TODO: investigate this decision here.
+					notifyGotoStmt(Statement.gotoStmt(label.toString(), getStmtContext()), label.toString()); // TODO: investigate this decision here.
 				} else {
 					for(Environment env: stack.peek().environments()) {
-						env.instructions.add(Statement.gotoStmt(label.toString()));
+						env.instructions.add(Statement.gotoStmt(label.toString(), getStmtContext()));
 					}
 				}
 			} else if (opcode == Opcodes.JSR) {
@@ -1036,10 +1048,10 @@ public class Decompiler {
 									null);
 					}
 					if(visitedLabels.contains(label.toString())) {
-						env.instructions.add(Statement.ifStmt(exp, label.toString()));
+						env.instructions.add(Statement.ifStmt(exp, label.toString(), getStmtContext()));
 					}
 					else {
-						stack.push(new BranchInstructionFlow(exp, label.toString()));
+						stack.push(new BranchInstructionFlow(exp, label.toString(), methodSignature));
 					}
 				}
 			}
@@ -1072,10 +1084,10 @@ public class Decompiler {
 				}
 
 				if (signature.returnType.equals(Type.TVoid())) {
-					env.instructions.add(Statement.invokeStmt(exp));
+					env.instructions.add(Statement.invokeStmt(exp, getStmtContext()));
 				} else {
 					LocalVariableDeclaration local = createLocal(signature.returnType);
-					env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.invokeExp(exp)));
+					env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.invokeExp(exp), getStmtContext()));
 					env.operands.push(new Operand(local));
 				}
 			}
@@ -1119,7 +1131,7 @@ public class Decompiler {
 
 			for (Environment env : stack.peek().environments()) {
 				Immediate immediate = env.operands.pop().immediate;
-				env.instructions.add(assignmentStmt(Variable.localVariable(local.local), Expression.immediate(immediate)));
+				env.instructions.add(Statement.assign(Variable.localVariable(local.local), Expression.immediate(immediate), getStmtContext()));
 			}
 		}
 
@@ -1131,14 +1143,14 @@ public class Decompiler {
 		private void retIns(int var) {
 			LocalVariableDeclaration local = findLocalVariable(var);
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.retStmt(Immediate.local(local.local)));
+				env.instructions.add(Statement.retStmt(Immediate.local(local.local), getStmtContext()));
 			}
 		}
 
 		private void newInstanceIns(Type type) {
 			LocalVariableDeclaration newLocal = createLocal(type);
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newInstance(type)));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), Expression.newInstance(type), getStmtContext()));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1156,7 +1168,7 @@ public class Decompiler {
 				List<ArrayDescriptor> dims = new ArrayList<>();
 				dims.add(ArrayDescriptor.fixedSize(size));
 
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), Expression.newArray(type, dims)));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), Expression.newArray(type, dims), getStmtContext()));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1166,7 +1178,7 @@ public class Decompiler {
 		 */
 		private void nopIns() {
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.nop());
+				env.instructions.add(Statement.nop(getStmtContext()));
 			}
 		}
 
@@ -1208,7 +1220,7 @@ public class Decompiler {
 
 				Expression expression = Expression.neg(operand.immediate);
 
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), expression, getStmtContext()));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1226,7 +1238,7 @@ public class Decompiler {
 
 				Expression expression = factory.createExpression(lhs.immediate, rhs.immediate);
 
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local), expression));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), expression, getStmtContext()));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1236,8 +1248,8 @@ public class Decompiler {
 			for(Environment env: stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(targetType);
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
-						Expression.cast(targetType, operand.immediate)));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local),
+						Expression.cast(targetType, operand.immediate), getStmtContext()));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1246,8 +1258,8 @@ public class Decompiler {
 			for(Environment env: stack.peek().environments()) {
 				Operand operand = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal(Type.TBoolean());
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
-						Expression.instanceOf(type, operand.immediate)));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local),
+						Expression.instanceOf(type, operand.immediate), getStmtContext()));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1255,7 +1267,7 @@ public class Decompiler {
 		private void returnIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand operand = env.operands.pop();
-				env.instructions.add(Statement.returnStmt(operand.immediate));
+				env.instructions.add(Statement.returnStmt(operand.immediate, getStmtContext()));
 				// TODO: perhaps we should call an exit monitor here.
 				notifyReturn();
 			}
@@ -1263,7 +1275,7 @@ public class Decompiler {
 
 		private void returnVoidIns() {
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.returnEmptyStmt());
+				env.instructions.add(Statement.returnEmptyStmt(getStmtContext()));
 				// TODO: perhaps we should call an exit monitor here.
 				notifyReturn();
 			}
@@ -1274,7 +1286,7 @@ public class Decompiler {
 				Operand arrayRef = env.operands.pop();
 				LocalVariableDeclaration newLocal = createLocal("I");
 				env.instructions.add(
-						assignmentStmt(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate)));
+						Statement.assign(Variable.localVariable(newLocal.local), Expression.lengthOf(arrayRef.immediate), getStmtContext()));
 				env.operands.push(new Operand(newLocal));
 			}
 		}
@@ -1282,7 +1294,7 @@ public class Decompiler {
 		private void throwIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand reference = env.operands.pop();
-				env.instructions.add(Statement.throwStmt(reference.immediate));
+				env.instructions.add(Statement.throwStmt(reference.immediate, getStmtContext()));
 				notifyReturn();
 				env.operands.push(reference);
 			}
@@ -1291,14 +1303,14 @@ public class Decompiler {
 		private void monitorEnterIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand reference = env.operands.pop();
-				env.instructions.add(Statement.enterMonitor(reference.immediate));
+				env.instructions.add(Statement.enterMonitor(reference.immediate, getStmtContext()));
 			}
 		}
 
 		private void monitorExitIns() {
 			for(Environment env: stack.peek().environments()) {
 				Operand reference = env.operands.pop();
-				env.instructions.add(Statement.exitMonitor(reference.immediate));
+				env.instructions.add(Statement.exitMonitor(reference.immediate, getStmtContext()));
 			}
 		}
 
@@ -1320,8 +1332,8 @@ public class Decompiler {
 
 				LocalVariableDeclaration newLocal = createLocal(baseType);
 
-				env.instructions.add(assignmentStmt(Variable.localVariable(newLocal.local),
-						newArraySubscript(((Immediate.c_local) ref.immediate).localName, idx.immediate)));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local),
+						newArraySubscript(((Immediate.c_local) ref.immediate).localName, idx.immediate), getStmtContext()));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1343,7 +1355,7 @@ public class Decompiler {
 
 				Variable var = Variable.arrayRef(((Immediate.c_local) arrayRef).localName, idx);
 
-				env.instructions.add(assignmentStmt(var, Expression.immediate(value)));
+				env.instructions.add(Statement.assign(var, Expression.immediate(value), getStmtContext()));
 			}
 		}
 
@@ -1546,7 +1558,7 @@ public class Decompiler {
 			Expression fieldRef = Expression.fieldRef(owner.replace("/", "."), fieldType, field);
 
 			for(Environment env: stack.peek().environments()) {
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, getStmtContext()));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1557,7 +1569,7 @@ public class Decompiler {
 
 			for(Environment env: stack.peek().environments()) {
 				Operand value = env.operands.pop();
-				env.instructions.add(assignmentStmt(Variable.staticFieldRef(signature), Expression.immediate(value.immediate)));
+				env.instructions.add(Statement.assign(Variable.staticFieldRef(signature), Expression.immediate(value.immediate), getStmtContext()));
 			}
 		}
 
@@ -1572,7 +1584,7 @@ public class Decompiler {
 
 
 				env.instructions.add(
-						assignmentStmt(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate)));
+						Statement.assign(Variable.fieldRef(reference, signature), Expression.immediate(value.immediate), getStmtContext()));
 			}
 		}
 
@@ -1599,7 +1611,7 @@ public class Decompiler {
 				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner, fieldType,
 						field);
 
-				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef));
+				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, getStmtContext()));
 
 				env.operands.push(new Operand(newLocal));
 			}
@@ -1672,7 +1684,8 @@ public class Decompiler {
 		}
 
 		public void initFormalArgs(boolean staticMethod, Type classType, boolean emptyLocalVariableTable,
-				List<Type> formals) {
+				List<Type> formals, List<LocalVariableNode> localVariableNodes) {
+			
 			if (emptyLocalVariableTable) {
 				assert localVariables.isEmpty(); // we expect an empty list of local variables here.
 				if (!staticMethod) {
@@ -1691,17 +1704,27 @@ public class Decompiler {
 			}
 			for(Environment env: stack.peek().environments()) {
 				if (!staticMethod) {
-					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType));
+					env.instructions.add(Statement.identity(LOCAL_NAME_FOR_IMPLICIT_PARAMETER, IMPLICIT_PARAMETER_NAME, classType, getStmtContext()));
 				}
+								
 				int idx = 0;
 				for (Type t : formals) {
-					env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1),
-							LOCAL_PARAMETER_PREFIX + idx, t));
+					if(keepOriginalVarNames && idx < localVariableNodes.size()) {
+						String name = (!staticMethod) 
+								? localVariableNodes.get(idx+1).name 
+								: localVariableNodes.get(idx).name;
+						env.instructions.add(Statement.identity(name, LOCAL_PARAMETER_PREFIX + idx, t, getStmtContext()));
+					}else {
+						env.instructions.add(Statement.identity(LOCAL_VARIABLE_PARAMETER_PREFIX + (idx + 1), LOCAL_PARAMETER_PREFIX + idx, t, getStmtContext()));
+					}					
+
 					idx++;
 				}
 			}
 		}
 
+		private StmtContext getStmtContext() {
+			return StmtContext.stmtContext(InstructionContext.instance().generateStmtId(), methodSignature, InstructionContext.instance().getLineNumber());
+		}
 	}
-
 }

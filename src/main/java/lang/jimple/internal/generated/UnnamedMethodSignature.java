@@ -2,10 +2,12 @@ package lang.jimple.internal.generated;
 
 import lang.jimple.internal.JimpleAbstractDataType; 
 import java.util.List; 
+import java.util.HashMap;
 
 import lombok.*; 
 
 import io.usethesource.vallang.IConstructor;
+import io.usethesource.vallang.ISourceLocation;
 import io.usethesource.vallang.IList;
 import io.usethesource.vallang.IValue;
 import io.usethesource.vallang.IValueFactory; 
@@ -48,23 +50,24 @@ public  class UnnamedMethodSignature extends JimpleAbstractDataType {
     @Override
     public IConstructor createVallangInstance(IValueFactory vf) {
       
-        IValue iv_returnType = returnType.createVallangInstance(vf);
+      IValue iv_returnType = returnType.createVallangInstance(vf);
       
-        IList iv_formals = vf.list();
-        
-        for(Type v: formals) {
-         iv_formals = iv_formals.append(v.createVallangInstance(vf));   
-        }
-                
+      IList iv_formals = vf.list();
       
-        
-         return vf.constructor(getVallangConstructor()
-         
-           , iv_returnType 
-         
-           , iv_formals 
-         
-         ); 
+      for(Type v: formals) {
+       iv_formals = iv_formals.append(v.createVallangInstance(vf));   
+      }
+      
+              
+      
+      
+      IValue[] children = new IValue[] { 
+        iv_returnType, iv_formals   
+      };
+    
+      
+      return vf.constructor(getVallangConstructor(), children);
+       
     }
    
    
