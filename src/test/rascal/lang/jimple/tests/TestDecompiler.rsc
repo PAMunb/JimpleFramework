@@ -6,6 +6,7 @@ import lang::jimple::decompiler::Decompiler;
 import lang::jimple::decompiler::jimplify::FixStmtId;
 import lang::jimple::decompiler::jimplify::FixStmtMethodSignature;
 import lang::jimple::decompiler::jimplify::ProcessLabels; 
+import lang::jimple::decompiler::jimplify::RemoveModifiers; 
 import lang::jimple::toolkit::PrettyPrinter; 
 import lang::jimple::util::JPrettyPrinter; 
 
@@ -135,4 +136,45 @@ test bool testWrongTypeDecompilerNames(){
    	
    	return true;
 }
+/*
+test bool removeModifiers(){
+
+	loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/WhileStatement.class|;
+	
+  	ClassOrInterfaceDeclaration c1 = processModifiers(decompile(pathDoWhile));
+  	ClassOrInterfaceDeclaration c2 = decompile(pathDoWhile);
+  	  	
+  	list[Modifier] e1 = [Public()];  
+    list[Modifier] e2 = [Public(),Synchronized()]; 
+    
+  	return classDecl(mds1, _, _, _, _, _) := c1 && e1 == mds1 &&
+  		   classDecl(mds2, _, _, _, _, _) := c2 && e2 == mds2;
+}*/
+
+test bool removeModifiers(){
+	set[Modifier] VALID_MODIFIERS = {Public(), Protected(), Private(), Abstract(), Static(), Final(), Strictfp()};
+	loc pathDoWhile = |project://JimpleFramework/target/test-classes/samples/controlStatements/WhileStatement.class|;
+	
+  	ClassOrInterfaceDeclaration c1 = decompile(pathDoWhile);
+  	switch(c1){
+  		case classDecl(modifiers, _, _, _, _, _): {
+  			for(m <- modifiers){
+  				if(m notin VALID_MODIFIERS){
+  					return false;
+  				}
+  			}
+  		}
+  	}
+  	return true;  	  	  
+}
+
+
+
+
+
+
+
+
+
+
  

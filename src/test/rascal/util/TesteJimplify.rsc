@@ -20,11 +20,13 @@ loc fooBar = |project://JimpleFramework/target/test-classes/samples/pointsto/sim
 loc fooBarStatic = |project://JimpleFramework/target/test-classes/samples/pointsto/simple/FooBarStatic.class|;
 
 public void executar(){
-	//ClassOrInterfaceDeclaration c = jimplify(decompile(fooBar,true));	
-	ClassOrInterfaceDeclaration c = decompile(fooBarStatic,true);
+	ClassOrInterfaceDeclaration c = decompile(fooBar,true);	
+	//ClassOrInterfaceDeclaration c = decompile(fooBarStatic,true);
+    
+    println(c);
     
     //toPrettyPrint(c);
-	toJimple(c);
+	//toJimple(c);
 }
 
 void toPrettyPrint(ClassOrInterfaceDeclaration c){	

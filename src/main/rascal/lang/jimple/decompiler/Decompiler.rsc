@@ -15,7 +15,7 @@ public ClassOrInterfaceDeclaration decompile(loc classFile) throws IO {
 }
 
 public ClassOrInterfaceDeclaration decompile(loc classFile, bool keepOriginalVarNames) throws IO {
-	return jimplify(bytecodeToJimple(classFile, keepOriginalVarNames));
+	return jimplify(bytecodeToJimple(classFile, keepOriginalVarNames));	
 }
 
 @javaClass{lang.jimple.internal.Decompiler}

@@ -14,10 +14,6 @@ module lang::jimple::core::Context
 
 import lang::jimple::core::Syntax; 
 import lang::jimple::decompiler::Decompiler; 
-import lang::jimple::decompiler::jimplify::ProcessLabels;
-import lang::jimple::decompiler::jimplify::FixStmtMethodSignature;
-import lang::jimple::decompiler::jimplify::FixStmtId;
-import lang::jimple::decompiler::jimplify::ConstantPropagator;
 import lang::jimple::util::Converters;
 import lang::jimple::util::IO;
 
@@ -78,8 +74,8 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 		println(errors); 
 	}
 		
-	ClassTable ct  = (n : Class(classDecl(ms, n, s, is, fs, mss), ApplicationClass()) | Success(classDecl(ms, n, s, is, fs, mss)) <- classes);
-	ct = ct + (n : Class(interfaceDecl(ms, n, is, fs, mss), ApplicationClass()) | Success(interfaceDecl(ms, n, is, fs, mss)) <- classes);
+	ClassTable ct  = (n : Class(c, ApplicationClass()) | Success(c: classDecl(_, n, _, _, _, _)) <- classes);
+	ct = ct + (n : Class(i, ApplicationClass()) | Success(i: interfaceDecl(_, n, _, _, _)) <- classes);
 	
 	MethodTable mt = ();
 
