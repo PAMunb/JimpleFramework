@@ -18,6 +18,7 @@ import lang::jimple::decompiler::jimplify::ProcessLabels;
 import lang::jimple::decompiler::jimplify::FixStmtMethodSignature;
 import lang::jimple::decompiler::jimplify::FixStmtId;
 import lang::jimple::decompiler::jimplify::ConstantPropagator;
+import lang::jimple::decompiler::jimplify::RemoveModifiers;
 import lang::jimple::util::Converters;
 import lang::jimple::util::IO;
 
@@ -98,6 +99,7 @@ ExecutionContext createExecutionContext(list[loc] classPath, list[str] entryPoin
 }
 
 private CID jimplify(CID c) = jimplify([processJimpleLabels, fixSignature, fixSignature], c); 
+
 
 private CID jimplify(list[CID (CID)] fs, CID c) { 
   switch(fs) {
