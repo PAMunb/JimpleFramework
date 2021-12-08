@@ -14,8 +14,7 @@ loc fooBarStatic = |project://JimpleFramework/target/test-classes/samples/points
 test bool testFooBar(){
 	ClassOrInterfaceDeclaration c = decompile(fooBar,true);
 	
-	Method bar = getMethodByName(c,"bar");
-	println("bar=<bar>");
+	Method bar = getMethodByName(c,"bar");	
 	
 	list[LocalVariableDeclaration] localVarsExpected = [
 		localVariableDeclaration(TObject("samples.pointsto.simple.Node"),"s"),
