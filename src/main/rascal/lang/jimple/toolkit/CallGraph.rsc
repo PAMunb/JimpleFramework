@@ -229,15 +229,6 @@ private list[MethodSignature] getInvokedMethods(str from, CallGraphRuntime rt){
   	return methods;
 }
 
-/*
- * Retrieves the method signature from the method invocation info.
- */
-private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) = ms; 
-private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) = ms; 
-private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) = ms;
-private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) = ms; 
-//TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
-private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) = ms; 
 
 private list[str] computeClasses(MethodSignature ms, callGraphRuntime(_,RA(),_,_)) = [];
 private list[str] computeClasses(methodSignature(cn, r, mn, args), rt: callGraphRuntime(ctx,CHA(),_,ht)){
@@ -297,6 +288,8 @@ private HT createHT(ExecutionContext ctx){
 // - criar um mapa global no modulo: mapa = (k.parent : hierarchy_types(ht,k.parent) | k <- ht); ... mas assim chamaria o hierarchy_types zilhoes de vezes
 // - criar o mapa dinamicamente ... o mapa seria global mas seria criada uma entrada sob demanda ... tipo memoizacao
 // - ver o uso de @memo ... como funciona isso?
+//    - https://stackoverflow.com/questions/43830255/representing-a-class-table-in-rascal/43850762#43850762
+//    - https://stackoverflow.com/questions/20107393/does-the-rascal-unit-testing-framework-has-support-for-a-test-fixture/20108912#20108912
 private list[str] hierarchy_types(HT ht, str name) {
 	hierarchy = [name];
 	

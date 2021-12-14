@@ -14,10 +14,8 @@ import List;
 import Set;
 import String;
 
-import vis::Render;
 
-
-
+//TODO mudar nome do metodo ... nao esta fazendo pointsto analysis exatamente
 public &T(ExecutionContext) pointsToAnalysis(list[str] entryPoints) {
 	return PointerAssignGraph(ExecutionContext ctx){
 		return execute(ctx, entryPoints);
@@ -62,28 +60,5 @@ str getClassName(str methodSignature) {
 		return substring(untilMethodName,0,findLast(untilMethodName,"."));
 	}
 	return "";
-}
-
-////////////////////////////////////////////
-tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
-	//TODO compile class before using: mvn test -DskipTests
-	files = [|project://JimpleFramework/target/test-classes/samples/pointsto/simple/|];
-	//TODO rever entry points
-    es = ["samples.pointsto.simple.FooBar.foo()", "samples.pointsto.simple.FooBar.bar(samples.pointsto.simple.Node)"];
-    return <files, es>;
-}
-
-public void pointsTo() {
-	// possible tests	
-	tuple[list[loc] cp, list[str] e] t = fooBar();
-
-    files = t.cp;
-    es = t.e;
-
-	println("INICIANDO");
-    PointerAssignGraph pag = execute(files, es, Analysis(pointsToAnalysis(es)), true);
-    println("TERMINOU");
-    render(toFigure(pag));  
-  	     
 }
 

@@ -8,7 +8,7 @@ import IO;
 import Exception;
 
 
-bool defaultKeepOriginalVarNames = false;
+bool defaultKeepOriginalVarNames = true;
 
 public ClassOrInterfaceDeclaration decompile(loc classFile) throws IO {
 	return decompile(classFile, defaultKeepOriginalVarNames);

@@ -103,6 +103,10 @@ void build(Method currentMethod, str methodSig, assign(localVariable(lhs), inv: 
 	//pag = pag + <alloc, edge, var>;
 }
 
+void build(Method currentMethod, str methodSig, assign(localVariable(lhs), inv: invokeExp(exp))){
+	println("%%%%%%%%%%%%%%%%%%%% EXP: <exp>"); 
+}
+
 // x = new A 
 // a: new A --> x			
 void build(Method currentMethod, str methodSig, assign(localVariable(lhs), newInstance(\type))){
@@ -168,22 +172,6 @@ void build(Method currentMethod, str methodSig,	a: assign(fieldRef(lhs,fieldSign
 
 
 ////////////////////////////////////////////	
-/*
- * Retrieves the method signature from the method invocation info.
- */
-private MethodSignature getMethodSignature(specialInvoke(_, ms, _)) = ms; 
-private MethodSignature getMethodSignature(virtualInvoke(_, ms, _)) = ms; 
-private MethodSignature getMethodSignature(interfaceInvoke(_, ms, _)) = ms;
-private MethodSignature getMethodSignature(staticMethodInvoke(ms, _)) = ms; 
-//TODO verificar se eh o segundo methodSignature mesmo (acho q o primeiro eh o bootstrap method)
-private MethodSignature getMethodSignature(dynamicInvoke(_,_,ms,_)) = ms; 
-
-private list[Immediate] getArgs(specialInvoke(_, _, args)) = args;
-private list[Immediate] getArgs(virtualInvoke(_, _, args)) = args;
-private list[Immediate] getArgs(interfaceInvoke(_, _, args)) = args;
-private list[Immediate] getArgs(staticMethodInvoke(_, args)) = args;
-private list[Immediate] getArgs(dynamicInvoke(_, _, _, args)) = args;
-
 private list[Immediate] getAllPagVars(PointerAssignGraph pag) {
 	list[Immediate] vars = [];
 	top-down visit(carrier(pag)) {

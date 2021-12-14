@@ -34,6 +34,13 @@ public tuple[list[loc] classPath, list[str] entryPoints] fooBar() {
     return <files, es>;
 }
 
+public tuple[list[loc] classPath, list[str] entryPoints] fooBarStatic() {
+	files = [|project://JimpleFramework/target/test-classes/samples/pointsto/simple/|];
+	//TODO rever entry points
+    es = ["samples.pointsto.simple.FooBarStatic.foo()", "samples.pointsto.simple.FooBarStatic.bar(samples.pointsto.simple.Node)"];
+    return <files, es>;
+}
+
 public void pointsTo() {
 	// possible tests	
 	tuple[list[loc] cp, list[str] e] t = fooBar();
