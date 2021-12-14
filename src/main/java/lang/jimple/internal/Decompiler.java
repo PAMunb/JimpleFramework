@@ -1565,7 +1565,7 @@ public class Decompiler {
 		}
 
 		private void putStaticIns(String owner, String field, String descriptor) {
-			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
+			FieldSignature signature = FieldSignature.fieldSignature(owner.replace("/", "."), type(descriptor), field);
 
 			for(Environment env: stack.peek().environments()) {
 				Operand value = env.operands.pop();
@@ -1574,7 +1574,7 @@ public class Decompiler {
 		}
 
 		private void putFieldIns(String owner, String field, String descriptor) {
-			FieldSignature signature = FieldSignature.fieldSignature(owner, type(descriptor), field);
+			FieldSignature signature = FieldSignature.fieldSignature(owner.replace("/", "."), type(descriptor), field);
 
 			for(Environment env: stack.peek().environments()) {
 				Operand value = env.operands.pop();
@@ -1608,7 +1608,7 @@ public class Decompiler {
 				Immediate instance = env.operands.pop().immediate;
 
 
-				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner, fieldType,
+				Expression fieldRef = Expression.localFieldRef(((Immediate.c_local) instance).localName, owner.replace("/", "."), fieldType,
 						field);
 
 				env.instructions.add(Statement.assign(Variable.localVariable(newLocal.local), fieldRef, getStmtContext()));
