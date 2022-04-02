@@ -322,9 +322,9 @@ public class Decompiler {
 		}
 		
 		private void notifyReturn() {
-			for(Environment env: stack.peek().environments()) {
-				env.operands.clear();
-			}
+//			for(Environment env: stack.peek().environments()) {
+//				env.operands.clear();
+//			}
 		}
 
 		private void nextBranch() {
